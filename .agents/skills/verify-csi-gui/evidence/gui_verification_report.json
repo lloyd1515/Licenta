@@ -1,0 +1,152 @@
+{
+  "timestamp": "2026-10-12",
+  "resolution": "1600x950",
+  "passed": true,
+  "screenshots_count": 24,
+  "evidence": {
+    "phase_1_calm_window.png": {
+      "file": "/home/vlads4r4/dev/Licenta/.agents/skills/verify-csi-gui/evidence/phase_1_calm_window.png",
+      "width": 1600,
+      "height": 950,
+      "bytes": 161913
+    },
+    "phase_1_calm_room_map.png": {
+      "file": "/home/vlads4r4/dev/Licenta/.agents/skills/verify-csi-gui/evidence/phase_1_calm_room_map.png",
+      "width": 789,
+      "height": 403,
+      "bytes": 45674
+    },
+    "phase_1_calm_waterfall.png": {
+      "file": "/home/vlads4r4/dev/Licenta/.agents/skills/verify-csi-gui/evidence/phase_1_calm_waterfall.png",
+      "width": 788,
+      "height": 484,
+      "bytes": 27867
+    },
+    "phase_1_calm_doppler.png": {
+      "file": "/home/vlads4r4/dev/Licenta/.agents/skills/verify-csi-gui/evidence/phase_1_calm_doppler.png",
+      "width": 789,
+      "height": 345,
+      "bytes": 27959
+    },
+    "phase_1_calm_telemetry.png": {
+      "file": "/home/vlads4r4/dev/Licenta/.agents/skills/verify-csi-gui/evidence/phase_1_calm_telemetry.png",
+      "width": 788,
+      "height": 264,
+      "bytes": 22865
+    },
+    "phase_1_calm_alert_banner.png": {
+      "file": "/home/vlads4r4/dev/Licenta/.agents/skills/verify-csi-gui/evidence/phase_1_calm_alert_banner.png",
+      "width": 1584,
+      "height": 79,
+      "bytes": 22757
+    },
+    "phase_2_walking_window.png": {
+      "file": "/home/vlads4r4/dev/Licenta/.agents/skills/verify-csi-gui/evidence/phase_2_walking_window.png",
+      "width": 1600,
+      "height": 950,
+      "bytes": 164287
+    },
+    "phase_2_walking_room_map.png": {
+      "file": "/home/vlads4r4/dev/Licenta/.agents/skills/verify-csi-gui/evidence/phase_2_walking_room_map.png",
+      "width": 789,
+      "height": 403,
+      "bytes": 47276
+    },
+    "phase_2_walking_waterfall.png": {
+      "file": "/home/vlads4r4/dev/Licenta/.agents/skills/verify-csi-gui/evidence/phase_2_walking_waterfall.png",
+      "width": 788,
+      "height": 484,
+      "bytes": 27867
+    },
+    "phase_2_walking_doppler.png": {
+      "file": "/home/vlads4r4/dev/Licenta/.agents/skills/verify-csi-gui/evidence/phase_2_walking_doppler.png",
+      "width": 789,
+      "height": 345,
+      "bytes": 28841
+    },
+    "phase_2_walking_telemetry.png": {
+      "file": "/home/vlads4r4/dev/Licenta/.agents/skills/verify-csi-gui/evidence/phase_2_walking_telemetry.png",
+      "width": 788,
+      "height": 264,
+      "bytes": 22862
+    },
+    "phase_2_walking_alert_banner.png": {
+      "file": "/home/vlads4r4/dev/Licenta/.agents/skills/verify-csi-gui/evidence/phase_2_walking_alert_banner.png",
+      "width": 1584,
+      "height": 79,
+      "bytes": 22757
+    },
+    "phase_3_impact_window.png": {
+      "file": "/home/vlads4r4/dev/Licenta/.agents/skills/verify-csi-gui/evidence/phase_3_impact_window.png",
+      "width": 1600,
+      "height": 950,
+      "bytes": 166439
+    },
+    "phase_3_impact_room_map.png": {
+      "file": "/home/vlads4r4/dev/Licenta/.agents/skills/verify-csi-gui/evidence/phase_3_impact_room_map.png",
+      "width": 789,
+      "height": 403,
+      "bytes": 45928
+    },
+    "phase_3_impact_waterfall.png": {
+      "file": "/home/vlads4r4/dev/Licenta/.agents/skills/verify-csi-gui/evidence/phase_3_impact_waterfall.png",
+      "width": 788,
+      "height": 484,
+      "bytes": 27797
+    },
+    "phase_3_impact_doppler.png": {
+      "file": "/home/vlads4r4/dev/Licenta/.agents/skills/verify-csi-gui/evidence/phase_3_impact_doppler.png",
+      "width": 789,
+      "height": 345,
+      "bytes": 30998
+    },
+    "phase_3_impact_telemetry.png": {
+      "file": "/home/vlads4r4/dev/Licenta/.agents/skills/verify-csi-gui/evidence/phase_3_impact_telemetry.png",
+      "width": 788,
+      "height": 264,
+      "bytes": 23616
+    },
+    "phase_3_impact_alert_banner.png": {
+      "file": "/home/vlads4r4/dev/Licenta/.agents/skills/verify-csi-gui/evidence/phase_3_impact_alert_banner.png",
+      "width": 1584,
+      "height": 79,
+      "bytes": 22757
+    },
+    "phase_4_alarm_window.png": {
+      "file": "/home/vlads4r4/dev/Licenta/.agents/skills/verify-csi-gui/evidence/phase_4_alarm_window.png",
+      "width": 1600,
+      "height": 950,
+      "bytes": 179568
+    },
+    "phase_4_alarm_room_map.png": {
+      "file": "/home/vlads4r4/dev/Licenta/.agents/skills/verify-csi-gui/evidence/phase_4_alarm_room_map.png",
+      "width": 789,
+      "height": 380,
+      "bytes": 44478
+    },
+    "phase_4_alarm_waterfall.png": {
+      "file": "/home/vlads4r4/dev/Licenta/.agents/skills/verify-csi-gui/evidence/phase_4_alarm_waterfall.png",
+      "width": 788,
+      "height": 397,
+      "bytes": 25316
+    },
+    "phase_4_alarm_doppler.png": {
+      "file": "/home/vlads4r4/dev/Licenta/.agents/skills/verify-csi-gui/evidence/phase_4_alarm_doppler.png",
+      "width": 789,
+      "height": 281,
+      "bytes": 28836
+    },
+    "phase_4_alarm_telemetry.png": {
+      "file": "/home/vlads4r4/dev/Licenta/.agents/skills/verify-csi-gui/evidence/phase_4_alarm_telemetry.png",
+      "width": 788,
+      "height": 264,
+      "bytes": 23321
+    },
+    "phase_4_alarm_alert_banner.png": {
+      "file": "/home/vlads4r4/dev/Licenta/.agents/skills/verify-csi-gui/evidence/phase_4_alarm_alert_banner.png",
+      "width": 1584,
+      "height": 79,
+      "bytes": 22685
+    }
+  }
+}

@@ -1,0 +1,197 @@
+<template>
+  <style>
+    @font-face { font-family: "Inter"; src: url("../../assets/fonts/Inter-400.woff2") format("woff2"); font-weight: 400; font-style: normal; }
+    @font-face { font-family: "Inter"; src: url("../../assets/fonts/Inter-700.woff2") format("woff2"); font-weight: 700; font-style: normal; }
+    @font-face { font-family: "JetBrains Mono"; src: url("../../assets/fonts/JetBrainsMono-400.woff2") format("woff2"); font-weight: 400; font-style: normal; }
+
+    #a2-envelope {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      font-family: "Inter", system-ui, sans-serif;
+      color: #eef1f7;
+    }
+    #a2-envelope .a2e-ground { position: absolute; inset: 0; background: #0f1420; }
+    #a2e-stage { position: absolute; inset: 0; }
+
+    #a2-envelope .a2e-board {
+      position: absolute;
+      left: 110px;
+      top: 270px;
+      width: 170px;
+      height: 110px;
+      background: #182133;
+      border: 2px solid #c3b1f2;
+      border-radius: 16px;
+      opacity: 0;
+    }
+    #a2-envelope .a2e-board::before {
+      content: "";
+      position: absolute;
+      left: 80px;
+      top: -28px;
+      width: 4px;
+      height: 28px;
+      background: #c3b1f2;
+      border-radius: 2px;
+    }
+    #a2-envelope .a2e-env {
+      position: absolute;
+      left: 680px;
+      top: 230px;
+      width: 560px;
+      height: 340px;
+      opacity: 0;
+    }
+    #a2-envelope .a2e-env svg { position: absolute; left: 0; top: 0; overflow: visible; }
+
+    #a2-envelope .a2e-tile {
+      position: absolute;
+      width: 18px;
+      height: 18px;
+      border-radius: 4px;
+      background: #5d6a82;
+    }
+    #a2-envelope .a2e-count {
+      position: absolute;
+      right: 160px;
+      top: 130px;
+      font-size: 96px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      white-space: nowrap;
+      opacity: 0;
+    }
+    #a2-envelope .a2e-lab {
+      position: absolute;
+      top: 600px;
+      font-family: "JetBrains Mono", monospace;
+      font-size: 44px;
+      white-space: nowrap;
+      opacity: 0;
+    }
+    #a2-envelope .a2e-lab-addr { left: 166px; color: #c3b1f2; }
+    #a2-envelope .a2e-lab-body { right: 166px; color: #8ab8ff; }
+    #a2-envelope .a2e-tag {
+      position: absolute;
+      left: 160px;
+      padding: 10px 24px;
+      background: #182133;
+      border: 2px solid #c3b1f2;
+      border-radius: 999px;
+      font-size: 44px;
+      font-weight: 700;
+      color: #c3b1f2;
+      white-space: nowrap;
+      opacity: 0;
+    }
+    #a2-envelope .a2e-tag-1 { top: 320px; }
+    #a2-envelope .a2e-tag-2 { top: 395px; }
+    #a2-envelope .a2e-tag-3 { top: 470px; }
+  </style>
+
+  <div id="a2-envelope" data-composition-id="a2-envelope" data-start="0" data-duration="16.7" data-width="1920" data-height="1080">
+    <div id="a2e-ground" class="clip a2e-ground" data-start="0" data-duration="16.7" data-track-index="0"></div>
+
+    <div id="a2e-stage" class="clip" data-start="0" data-duration="16.7" data-track-index="1">
+      <div class="a2e-board" id="a2e-board"></div>
+
+      <div class="a2e-env" id="a2e-env">
+        <svg width="560" height="340" viewBox="0 0 560 340" aria-hidden="true">
+          <rect x="2" y="2" width="556" height="336" rx="18" fill="#182133" stroke="#a9b3c6" stroke-width="3"></rect>
+          <path d="M2 338 L220 150 M558 338 L340 150" fill="none" stroke="#2a3448" stroke-width="3"></path>
+          <path id="a2e-flap" d="M2 2 L558 2 L280 190 Z" fill="#1d2a40" stroke="#a9b3c6" stroke-width="3" stroke-linejoin="round"></path>
+        </svg>
+      </div>
+
+      <div class="a2e-count" id="a2e-count">138 bytes</div>
+
+      <div class="a2e-tag a2e-tag-1" id="a2e-tag-1">which board</div>
+      <div class="a2e-tag a2e-tag-2" id="a2e-tag-2">how strong</div>
+      <div class="a2e-tag a2e-tag-3" id="a2e-tag-3">when</div>
+
+      <div class="a2e-lab a2e-lab-addr" id="a2e-lab-addr">address (10)</div>
+      <div class="a2e-lab a2e-lab-body" id="a2e-lab-body">readings (128)</div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      var TOTAL = 138;
+      var ADDR = 10;
+      var PER_ROW = 69;
+      var GRID_LEFT = 166;
+      var GRID_TOP = 650;
+      var PITCH = 23;
+      var ROW_GAP = 40;
+      var TILE = 18;
+      var SPILL_X = 960;
+      var SPILL_Y = 400;
+
+      var stage = document.getElementById("a2e-stage");
+      var tiles = [];
+      var dx = [];
+      var dy = [];
+      for (var i = 0; i < TOTAL; i++) {
+        var row = Math.floor(i / PER_ROW);
+        var col = i % PER_ROW;
+        var left = GRID_LEFT + col * PITCH;
+        var top = GRID_TOP + row * ROW_GAP;
+        var tile = document.createElement("div");
+        tile.className = "a2e-tile";
+        tile.style.left = left + "px";
+        tile.style.top = top + "px";
+        stage.appendChild(tile);
+        tiles.push(tile);
+        dx.push(SPILL_X - (left + TILE / 2));
+        dy.push(SPILL_Y - (top + TILE / 2));
+      }
+
+      var board = document.getElementById("a2e-board");
+      var env = document.getElementById("a2e-env");
+      var flap = document.getElementById("a2e-flap");
+      var count = document.getElementById("a2e-count");
+      var labAddr = document.getElementById("a2e-lab-addr");
+      var labBody = document.getElementById("a2e-lab-body");
+      var tag1 = document.getElementById("a2e-tag-1");
+      var tag2 = document.getElementById("a2e-tag-2");
+      var tag3 = document.getElementById("a2e-tag-3");
+      var addrTiles = tiles.slice(0, ADDR);
+      var bodyTiles = tiles.slice(ADDR);
+
+      var tl = gsap.timeline({ paused: true });
+
+      // S0 (0.2 s): envelope flies in from the violet board and lands centre.
+      tl.fromTo(board, { opacity: 0 }, { opacity: 1, duration: 0.4, ease: "power1.out" }, 0);
+      tl.fromTo(env, { x: -500, opacity: 0 }, { x: 0, opacity: 1, duration: 1.2, ease: "power3.out" }, 0.2);
+
+      // S1 (4.78 s): envelope opens, the board drops away, 138 tiles spill out.
+      tl.to(board, { opacity: 0, duration: 0.4, ease: "power1.in" }, 4.7);
+      tl.to(flap, { y: -70, opacity: 0, duration: 0.6, ease: "power2.out" }, 4.8);
+      tl.to(env, { opacity: 0.3, duration: 0.6, ease: "power1.out" }, 5.0);
+      tl.fromTo(count, { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }, 5.0);
+      tl.fromTo(tiles,
+        { x: function (idx) { return dx[idx]; }, y: function (idx) { return dy[idx]; }, opacity: 0, scale: 0.3 },
+        { x: 0, y: 0, opacity: 1, scale: 1, duration: 0.7, ease: "power2.out", stagger: { each: 0.008, from: "start" } },
+        5.2);
+
+      // S2 (7.2 s): first 10 tiles turn violet = address; tags pop on their words.
+      tl.to(addrTiles, { backgroundColor: "#c3b1f2", duration: 0.5, ease: "power1.out", stagger: { each: 0.05, from: "start" } }, 7.4);
+      tl.fromTo(labAddr, { opacity: 0 }, { opacity: 1, duration: 0.5, ease: "power1.out" }, 7.6);
+      tl.fromTo(tag1, { opacity: 0, scale: 0.8 }, { opacity: 1, scale: 1, duration: 0.4, ease: "back.out(1.7)" }, 9.15);
+      tl.fromTo(tag2, { opacity: 0, scale: 0.8 }, { opacity: 1, scale: 1, duration: 0.4, ease: "back.out(1.7)" }, 10.35);
+      tl.fromTo(tag3, { opacity: 0, scale: 0.8 }, { opacity: 1, scale: 1, duration: 0.4, ease: "back.out(1.7)" }, 11.45);
+
+      // S3 (12.79 s): the other 128 tiles turn accent blue = readings.
+      tl.to(bodyTiles, { backgroundColor: "#8ab8ff", duration: 0.5, ease: "power1.out", stagger: { each: 0.01, from: "start" } }, 12.9);
+      tl.fromTo(labBody, { opacity: 0 }, { opacity: 1, duration: 0.5, ease: "power1.out" }, 13.1);
+
+      // Hold to the end of the scene.
+      tl.to({}, { duration: 16.7 }, 0);
+
+      window.__timelines = window.__timelines || {};
+      window.__timelines["a2-envelope"] = tl;
+    })();
+  </script>
+</template>

@@ -1,0 +1,373 @@
+WEBVTT
+
+00:00:00.300 --> 00:00:01.964
+How Wi-Fi notices a fall.
+
+00:00:02.367 --> 00:00:03.967
+Someone just fell in this room.
+
+00:00:04.387 --> 00:00:05.582
+No camera saw it.
+
+00:00:06.002 --> 00:00:07.367
+Nobody wore a sensor.
+
+00:00:07.787 --> 00:00:08.875
+The Wi-Fi did.
+
+00:00:09.295 --> 00:00:13.882
+In nine minutes you'll know exactly how, down to the line of code that rang this alarm.
+
+00:00:14.800 --> 00:00:17.125
+First, the idea, with no code at all.
+
+00:00:17.633 --> 00:00:19.873
+Picture an older person who lives alone.
+
+00:00:20.293 --> 00:00:22.576
+They fall, and the phone is across the room.
+
+00:00:22.996 --> 00:00:26.878
+Cameras feel like spying, and a wristband gets left on the nightstand.
+
+00:00:27.298 --> 00:00:30.712
+So here is the question: can the room itself notice the fall?
+
+00:00:31.133 --> 00:00:32.200
+Think of a pond.
+
+00:00:32.620 --> 00:00:36.353
+Drop a stone, and ripples spread out and bounce off everything they meet.
+
+00:00:36.773 --> 00:00:41.125
+Someone on the far bank can tell a reed is there, just from how the ripples arrive.
+
+00:00:41.545 --> 00:00:43.828
+Radio waves do the same thing in a room.
+
+00:00:44.248 --> 00:00:50.840
+Three small boards keep sending Wi-Fi messages to each other, and a body in the way changes how each wave arrives.
+
+00:00:51.260 --> 00:00:52.646
+We never look at the person.
+
+00:00:53.066 --> 00:00:54.581
+We watch the ripples wobble.
+
+00:00:55.001 --> 00:00:58.777
+The radio's report of how each wave arrived is called CSI.
+
+00:00:59.200 --> 00:01:00.992
+And Wi-Fi is not one wave.
+
+00:01:01.412 --> 00:01:06.276
+It is 52 narrow waves sent side by side, like 52 radio stations.
+
+00:01:06.696 --> 00:01:10.557
+For every message, the board measures how loud each station arrived.
+
+00:01:10.977 --> 00:01:17.228
+So every message gives us 52 volume numbers, and about 33 messages arrive every second.
+
+00:01:17.648 --> 00:01:20.379
+Each of those narrow waves is called a subcarrier.
+
+00:01:20.800 --> 00:01:25.216
+Now squeeze all those numbers into one wiggly line, and compare three rooms.
+
+00:01:25.636 --> 00:01:27.087
+An empty room: calm.
+
+00:01:27.507 --> 00:01:29.597
+Someone walking: busy all the time.
+
+00:01:30.017 --> 00:01:34.711
+A fall: busy, then one sharp jerk, then flat, because the person is lying still.
+
+00:01:35.131 --> 00:01:36.517
+That shape is everything.
+
+00:01:36.937 --> 00:01:40.543
+The whole program hunts for one sharp jerk, followed by stillness.
+
+00:01:40.963 --> 00:01:43.160
+Let's follow one real fall through the code.
+
+00:01:43.967 --> 00:01:48.191
+This is a real recording: twenty seconds, with one real fall in the middle.
+
+00:01:48.700 --> 00:01:52.860
+Each Wi-Fi message reaches the computer like a letter in an envelope.
+
+00:01:53.280 --> 00:01:55.285
+138 bytes in total.
+
+00:01:55.705 --> 00:02:00.868
+The first 10 are the address on the envelope: which board sent it, how strong it was, and when.
+
+00:02:01.288 --> 00:02:04.979
+The other 128 are the letter itself: the readings.
+
+00:02:05.500 --> 00:02:08.060
+Here is the function that opens the envelope.
+
+00:02:08.480 --> 00:02:13.216
+The first line reads the address: board number, signal strength, time, and a counter.
+
+00:02:13.636 --> 00:02:18.692
+The next line takes the 128 reading bytes as small whole numbers, called iq.
+
+00:02:19.112 --> 00:02:23.997
+Then the readings are paired up: the first byte of each pair, plus the second byte times j.
+
+00:02:24.417 --> 00:02:28.300
+That j just means: these two numbers belong together as one reading.
+
+00:02:28.720 --> 00:02:33.051
+The last line keeps only the 52 useful stations and drops the rest.
+
+00:02:33.467 --> 00:02:34.982
+Why two numbers per reading?
+
+00:02:35.402 --> 00:02:37.770
+Draw each pair as an arrow on graph paper.
+
+00:02:38.190 --> 00:02:42.840
+A pair of 30 and minus 40 means: 30 steps right, 40 steps down.
+
+00:02:43.260 --> 00:02:47.378
+The arrow's length is 50, from the classic three, four, five triangle.
+
+00:02:47.798 --> 00:02:50.080
+That length is how loud the station arrived.
+
+00:02:50.500 --> 00:02:52.442
+The direction we simply throw away.
+
+00:02:52.967 --> 00:02:56.871
+But the bytes arrive like a conveyor belt with no gaps between letters.
+
+00:02:57.291 --> 00:03:01.003
+So every letter starts with the same stamp, written A five, five A.
+
+00:03:01.423 --> 00:03:03.258
+The feed function looks for the stamp.
+
+00:03:03.678 --> 00:03:06.238
+Anything before it is junk, so it gets deleted.
+
+00:03:06.658 --> 00:03:10.412
+If fewer than 138 bytes have arrived, it waits for more.
+
+00:03:10.832 --> 00:03:15.504
+Otherwise it opens that envelope, cuts it off the belt, and looks for the next stamp.
+
+00:03:16.033 --> 00:03:18.913
+Each opened letter becomes one row of a spreadsheet.
+
+00:03:19.333 --> 00:03:22.021
+This line keeps only the arrow lengths, the loudness.
+
+00:03:22.441 --> 00:03:28.542
+About 33 rows a second, for 20 seconds, gives 669 rows of 52 numbers.
+
+00:03:28.962 --> 00:03:32.461
+Every row is one moment, and every column is one station.
+
+00:03:32.967 --> 00:03:34.439
+Some stations are broken.
+
+00:03:34.859 --> 00:03:38.827
+Think of a choir where a few singers never make a sound and a few just scream.
+
+00:03:39.247 --> 00:03:42.106
+The first line measures how much each column wobbles.
+
+00:03:42.526 --> 00:03:44.168
+That number is called the variance.
+
+00:03:44.588 --> 00:03:48.471
+The next line marks the columns that wobble too little or far too much.
+
+00:03:48.891 --> 00:03:50.427
+The last line removes them.
+
+00:03:50.847 --> 00:03:54.708
+In this recording, 11 columns go, and 41 good ones stay.
+
+00:03:55.133 --> 00:03:57.821
+Next, think of the equalizer on a music player.
+
+00:03:58.241 --> 00:04:01.462
+Slide down the very slow drift, like a room warming up.
+
+00:04:01.882 --> 00:04:04.677
+Slide down the very fast hiss from the electronics.
+
+00:04:05.097 --> 00:04:08.980
+Keep only the middle: wobbles about as fast as a human body moves.
+
+00:04:09.500 --> 00:04:11.975
+In the code, butter designs that equalizer.
+
+00:04:12.395 --> 00:04:15.979
+It keeps wobbles between 0.2 and 12 times a second.
+
+00:04:16.399 --> 00:04:18.617
+Times per second has a name: hertz.
+
+00:04:19.037 --> 00:04:24.477
+Then filtfilt runs the filter forwards and then backwards, so nothing slides out of place in time.
+
+00:04:25.000 --> 00:04:28.115
+Now we have 41 lines that mostly move together.
+
+00:04:28.535 --> 00:04:34.060
+Picture 41 fans watching the same match: when something happens, they all lean the same way.
+
+00:04:34.480 --> 00:04:37.445
+So we listen to the lean of the crowd, not to each fan.
+
+00:04:37.865 --> 00:04:40.468
+The first line centres every column on zero.
+
+00:04:40.888 --> 00:04:44.344
+The next lines find the direction the columns lean together most.
+
+00:04:44.764 --> 00:04:46.599
+The last line projects onto it.
+
+00:04:47.019 --> 00:04:49.771
+That leaves one number per moment: the motion line.
+
+00:04:50.191 --> 00:04:51.919
+This trick is called PCA.
+
+00:04:52.433 --> 00:04:53.841
+Now we look for the jerk.
+
+00:04:54.261 --> 00:04:57.738
+First, the line is rescaled so its biggest swing equals 1.
+
+00:04:58.158 --> 00:05:01.294
+That way a big room and a small room can share one rule.
+
+00:05:01.714 --> 00:05:06.536
+Then gradient measures how steep the line is at every moment, like the steepness of a hill.
+
+00:05:06.956 --> 00:05:11.073
+The rule says: steeper than 17.5 means a hard impact.
+
+00:05:11.493 --> 00:05:14.736
+At this moment, the steepness hits 17.63.
+
+00:05:15.156 --> 00:05:18.932
+A close call: only 3 moments in the whole recording go that steep.
+
+00:05:19.333 --> 00:05:21.189
+But a jerk alone is not a fall.
+
+00:05:21.609 --> 00:05:23.060
+You might just sit down hard.
+
+00:05:23.480 --> 00:05:26.893
+So the detector works like a careful smoke alarm with stages.
+
+00:05:27.313 --> 00:05:28.038
+Calm.
+
+00:05:28.458 --> 00:05:29.653
+Something is moving.
+
+00:05:30.073 --> 00:05:31.118
+A sudden jerk.
+
+00:05:31.538 --> 00:05:32.946
+Then: wait, and watch.
+
+00:05:33.366 --> 00:05:35.564
+Only if the person stays still does it ring.
+
+00:05:36.067 --> 00:05:39.011
+In code, those stages are a loop over every moment.
+
+00:05:39.431 --> 00:05:42.247
+If the line is steep enough, the state becomes impact.
+
+00:05:42.667 --> 00:05:45.526
+On the very next moment, it switches to checking still.
+
+00:05:45.946 --> 00:05:47.738
+Then it waits, and counts readings.
+
+00:05:48.267 --> 00:05:51.723
+It counts 83 readings, which is about two and a half seconds.
+
+00:05:52.143 --> 00:05:55.535
+Then is still measures how much the line wobbled since the jerk.
+
+00:05:55.955 --> 00:06:00.392
+Here the wobble is 0.06, far below the limit of 0.2.
+
+00:06:00.812 --> 00:06:02.348
+The person is not getting up.
+
+00:06:02.768 --> 00:06:04.667
+Alarm, at about seven seconds.
+
+00:06:05.087 --> 00:06:12.618
+From the jerk to the alarm took about 3 seconds, a little more than two and a half, because the packets arrived a bit slower right then.
+
+00:06:13.433 --> 00:06:15.972
+Last step: how the alarm reaches the screen.
+
+00:06:16.500 --> 00:06:17.716
+Think of a restaurant.
+
+00:06:18.136 --> 00:06:22.317
+The kitchen does the heavy cooking in the back, so the dining room never freezes.
+
+00:06:22.737 --> 00:06:25.596
+In the app, the kitchen is a worker called FrameSource.
+
+00:06:26.016 --> 00:06:33.035
+It runs the whole pipeline we just saw, and passes every finished result through a hatch, with a bell, to the window you look at.
+
+00:06:33.567 --> 00:06:35.615
+When the bell rings, show frame runs.
+
+00:06:36.035 --> 00:06:40.088
+It updates the room map, two charts, and the status panel, one line each.
+
+00:06:40.508 --> 00:06:43.474
+And if the result says alarm, it shows the red banner.
+
+00:06:43.894 --> 00:06:48.502
+One honest detail: the little figure on the map is a drawing of the current stage.
+
+00:06:48.922 --> 00:06:51.247
+It does not measure where the person really is.
+
+00:06:51.767 --> 00:06:52.791
+Try it yourself.
+
+00:06:53.211 --> 00:06:55.856
+From the source folder, run the app in replay mode.
+
+00:06:56.276 --> 00:06:59.284
+It plays this exact fall on a loop, with no hardware.
+
+00:06:59.704 --> 00:07:05.720
+Then a challenge: in the fall detector, change the still window from 2.5 to 1.0 seconds.
+
+00:07:06.140 --> 00:07:07.591
+Does the alarm come sooner?
+
+00:07:08.011 --> 00:07:10.272
+And does it now ring when someone just sits down?
+
+00:07:10.800 --> 00:07:16.816
+Ripples, radio stations, letters, a spreadsheet, three clean ups, one steep moment, and a careful alarm.
+
+00:07:17.236 --> 00:07:18.580
+That is the whole idea.

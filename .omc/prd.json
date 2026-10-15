@@ -1,0 +1,113 @@
+{
+  "title": "Ubertooth Standalone App",
+  "description": "Windows standalone Tauri app (Rust backend) that directly spawns ubertooth-*.exe binaries without Node.js dependency",
+  "stories": [
+    {
+      "id": "US-001",
+      "title": "Project Scaffolding & Build",
+      "passes": true,
+      "acceptanceCriteria": [
+        "ubertooth-standalone/ directory exists with Cargo.toml, package.json, src-tauri/, src/ ✓",
+        "src-tauri/resources/ contains all 16 ubertooth binaries and DLLs ✓",
+        "cargo check passes (exit 0, 32.18s) ✓",
+        "npm install completes without errors ✓",
+        "grep -r 'ubertooth-windows-host' ubertooth-standalone/ returns exit 1 (no matches) ✓",
+        "No node_executable(), cli_entry(), or packages/cli references in Rust code ✓"
+      ]
+    },
+    {
+      "id": "US-002",
+      "title": "discovery.rs — USB Hardware Detection",
+      "passes": true,
+      "acceptanceCriteria": [
+        "ubertooth-standalone/src-tauri/src/discovery.rs exists ✓",
+        "UbertoothDevice struct has fields: name, status, pnp_device_id, is_present ✓",
+        "discover_devices() runs PowerShell WMI Win32_PnPEntity query filtering VID=1D50, PID=6002 or 6003 ✓",
+        "discover_devices() returns Vec<UbertoothDevice> (empty vec on no device) ✓",
+        "#[tauri::command] detect_devices() registered in main.rs invoke_handler ✓",
+        "cargo check passes with no errors ✓"
+      ]
+    },
+    {
+      "id": "US-003",
+      "title": "runner.rs — Subprocess Manager",
+      "passes": true,
+      "acceptanceCriteria": [
+        "ubertooth-standalone/src-tauri/src/runner.rs exists ✓",
+        "resolve_binary_path(tool_name) resolves path relative to app executable ✓",
+        "start_command spawns subprocess with Stdio::piped() and emits 'command-output' events per line ✓",
+        "CommandOutput event has fields: job_id, line, is_stderr ✓",
+        "stop_command(job_id) kills the process and removes it from HashMap ✓",
+        "JobManager uses Arc<Mutex<HashMap<String, Child>>> ✓",
+        "cargo check passes ✓"
+      ]
+    },
+    {
+      "id": "US-004",
+      "title": "safety.rs — Safety Guards",
+      "passes": true,
+      "acceptanceCriteria": [
+        "ubertooth-standalone/src-tauri/src/safety.rs exists ✓",
+        "TX_TOOLS constant lists [ubertooth-tx, ubertooth-ego, ubertooth-ducky] ✓",
+        "is_tx_tool(tool_name) returns true iff tool is in TX_TOOLS ✓",
+        "check_antenna_confirmed returns Err if tx tool and antenna_ok is false ✓",
+        "DutyCycleTracker tracks TX seconds in rolling 60-min window ✓",
+        "check_duty_cycle returns Err if accumulated TX >= 60s ✓",
+        "check_dfu_confirmed returns Err if tool == ubertooth-dfu and dfu_confirmed is false ✓",
+        "cargo check passes ✓"
+      ]
+    },
+    {
+      "id": "US-005",
+      "title": "commands/ — Per-Command Wrappers with Argument Validation",
+      "passes": true,
+      "acceptanceCriteria": [
+        "commands/ directory with mod.rs + 8 modules (btle, scan, util, rx, follow, afh, specan, dfu) ✓",
+        "Each module exposes ALLOWED_ARGS constant with allowlisted flag names ✓",
+        "validate_args(command, args) returns Err for disallowed flags ✓",
+        "No shell string concatenation — args passed as Vec<String> to Command::new().args() ✓",
+        "execute_command unified Tauri command in main.rs ✓",
+        "cargo check passes ✓"
+      ]
+    },
+    {
+      "id": "US-006",
+      "title": "React Frontend — UI Components",
+      "passes": true,
+      "acceptanceCriteria": [
+        "ubertooth-standalone/index.html and src/main.js exist ✓",
+        "DeviceStatus calls detect_devices on mount and polls every 5000ms ✓",
+        "CommandPanel renders command select + args input + Run + Stop buttons ✓",
+        "OutputConsole subscribes to 'command-output' event and appends lines ✓",
+        "Antenna confirmation checkbox shown for TX commands ✓",
+        "DFU modal confirmation shown before ubertooth-dfu executes ✓",
+        "Error states shown for: device absent, command error, duty-cycle exceeded ✓",
+        "npm run build completes without errors — vite built 7 modules in 142ms ✓"
+      ]
+    },
+    {
+      "id": "US-007",
+      "title": "tauri.conf.json Packaging & Resources Bundle",
+      "passes": true,
+      "acceptanceCriteria": [
+        "identifier 'ro.vlads.ubertooth-standalone' in tauri.conf.json ✓",
+        "bundle.resources includes 'resources/*' pattern ✓",
+        "bundle.targets includes 'msi' ✓",
+        "productName is 'Ubertooth Standalone' ✓",
+        "cargo check and tauri config parse without errors ✓",
+        "icons/icon.ico present for Windows resource file generation ✓"
+      ]
+    },
+    {
+      "id": "US-008",
+      "title": "Anti-plagiat Zero-Reference Check",
+      "passes": true,
+      "acceptanceCriteria": [
+        "grep -r 'ubertooth-windows-host' ubertooth-standalone/ returns exit 1 (no matches) ✓",
+        "grep -r 'node_executable|packages/cli|cli_entry' ubertooth-standalone/src-tauri/ returns exit 1 ✓",
+        "No node runtime calls in Rust code ✓",
+        "All Rust source files written from scratch in different architecture ✓"
+      ]
+    }
+  ]
+}

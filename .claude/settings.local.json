@@ -1,0 +1,27 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(anything)",
+      "Bash(npm list:*)",
+      "Bash(mkdir -p .claude/rules)",
+      "Bash(cp \"C:/Users/vlads/.claude/plugins/marketplaces/omc/templates/rules/\"*.md .claude/rules/)",
+      "Bash(node --test)",
+      "Bash(npm test:*)",
+      "Bash(cat /c/Users/vlads/Desktop/AN3/Licenta/ubertooth-windows-host/.omc/state/*.json)",
+      "Bash(cat /c/Users/vlads/Desktop/AN3/Licenta/.omc/state/*.json)",
+      "mcp__filesystem__read_text_file",
+      "mcp__plugin_oh-my-claudecode_t__state_read",
+      "mcp__filesystem__list_directory",
+      "mcp__plugin_oh-my-claudecode_t__state_write",
+      "Bash(cargo --version)",
+      "Bash(rustc --version)",
+      "Bash(npm --version)",
+      "mcp__gitnexus__impact",
+      "Bash(cargo test *)",
+      "Bash(npm run *)",
+      "Bash(python -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\(json.dumps\\(d.get\\('scripts',{}\\), indent=2\\)\\)\")",
+      "Bash(taskkill /F /IM ubertooth-standalone.exe)",
+      "PowerShell(& \"C:\\\\Users\\\\vlads\\\\Desktop\\\\AN3\\\\Licenta\\\\ubertooth-standalone\\\\src-tauri\\\\resources\\\\ubertooth-util.exe\" -v 2>&1; Write-Host \"EXIT: $LASTEXITCODE\")"
+    ]
+  }
+}

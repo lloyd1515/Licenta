@@ -1,0 +1,2174 @@
+{
+  "name": "licenta-explained",
+  "title": "How Wi-Fi notices a fall",
+  "voiced": true,
+  "captions": false,
+  "duration": 440.5,
+  "poster": 103.16,
+  "scenes": [
+    {
+      "id": "title",
+      "start": 0.0,
+      "end": 2.1666666666666665,
+      "sentences": [
+        {
+          "text": "How Wi-Fi notices a fall.",
+          "spoken": "How Wi-Fi notices a fall.",
+          "start": 0.3,
+          "end": 1.964,
+          "parts": [
+            {
+              "text": "How Wi-Fi notices a fall.",
+              "spoken": "How Wi-Fi notices a fall.",
+              "lang": "en-us",
+              "start": 0.3,
+              "end": 1.964
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "intro",
+      "start": 2.1666666666666665,
+      "end": 14.2,
+      "sentences": [
+        {
+          "text": "Someone just fell in this room.",
+          "spoken": "Someone just fell in this room.",
+          "start": 2.3666666666666667,
+          "end": 3.966666666666667,
+          "parts": [
+            {
+              "text": "Someone just fell in this room.",
+              "spoken": "Someone just fell in this room.",
+              "lang": "en-us",
+              "start": 2.3666666666666667,
+              "end": 3.966666666666667
+            }
+          ]
+        },
+        {
+          "text": "No camera saw it.",
+          "spoken": "No camera saw it.",
+          "start": 4.386666666666667,
+          "end": 5.581666666666667,
+          "parts": [
+            {
+              "text": "No camera saw it.",
+              "spoken": "No camera saw it.",
+              "lang": "en-us",
+              "start": 4.386666666666667,
+              "end": 5.581666666666667
+            }
+          ]
+        },
+        {
+          "text": "Nobody wore a sensor.",
+          "spoken": "Nobody wore a sensor.",
+          "start": 6.001666666666667,
+          "end": 7.366666666666666,
+          "parts": [
+            {
+              "text": "Nobody wore a sensor.",
+              "spoken": "Nobody wore a sensor.",
+              "lang": "en-us",
+              "start": 6.001666666666667,
+              "end": 7.366666666666666
+            }
+          ]
+        },
+        {
+          "text": "The Wi-Fi did.",
+          "spoken": "The Wi-Fi did.",
+          "start": 7.786666666666667,
+          "end": 8.874666666666666,
+          "parts": [
+            {
+              "text": "The Wi-Fi did.",
+              "spoken": "The Wi-Fi did.",
+              "lang": "en-us",
+              "start": 7.786666666666667,
+              "end": 8.874666666666666
+            }
+          ]
+        },
+        {
+          "text": "In nine minutes you'll know exactly how, down to the line of code that rang this alarm.",
+          "spoken": "In nine minutes you'll know exactly how, down to the line of code that rang this alarm.",
+          "start": 9.294666666666666,
+          "end": 13.881666666666666,
+          "parts": [
+            {
+              "text": "In nine minutes you'll know exactly how, down to the line of code that rang this alarm.",
+              "spoken": "In nine minutes you'll know exactly how, down to the line of code that rang this alarm.",
+              "lang": "en-us",
+              "start": 9.294666666666666,
+              "end": 13.881666666666666
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "k1-why",
+      "start": 14.2,
+      "end": 17.433333333333334,
+      "sentences": [
+        {
+          "text": "First, the idea, with no code at all.",
+          "spoken": "First, the idea, with no code at all.",
+          "start": 14.8,
+          "end": 17.125,
+          "parts": [
+            {
+              "text": "First, the idea, with no code at all.",
+              "spoken": "First, the idea, with no code at all.",
+              "lang": "en-us",
+              "start": 14.8,
+              "end": 17.125
+            }
+          ]
+        }
+      ],
+      "chapter": "Why Wi-Fi can see a fall"
+    },
+    {
+      "id": "a1-care",
+      "start": 17.433333333333334,
+      "end": 30.933333333333334,
+      "sentences": [
+        {
+          "text": "Picture an older person who lives alone.",
+          "spoken": "Picture an older person who lives alone.",
+          "start": 17.633333333333333,
+          "end": 19.873333333333335,
+          "parts": [
+            {
+              "text": "Picture an older person who lives alone.",
+              "spoken": "Picture an older person who lives alone.",
+              "lang": "en-us",
+              "start": 17.633333333333333,
+              "end": 19.873333333333335
+            }
+          ]
+        },
+        {
+          "text": "They fall, and the phone is across the room.",
+          "spoken": "They fall, and the phone is across the room.",
+          "start": 20.293333333333333,
+          "end": 22.576333333333334,
+          "parts": [
+            {
+              "text": "They fall, and the phone is across the room.",
+              "spoken": "They fall, and the phone is across the room.",
+              "lang": "en-us",
+              "start": 20.293333333333333,
+              "end": 22.576333333333334
+            }
+          ]
+        },
+        {
+          "text": "Cameras feel like spying, and a wristband gets left on the nightstand.",
+          "spoken": "Cameras feel like spying, and a wristband gets left on the nightstand.",
+          "start": 22.996333333333332,
+          "end": 26.878333333333334,
+          "parts": [
+            {
+              "text": "Cameras feel like spying, and a wristband gets left on the nightstand.",
+              "spoken": "Cameras feel like spying, and a wristband gets left on the nightstand.",
+              "lang": "en-us",
+              "start": 22.996333333333332,
+              "end": 26.878333333333334
+            }
+          ]
+        },
+        {
+          "text": "So here is the question: can the room itself notice the fall?",
+          "spoken": "So here is the question: can the room itself notice the fall?",
+          "start": 27.298333333333332,
+          "end": 30.712333333333333,
+          "parts": [
+            {
+              "text": "So here is the question: can the room itself notice the fall?",
+              "spoken": "So here is the question: can the room itself notice the fall?",
+              "lang": "en-us",
+              "start": 27.298333333333332,
+              "end": 30.712333333333333
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "a1-pond",
+      "start": 30.933333333333334,
+      "end": 59.0,
+      "sentences": [
+        {
+          "text": "Think of a pond.",
+          "spoken": "Think of a pond.",
+          "start": 31.133333333333333,
+          "end": 32.20033333333333,
+          "parts": [
+            {
+              "text": "Think of a pond.",
+              "spoken": "Think of a pond.",
+              "lang": "en-us",
+              "start": 31.133333333333333,
+              "end": 32.20033333333333
+            }
+          ]
+        },
+        {
+          "text": "Drop a stone, and ripples spread out and bounce off everything they meet.",
+          "spoken": "Drop a stone, and ripples spread out and bounce off everything they meet.",
+          "start": 32.620333333333335,
+          "end": 36.35333333333333,
+          "parts": [
+            {
+              "text": "Drop a stone, and ripples spread out and bounce off everything they meet.",
+              "spoken": "Drop a stone, and ripples spread out and bounce off everything they meet.",
+              "lang": "en-us",
+              "start": 32.620333333333335,
+              "end": 36.35333333333333
+            }
+          ]
+        },
+        {
+          "text": "Someone on the far bank can tell a reed is there, just from how the ripples arrive.",
+          "spoken": "Someone on the far bank can tell a reed is there, just from how the ripples arrive.",
+          "start": 36.77333333333333,
+          "end": 41.12533333333333,
+          "parts": [
+            {
+              "text": "Someone on the far bank can tell a reed is there, just from how the ripples arrive.",
+              "spoken": "Someone on the far bank can tell a reed is there, just from how the ripples arrive.",
+              "lang": "en-us",
+              "start": 36.77333333333333,
+              "end": 41.12533333333333
+            }
+          ]
+        },
+        {
+          "text": "Radio waves do the same thing in a room.",
+          "spoken": "Radio waves do the same thing in a room.",
+          "start": 41.54533333333333,
+          "end": 43.82833333333333,
+          "parts": [
+            {
+              "text": "Radio waves do the same thing in a room.",
+              "spoken": "Radio waves do the same thing in a room.",
+              "lang": "en-us",
+              "start": 41.54533333333333,
+              "end": 43.82833333333333
+            }
+          ]
+        },
+        {
+          "text": "Three small boards keep sending Wi-Fi messages to each other, and a body in the way changes how each wave arrives.",
+          "spoken": "Three small boards keep sending Wi-Fi messages to each other, and a body in the way changes how each wave arrives.",
+          "start": 44.248333333333335,
+          "end": 50.840333333333334,
+          "parts": [
+            {
+              "text": "Three small boards keep sending Wi-Fi messages to each other, and a body in the way changes how each wave arrives.",
+              "spoken": "Three small boards keep sending Wi-Fi messages to each other, and a body in the way changes how each wave arrives.",
+              "lang": "en-us",
+              "start": 44.248333333333335,
+              "end": 50.840333333333334
+            }
+          ]
+        },
+        {
+          "text": "We never look at the person.",
+          "spoken": "We never look at the person.",
+          "start": 51.260333333333335,
+          "end": 52.64633333333333,
+          "parts": [
+            {
+              "text": "We never look at the person.",
+              "spoken": "We never look at the person.",
+              "lang": "en-us",
+              "start": 51.260333333333335,
+              "end": 52.64633333333333
+            }
+          ]
+        },
+        {
+          "text": "We watch the ripples wobble.",
+          "spoken": "We watch the ripples wobble.",
+          "start": 53.06633333333333,
+          "end": 54.58133333333333,
+          "parts": [
+            {
+              "text": "We watch the ripples wobble.",
+              "spoken": "We watch the ripples wobble.",
+              "lang": "en-us",
+              "start": 53.06633333333333,
+              "end": 54.58133333333333
+            }
+          ]
+        },
+        {
+          "text": "The radio's report of how each wave arrived is called CSI.",
+          "spoken": "The radio's report of how each wave arrived is called C S I.",
+          "start": 55.001333333333335,
+          "end": 58.77733333333333,
+          "parts": [
+            {
+              "text": "The radio's report of how each wave arrived is called CSI.",
+              "spoken": "The radio's report of how each wave arrived is called C S I.",
+              "lang": "en-us",
+              "start": 55.001333333333335,
+              "end": 58.77733333333333
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "a1-stations",
+      "start": 59.0,
+      "end": 80.6,
+      "sentences": [
+        {
+          "text": "And Wi-Fi is not one wave.",
+          "spoken": "And Wi-Fi is not one wave.",
+          "start": 59.2,
+          "end": 60.992,
+          "parts": [
+            {
+              "text": "And Wi-Fi is not one wave.",
+              "spoken": "And Wi-Fi is not one wave.",
+              "lang": "en-us",
+              "start": 59.2,
+              "end": 60.992
+            }
+          ]
+        },
+        {
+          "text": "It is 52 narrow waves sent side by side, like 52 radio stations.",
+          "spoken": "It is 52 narrow waves sent side by side, like 52 radio stations.",
+          "start": 61.412,
+          "end": 66.276,
+          "parts": [
+            {
+              "text": "It is 52 narrow waves sent side by side, like 52 radio stations.",
+              "spoken": "It is 52 narrow waves sent side by side, like 52 radio stations.",
+              "lang": "en-us",
+              "start": 61.412,
+              "end": 66.276
+            }
+          ]
+        },
+        {
+          "text": "For every message, the board measures how loud each station arrived.",
+          "spoken": "For every message, the board measures how loud each station arrived.",
+          "start": 66.696,
+          "end": 70.557,
+          "parts": [
+            {
+              "text": "For every message, the board measures how loud each station arrived.",
+              "spoken": "For every message, the board measures how loud each station arrived.",
+              "lang": "en-us",
+              "start": 66.696,
+              "end": 70.557
+            }
+          ]
+        },
+        {
+          "text": "So every message gives us 52 volume numbers, and about 33 messages arrive every second.",
+          "spoken": "So every message gives us 52 volume numbers, and about 33 messages arrive every second.",
+          "start": 70.977,
+          "end": 77.228,
+          "parts": [
+            {
+              "text": "So every message gives us 52 volume numbers, and about 33 messages arrive every second.",
+              "spoken": "So every message gives us 52 volume numbers, and about 33 messages arrive every second.",
+              "lang": "en-us",
+              "start": 70.977,
+              "end": 77.228
+            }
+          ]
+        },
+        {
+          "text": "Each of those narrow waves is called a subcarrier.",
+          "spoken": "Each of those narrow waves is called a subcarrier.",
+          "start": 77.648,
+          "end": 80.379,
+          "parts": [
+            {
+              "text": "Each of those narrow waves is called a subcarrier.",
+              "spoken": "Each of those narrow waves is called a subcarrier.",
+              "lang": "en-us",
+              "start": 77.648,
+              "end": 80.379
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "a1-shape",
+      "start": 80.6,
+      "end": 103.36666666666666,
+      "sentences": [
+        {
+          "text": "Now squeeze all those numbers into one wiggly line, and compare three rooms.",
+          "spoken": "Now squeeze all those numbers into one wiggly line, and compare three rooms.",
+          "start": 80.8,
+          "end": 85.216,
+          "parts": [
+            {
+              "text": "Now squeeze all those numbers into one wiggly line, and compare three rooms.",
+              "spoken": "Now squeeze all those numbers into one wiggly line, and compare three rooms.",
+              "lang": "en-us",
+              "start": 80.8,
+              "end": 85.216
+            }
+          ]
+        },
+        {
+          "text": "An empty room: calm.",
+          "spoken": "An empty room: calm.",
+          "start": 85.636,
+          "end": 87.087,
+          "parts": [
+            {
+              "text": "An empty room: calm.",
+              "spoken": "An empty room: calm.",
+              "lang": "en-us",
+              "start": 85.636,
+              "end": 87.087
+            }
+          ]
+        },
+        {
+          "text": "Someone walking: busy all the time.",
+          "spoken": "Someone walking: busy all the time.",
+          "start": 87.507,
+          "end": 89.597,
+          "parts": [
+            {
+              "text": "Someone walking: busy all the time.",
+              "spoken": "Someone walking: busy all the time.",
+              "lang": "en-us",
+              "start": 87.507,
+              "end": 89.597
+            }
+          ]
+        },
+        {
+          "text": "A fall: busy, then one sharp jerk, then flat, because the person is lying still.",
+          "spoken": "A fall: busy, then one sharp jerk, then flat, because the person is lying still.",
+          "start": 90.017,
+          "end": 94.711,
+          "parts": [
+            {
+              "text": "A fall: busy, then one sharp jerk, then flat, because the person is lying still.",
+              "spoken": "A fall: busy, then one sharp jerk, then flat, because the person is lying still.",
+              "lang": "en-us",
+              "start": 90.017,
+              "end": 94.711
+            }
+          ]
+        },
+        {
+          "text": "That shape is everything.",
+          "spoken": "That shape is everything.",
+          "start": 95.131,
+          "end": 96.517,
+          "parts": [
+            {
+              "text": "That shape is everything.",
+              "spoken": "That shape is everything.",
+              "lang": "en-us",
+              "start": 95.131,
+              "end": 96.517
+            }
+          ]
+        },
+        {
+          "text": "The whole program hunts for one sharp jerk, followed by stillness.",
+          "spoken": "The whole program hunts for one sharp jerk, followed by stillness.",
+          "start": 96.937,
+          "end": 100.543,
+          "parts": [
+            {
+              "text": "The whole program hunts for one sharp jerk, followed by stillness.",
+              "spoken": "The whole program hunts for one sharp jerk, followed by stillness.",
+              "lang": "en-us",
+              "start": 96.937,
+              "end": 100.543
+            }
+          ]
+        },
+        {
+          "text": "Let's follow one real fall through the code.",
+          "spoken": "Let's follow one real fall through the code.",
+          "start": 100.963,
+          "end": 103.16,
+          "parts": [
+            {
+              "text": "Let's follow one real fall through the code.",
+              "spoken": "Let's follow one real fall through the code.",
+              "lang": "en-us",
+              "start": 100.963,
+              "end": 103.16
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "k2-why",
+      "start": 103.36666666666666,
+      "end": 108.5,
+      "sentences": [
+        {
+          "text": "This is a real recording: twenty seconds, with one real fall in the middle.",
+          "spoken": "This is a real recording: twenty seconds, with one real fall in the middle.",
+          "start": 103.96666666666667,
+          "end": 108.19066666666667,
+          "parts": [
+            {
+              "text": "This is a real recording: twenty seconds, with one real fall in the middle.",
+              "spoken": "This is a real recording: twenty seconds, with one real fall in the middle.",
+              "lang": "en-us",
+              "start": 103.96666666666667,
+              "end": 108.19066666666667
+            }
+          ]
+        }
+      ],
+      "chapter": "One real fall, line by line",
+      "path": [
+        "Firmware",
+        "packets",
+        "dsp",
+        "fall_detector"
+      ]
+    },
+    {
+      "id": "a2-envelope",
+      "start": 108.5,
+      "end": 125.2,
+      "sentences": [
+        {
+          "text": "Each Wi-Fi message reaches the computer like a letter in an envelope.",
+          "spoken": "Each Wi-Fi message reaches the computer like a letter in an envelope.",
+          "start": 108.7,
+          "end": 112.86,
+          "parts": [
+            {
+              "text": "Each Wi-Fi message reaches the computer like a letter in an envelope.",
+              "spoken": "Each Wi-Fi message reaches the computer like a letter in an envelope.",
+              "lang": "en-us",
+              "start": 108.7,
+              "end": 112.86
+            }
+          ]
+        },
+        {
+          "text": "138 bytes in total.",
+          "spoken": "138 bytes in total.",
+          "start": 113.28,
+          "end": 115.285,
+          "parts": [
+            {
+              "text": "138 bytes in total.",
+              "spoken": "138 bytes in total.",
+              "lang": "en-us",
+              "start": 113.28,
+              "end": 115.285
+            }
+          ]
+        },
+        {
+          "text": "The first 10 are the address on the envelope: which board sent it, how strong it was, and when.",
+          "spoken": "The first 10 are the address on the envelope: which board sent it, how strong it was, and when.",
+          "start": 115.705,
+          "end": 120.868,
+          "parts": [
+            {
+              "text": "The first 10 are the address on the envelope: which board sent it, how strong it was, and when.",
+              "spoken": "The first 10 are the address on the envelope: which board sent it, how strong it was, and when.",
+              "lang": "en-us",
+              "start": 115.705,
+              "end": 120.868
+            }
+          ]
+        },
+        {
+          "text": "The other 128 are the letter itself: the readings.",
+          "spoken": "The other 128 are the letter itself: the readings.",
+          "start": 121.288,
+          "end": 124.979,
+          "parts": [
+            {
+              "text": "The other 128 are the letter itself: the readings.",
+              "spoken": "The other 128 are the letter itself: the readings.",
+              "lang": "en-us",
+              "start": 121.288,
+              "end": 124.979
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "c2-parse",
+      "start": 125.2,
+      "end": 153.26666666666668,
+      "sentences": [
+        {
+          "text": "Here is the function that opens the envelope.",
+          "spoken": "Here is the function that opens the envelope.",
+          "start": 125.5,
+          "end": 128.06,
+          "parts": [
+            {
+              "text": "Here is the function that opens the envelope.",
+              "spoken": "Here is the function that opens the envelope.",
+              "lang": "en-us",
+              "start": 125.5,
+              "end": 128.06
+            }
+          ]
+        },
+        {
+          "text": "The first line reads the address: board number, signal strength, time, and a counter.",
+          "spoken": "The first line reads the address: board number, signal strength, time, and a counter.",
+          "start": 128.48,
+          "end": 133.216,
+          "parts": [
+            {
+              "text": "The first line reads the address: board number, signal strength, time, and a counter.",
+              "spoken": "The first line reads the address: board number, signal strength, time, and a counter.",
+              "lang": "en-us",
+              "start": 128.48,
+              "end": 133.216
+            }
+          ]
+        },
+        {
+          "text": "The next line takes the 128 reading bytes as small whole numbers, called iq.",
+          "spoken": "The next line takes the 128 reading bytes as small whole numbers, called iq.",
+          "start": 133.636,
+          "end": 138.692,
+          "parts": [
+            {
+              "text": "The next line takes the 128 reading bytes as small whole numbers, called iq.",
+              "spoken": "The next line takes the 128 reading bytes as small whole numbers, called iq.",
+              "lang": "en-us",
+              "start": 133.636,
+              "end": 138.692
+            }
+          ]
+        },
+        {
+          "text": "Then the readings are paired up: the first byte of each pair, plus the second byte times j.",
+          "spoken": "Then the readings are paired up: the first byte of each pair, plus the second byte times j.",
+          "start": 139.112,
+          "end": 143.997,
+          "parts": [
+            {
+              "text": "Then the readings are paired up: the first byte of each pair, plus the second byte times j.",
+              "spoken": "Then the readings are paired up: the first byte of each pair, plus the second byte times j.",
+              "lang": "en-us",
+              "start": 139.112,
+              "end": 143.997
+            }
+          ]
+        },
+        {
+          "text": "That j just means: these two numbers belong together as one reading.",
+          "spoken": "That j just means: these two numbers belong together as one reading.",
+          "start": 144.417,
+          "end": 148.3,
+          "parts": [
+            {
+              "text": "That j just means: these two numbers belong together as one reading.",
+              "spoken": "That j just means: these two numbers belong together as one reading.",
+              "lang": "en-us",
+              "start": 144.417,
+              "end": 148.3
+            }
+          ]
+        },
+        {
+          "text": "The last line keeps only the 52 useful stations and drops the rest.",
+          "spoken": "The last line keeps only the 52 useful stations and drops the rest.",
+          "start": 148.72,
+          "end": 153.051,
+          "parts": [
+            {
+              "text": "The last line keeps only the 52 useful stations and drops the rest.",
+              "spoken": "The last line keeps only the 52 useful stations and drops the rest.",
+              "lang": "en-us",
+              "start": 148.72,
+              "end": 153.051
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "a2-arrow",
+      "start": 153.26666666666668,
+      "end": 172.66666666666666,
+      "sentences": [
+        {
+          "text": "Why two numbers per reading?",
+          "spoken": "Why two numbers per reading?",
+          "start": 153.46666666666667,
+          "end": 154.98166666666665,
+          "parts": [
+            {
+              "text": "Why two numbers per reading?",
+              "spoken": "Why two numbers per reading?",
+              "lang": "en-us",
+              "start": 153.46666666666667,
+              "end": 154.98166666666665
+            }
+          ]
+        },
+        {
+          "text": "Draw each pair as an arrow on graph paper.",
+          "spoken": "Draw each pair as an arrow on graph paper.",
+          "start": 155.40166666666667,
+          "end": 157.76966666666667,
+          "parts": [
+            {
+              "text": "Draw each pair as an arrow on graph paper.",
+              "spoken": "Draw each pair as an arrow on graph paper.",
+              "lang": "en-us",
+              "start": 155.40166666666667,
+              "end": 157.76966666666667
+            }
+          ]
+        },
+        {
+          "text": "A pair of 30 and minus 40 means: 30 steps right, 40 steps down.",
+          "spoken": "A pair of 30 and minus 40 means: 30 steps right, 40 steps down.",
+          "start": 158.18966666666665,
+          "end": 162.83966666666666,
+          "parts": [
+            {
+              "text": "A pair of 30 and minus 40 means: 30 steps right, 40 steps down.",
+              "spoken": "A pair of 30 and minus 40 means: 30 steps right, 40 steps down.",
+              "lang": "en-us",
+              "start": 158.18966666666665,
+              "end": 162.83966666666666
+            }
+          ]
+        },
+        {
+          "text": "The arrow's length is 50, from the classic three, four, five triangle.",
+          "spoken": "The arrow's length is 50, from the classic three, four, five triangle.",
+          "start": 163.25966666666667,
+          "end": 167.37766666666667,
+          "parts": [
+            {
+              "text": "The arrow's length is 50, from the classic three, four, five triangle.",
+              "spoken": "The arrow's length is 50, from the classic three, four, five triangle.",
+              "lang": "en-us",
+              "start": 163.25966666666667,
+              "end": 167.37766666666667
+            }
+          ]
+        },
+        {
+          "text": "That length is how loud the station arrived.",
+          "spoken": "That length is how loud the station arrived.",
+          "start": 167.79766666666666,
+          "end": 170.07966666666667,
+          "parts": [
+            {
+              "text": "That length is how loud the station arrived.",
+              "spoken": "That length is how loud the station arrived.",
+              "lang": "en-us",
+              "start": 167.79766666666666,
+              "end": 170.07966666666667
+            }
+          ]
+        },
+        {
+          "text": "The direction we simply throw away.",
+          "spoken": "The direction we simply throw away.",
+          "start": 170.49966666666666,
+          "end": 172.44166666666666,
+          "parts": [
+            {
+              "text": "The direction we simply throw away.",
+              "spoken": "The direction we simply throw away.",
+              "lang": "en-us",
+              "start": 170.49966666666666,
+              "end": 172.44166666666666
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "c2-feed",
+      "start": 172.66666666666666,
+      "end": 195.73333333333332,
+      "sentences": [
+        {
+          "text": "But the bytes arrive like a conveyor belt with no gaps between letters.",
+          "spoken": "But the bytes arrive like a conveyor belt with no gaps between letters.",
+          "start": 172.96666666666667,
+          "end": 176.87066666666666,
+          "parts": [
+            {
+              "text": "But the bytes arrive like a conveyor belt with no gaps between letters.",
+              "spoken": "But the bytes arrive like a conveyor belt with no gaps between letters.",
+              "lang": "en-us",
+              "start": 172.96666666666667,
+              "end": 176.87066666666666
+            }
+          ]
+        },
+        {
+          "text": "So every letter starts with the same stamp, written A five, five A.",
+          "spoken": "So every letter starts with the same stamp, written A five, five A.",
+          "start": 177.29066666666668,
+          "end": 181.00266666666667,
+          "parts": [
+            {
+              "text": "So every letter starts with the same stamp, written A five, five A.",
+              "spoken": "So every letter starts with the same stamp, written A five, five A.",
+              "lang": "en-us",
+              "start": 177.29066666666668,
+              "end": 181.00266666666667
+            }
+          ]
+        },
+        {
+          "text": "The feed function looks for the stamp.",
+          "spoken": "The feed function looks for the stamp.",
+          "start": 181.42266666666666,
+          "end": 183.25766666666667,
+          "parts": [
+            {
+              "text": "The feed function looks for the stamp.",
+              "spoken": "The feed function looks for the stamp.",
+              "lang": "en-us",
+              "start": 181.42266666666666,
+              "end": 183.25766666666667
+            }
+          ]
+        },
+        {
+          "text": "Anything before it is junk, so it gets deleted.",
+          "spoken": "Anything before it is junk, so it gets deleted.",
+          "start": 183.67766666666665,
+          "end": 186.23766666666666,
+          "parts": [
+            {
+              "text": "Anything before it is junk, so it gets deleted.",
+              "spoken": "Anything before it is junk, so it gets deleted.",
+              "lang": "en-us",
+              "start": 183.67766666666665,
+              "end": 186.23766666666666
+            }
+          ]
+        },
+        {
+          "text": "If fewer than 138 bytes have arrived, it waits for more.",
+          "spoken": "If fewer than 138 bytes have arrived, it waits for more.",
+          "start": 186.65766666666667,
+          "end": 190.41166666666666,
+          "parts": [
+            {
+              "text": "If fewer than 138 bytes have arrived, it waits for more.",
+              "spoken": "If fewer than 138 bytes have arrived, it waits for more.",
+              "lang": "en-us",
+              "start": 186.65766666666667,
+              "end": 190.41166666666666
+            }
+          ]
+        },
+        {
+          "text": "Otherwise it opens that envelope, cuts it off the belt, and looks for the next stamp.",
+          "spoken": "Otherwise it opens that envelope, cuts it off the belt, and looks for the next stamp.",
+          "start": 190.83166666666668,
+          "end": 195.50366666666667,
+          "parts": [
+            {
+              "text": "Otherwise it opens that envelope, cuts it off the belt, and looks for the next stamp.",
+              "spoken": "Otherwise it opens that envelope, cuts it off the belt, and looks for the next stamp.",
+              "lang": "en-us",
+              "start": 190.83166666666668,
+              "end": 195.50366666666667
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "c2-sheet",
+      "start": 195.73333333333332,
+      "end": 212.66666666666666,
+      "sentences": [
+        {
+          "text": "Each opened letter becomes one row of a spreadsheet.",
+          "spoken": "Each opened letter becomes one row of a spreadsheet.",
+          "start": 196.03333333333333,
+          "end": 198.91333333333333,
+          "parts": [
+            {
+              "text": "Each opened letter becomes one row of a spreadsheet.",
+              "spoken": "Each opened letter becomes one row of a spreadsheet.",
+              "lang": "en-us",
+              "start": 196.03333333333333,
+              "end": 198.91333333333333
+            }
+          ]
+        },
+        {
+          "text": "This line keeps only the arrow lengths, the loudness.",
+          "spoken": "This line keeps only the arrow lengths, the loudness.",
+          "start": 199.33333333333334,
+          "end": 202.02133333333333,
+          "parts": [
+            {
+              "text": "This line keeps only the arrow lengths, the loudness.",
+              "spoken": "This line keeps only the arrow lengths, the loudness.",
+              "lang": "en-us",
+              "start": 199.33333333333334,
+              "end": 202.02133333333333
+            }
+          ]
+        },
+        {
+          "text": "About 33 rows a second, for 20 seconds, gives 669 rows of 52 numbers.",
+          "spoken": "About 33 rows a second, for 20 seconds, gives 669 rows of 52 numbers.",
+          "start": 202.44133333333335,
+          "end": 208.54233333333335,
+          "parts": [
+            {
+              "text": "About 33 rows a second, for 20 seconds, gives 669 rows of 52 numbers.",
+              "spoken": "About 33 rows a second, for 20 seconds, gives 669 rows of 52 numbers.",
+              "lang": "en-us",
+              "start": 202.44133333333335,
+              "end": 208.54233333333335
+            }
+          ]
+        },
+        {
+          "text": "Every row is one moment, and every column is one station.",
+          "spoken": "Every row is one moment, and every column is one station.",
+          "start": 208.96233333333333,
+          "end": 212.46133333333333,
+          "parts": [
+            {
+              "text": "Every row is one moment, and every column is one station.",
+              "spoken": "Every row is one moment, and every column is one station.",
+              "lang": "en-us",
+              "start": 208.96233333333333,
+              "end": 212.46133333333333
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "c2-drop",
+      "start": 212.66666666666666,
+      "end": 234.93333333333334,
+      "sentences": [
+        {
+          "text": "Some stations are broken.",
+          "spoken": "Some stations are broken.",
+          "start": 212.96666666666667,
+          "end": 214.43866666666668,
+          "parts": [
+            {
+              "text": "Some stations are broken.",
+              "spoken": "Some stations are broken.",
+              "lang": "en-us",
+              "start": 212.96666666666667,
+              "end": 214.43866666666668
+            }
+          ]
+        },
+        {
+          "text": "Think of a choir where a few singers never make a sound and a few just scream.",
+          "spoken": "Think of a choir where a few singers never make a sound and a few just scream.",
+          "start": 214.85866666666666,
+          "end": 218.82666666666665,
+          "parts": [
+            {
+              "text": "Think of a choir where a few singers never make a sound and a few just scream.",
+              "spoken": "Think of a choir where a few singers never make a sound and a few just scream.",
+              "lang": "en-us",
+              "start": 214.85866666666666,
+              "end": 218.82666666666665
+            }
+          ]
+        },
+        {
+          "text": "The first line measures how much each column wobbles.",
+          "spoken": "The first line measures how much each column wobbles.",
+          "start": 219.24666666666667,
+          "end": 222.10566666666668,
+          "parts": [
+            {
+              "text": "The first line measures how much each column wobbles.",
+              "spoken": "The first line measures how much each column wobbles.",
+              "lang": "en-us",
+              "start": 219.24666666666667,
+              "end": 222.10566666666668
+            }
+          ]
+        },
+        {
+          "text": "That number is called the variance.",
+          "spoken": "That number is called the variance.",
+          "start": 222.52566666666667,
+          "end": 224.16766666666666,
+          "parts": [
+            {
+              "text": "That number is called the variance.",
+              "spoken": "That number is called the variance.",
+              "lang": "en-us",
+              "start": 222.52566666666667,
+              "end": 224.16766666666666
+            }
+          ]
+        },
+        {
+          "text": "The next line marks the columns that wobble too little or far too much.",
+          "spoken": "The next line marks the columns that wobble too little or far too much.",
+          "start": 224.58766666666668,
+          "end": 228.47066666666666,
+          "parts": [
+            {
+              "text": "The next line marks the columns that wobble too little or far too much.",
+              "spoken": "The next line marks the columns that wobble too little or far too much.",
+              "lang": "en-us",
+              "start": 224.58766666666668,
+              "end": 228.47066666666666
+            }
+          ]
+        },
+        {
+          "text": "The last line removes them.",
+          "spoken": "The last line removes them.",
+          "start": 228.89066666666668,
+          "end": 230.42666666666668,
+          "parts": [
+            {
+              "text": "The last line removes them.",
+              "spoken": "The last line removes them.",
+              "lang": "en-us",
+              "start": 228.89066666666668,
+              "end": 230.42666666666668
+            }
+          ]
+        },
+        {
+          "text": "In this recording, 11 columns go, and 41 good ones stay.",
+          "spoken": "In this recording, 11 columns go, and 41 good ones stay.",
+          "start": 230.84666666666666,
+          "end": 234.70766666666665,
+          "parts": [
+            {
+              "text": "In this recording, 11 columns go, and 41 good ones stay.",
+              "spoken": "In this recording, 11 columns go, and 41 good ones stay.",
+              "lang": "en-us",
+              "start": 230.84666666666666,
+              "end": 234.70766666666665
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "a2-eq",
+      "start": 234.93333333333334,
+      "end": 249.2,
+      "sentences": [
+        {
+          "text": "Next, think of the equalizer on a music player.",
+          "spoken": "Next, think of the equalizer on a music player.",
+          "start": 235.13333333333333,
+          "end": 237.82133333333334,
+          "parts": [
+            {
+              "text": "Next, think of the equalizer on a music player.",
+              "spoken": "Next, think of the equalizer on a music player.",
+              "lang": "en-us",
+              "start": 235.13333333333333,
+              "end": 237.82133333333334
+            }
+          ]
+        },
+        {
+          "text": "Slide down the very slow drift, like a room warming up.",
+          "spoken": "Slide down the very slow drift, like a room warming up.",
+          "start": 238.24133333333333,
+          "end": 241.46233333333333,
+          "parts": [
+            {
+              "text": "Slide down the very slow drift, like a room warming up.",
+              "spoken": "Slide down the very slow drift, like a room warming up.",
+              "lang": "en-us",
+              "start": 238.24133333333333,
+              "end": 241.46233333333333
+            }
+          ]
+        },
+        {
+          "text": "Slide down the very fast hiss from the electronics.",
+          "spoken": "Slide down the very fast hiss from the electronics.",
+          "start": 241.88233333333332,
+          "end": 244.67733333333334,
+          "parts": [
+            {
+              "text": "Slide down the very fast hiss from the electronics.",
+              "spoken": "Slide down the very fast hiss from the electronics.",
+              "lang": "en-us",
+              "start": 241.88233333333332,
+              "end": 244.67733333333334
+            }
+          ]
+        },
+        {
+          "text": "Keep only the middle: wobbles about as fast as a human body moves.",
+          "spoken": "Keep only the middle: wobbles about as fast as a human body moves.",
+          "start": 245.09733333333332,
+          "end": 248.98033333333333,
+          "parts": [
+            {
+              "text": "Keep only the middle: wobbles about as fast as a human body moves.",
+              "spoken": "Keep only the middle: wobbles about as fast as a human body moves.",
+              "lang": "en-us",
+              "start": 245.09733333333332,
+              "end": 248.98033333333333
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "d2-band",
+      "start": 249.2,
+      "end": 264.7,
+      "sentences": [
+        {
+          "text": "In the code, butter designs that equalizer.",
+          "spoken": "In the code, butter designs that equalizer.",
+          "start": 249.5,
+          "end": 251.975,
+          "parts": [
+            {
+              "text": "In the code, butter designs that equalizer.",
+              "spoken": "In the code, butter designs that equalizer.",
+              "lang": "en-us",
+              "start": 249.5,
+              "end": 251.975
+            }
+          ]
+        },
+        {
+          "text": "It keeps wobbles between 0.2 and 12 times a second.",
+          "spoken": "It keeps wobbles between 0.2 and 12 times a second.",
+          "start": 252.395,
+          "end": 255.979,
+          "parts": [
+            {
+              "text": "It keeps wobbles between 0.2 and 12 times a second.",
+              "spoken": "It keeps wobbles between 0.2 and 12 times a second.",
+              "lang": "en-us",
+              "start": 252.395,
+              "end": 255.979
+            }
+          ]
+        },
+        {
+          "text": "Times per second has a name: hertz.",
+          "spoken": "Times per second has a name: hertz.",
+          "start": 256.399,
+          "end": 258.617,
+          "parts": [
+            {
+              "text": "Times per second has a name: hertz.",
+              "spoken": "Times per second has a name: hertz.",
+              "lang": "en-us",
+              "start": 256.399,
+              "end": 258.617
+            }
+          ]
+        },
+        {
+          "text": "Then filtfilt runs the filter forwards and then backwards, so nothing slides out of place in time.",
+          "spoken": "Then filtfilt runs the filter forwards and then backwards, so nothing slides out of place in time.",
+          "start": 259.037,
+          "end": 264.477,
+          "parts": [
+            {
+              "text": "Then filtfilt runs the filter forwards and then backwards, so nothing slides out of place in time.",
+              "spoken": "Then filtfilt runs the filter forwards and then backwards, so nothing slides out of place in time.",
+              "lang": "en-us",
+              "start": 259.037,
+              "end": 264.477
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "d2-pca",
+      "start": 264.7,
+      "end": 292.1333333333333,
+      "sentences": [
+        {
+          "text": "Now we have 41 lines that mostly move together.",
+          "spoken": "Now we have 41 lines that mostly move together.",
+          "start": 265.0,
+          "end": 268.115,
+          "parts": [
+            {
+              "text": "Now we have 41 lines that mostly move together.",
+              "spoken": "Now we have 41 lines that mostly move together.",
+              "lang": "en-us",
+              "start": 265.0,
+              "end": 268.115
+            }
+          ]
+        },
+        {
+          "text": "Picture 41 fans watching the same match: when something happens, they all lean the same way.",
+          "spoken": "Picture 41 fans watching the same match: when something happens, they all lean the same way.",
+          "start": 268.535,
+          "end": 274.06,
+          "parts": [
+            {
+              "text": "Picture 41 fans watching the same match: when something happens, they all lean the same way.",
+              "spoken": "Picture 41 fans watching the same match: when something happens, they all lean the same way.",
+              "lang": "en-us",
+              "start": 268.535,
+              "end": 274.06
+            }
+          ]
+        },
+        {
+          "text": "So we listen to the lean of the crowd, not to each fan.",
+          "spoken": "So we listen to the lean of the crowd, not to each fan.",
+          "start": 274.48,
+          "end": 277.445,
+          "parts": [
+            {
+              "text": "So we listen to the lean of the crowd, not to each fan.",
+              "spoken": "So we listen to the lean of the crowd, not to each fan.",
+              "lang": "en-us",
+              "start": 274.48,
+              "end": 277.445
+            }
+          ]
+        },
+        {
+          "text": "The first line centres every column on zero.",
+          "spoken": "The first line centres every column on zero.",
+          "start": 277.865,
+          "end": 280.468,
+          "parts": [
+            {
+              "text": "The first line centres every column on zero.",
+              "spoken": "The first line centres every column on zero.",
+              "lang": "en-us",
+              "start": 277.865,
+              "end": 280.468
+            }
+          ]
+        },
+        {
+          "text": "The next lines find the direction the columns lean together most.",
+          "spoken": "The next lines find the direction the columns lean together most.",
+          "start": 280.888,
+          "end": 284.344,
+          "parts": [
+            {
+              "text": "The next lines find the direction the columns lean together most.",
+              "spoken": "The next lines find the direction the columns lean together most.",
+              "lang": "en-us",
+              "start": 280.888,
+              "end": 284.344
+            }
+          ]
+        },
+        {
+          "text": "The last line projects onto it.",
+          "spoken": "The last line projects onto it.",
+          "start": 284.764,
+          "end": 286.599,
+          "parts": [
+            {
+              "text": "The last line projects onto it.",
+              "spoken": "The last line projects onto it.",
+              "lang": "en-us",
+              "start": 284.764,
+              "end": 286.599
+            }
+          ]
+        },
+        {
+          "text": "That leaves one number per moment: the motion line.",
+          "spoken": "That leaves one number per moment: the motion line.",
+          "start": 287.019,
+          "end": 289.771,
+          "parts": [
+            {
+              "text": "That leaves one number per moment: the motion line.",
+              "spoken": "That leaves one number per moment: the motion line.",
+              "lang": "en-us",
+              "start": 287.019,
+              "end": 289.771
+            }
+          ]
+        },
+        {
+          "text": "This trick is called PCA.",
+          "spoken": "This trick is called P C A.",
+          "start": 290.191,
+          "end": 291.919,
+          "parts": [
+            {
+              "text": "This trick is called PCA.",
+              "spoken": "This trick is called P C A.",
+              "lang": "en-us",
+              "start": 290.191,
+              "end": 291.919
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "d2-slope",
+      "start": 292.1333333333333,
+      "end": 319.1333333333333,
+      "sentences": [
+        {
+          "text": "Now we look for the jerk.",
+          "spoken": "Now we look for the jerk.",
+          "start": 292.43333333333334,
+          "end": 293.84133333333335,
+          "parts": [
+            {
+              "text": "Now we look for the jerk.",
+              "spoken": "Now we look for the jerk.",
+              "lang": "en-us",
+              "start": 292.43333333333334,
+              "end": 293.84133333333335
+            }
+          ]
+        },
+        {
+          "text": "First, the line is rescaled so its biggest swing equals 1.",
+          "spoken": "First, the line is rescaled so its biggest swing equals 1.",
+          "start": 294.2613333333333,
+          "end": 297.73833333333334,
+          "parts": [
+            {
+              "text": "First, the line is rescaled so its biggest swing equals 1.",
+              "spoken": "First, the line is rescaled so its biggest swing equals 1.",
+              "lang": "en-us",
+              "start": 294.2613333333333,
+              "end": 297.73833333333334
+            }
+          ]
+        },
+        {
+          "text": "That way a big room and a small room can share one rule.",
+          "spoken": "That way a big room and a small room can share one rule.",
+          "start": 298.15833333333336,
+          "end": 301.2943333333333,
+          "parts": [
+            {
+              "text": "That way a big room and a small room can share one rule.",
+              "spoken": "That way a big room and a small room can share one rule.",
+              "lang": "en-us",
+              "start": 298.15833333333336,
+              "end": 301.2943333333333
+            }
+          ]
+        },
+        {
+          "text": "Then gradient measures how steep the line is at every moment, like the steepness of a hill.",
+          "spoken": "Then gradient measures how steep the line is at every moment, like the steepness of a hill.",
+          "start": 301.71433333333334,
+          "end": 306.53633333333335,
+          "parts": [
+            {
+              "text": "Then gradient measures how steep the line is at every moment, like the steepness of a hill.",
+              "spoken": "Then gradient measures how steep the line is at every moment, like the steepness of a hill.",
+              "lang": "en-us",
+              "start": 301.71433333333334,
+              "end": 306.53633333333335
+            }
+          ]
+        },
+        {
+          "text": "The rule says: steeper than 17.5 means a hard impact.",
+          "spoken": "The rule says: steeper than 17.5 means a hard impact.",
+          "start": 306.95633333333336,
+          "end": 311.0733333333333,
+          "parts": [
+            {
+              "text": "The rule says: steeper than 17.5 means a hard impact.",
+              "spoken": "The rule says: steeper than 17.5 means a hard impact.",
+              "lang": "en-us",
+              "start": 306.95633333333336,
+              "end": 311.0733333333333
+            }
+          ]
+        },
+        {
+          "text": "At this moment, the steepness hits 17.63.",
+          "spoken": "At this moment, the steepness hits 17.63.",
+          "start": 311.49333333333334,
+          "end": 314.73633333333333,
+          "parts": [
+            {
+              "text": "At this moment, the steepness hits 17.63.",
+              "spoken": "At this moment, the steepness hits 17.63.",
+              "lang": "en-us",
+              "start": 311.49333333333334,
+              "end": 314.73633333333333
+            }
+          ]
+        },
+        {
+          "text": "A close call: only 3 moments in the whole recording go that steep.",
+          "spoken": "A close call: only 3 moments in the whole recording go that steep.",
+          "start": 315.15633333333335,
+          "end": 318.93233333333336,
+          "parts": [
+            {
+              "text": "A close call: only 3 moments in the whole recording go that steep.",
+              "spoken": "A close call: only 3 moments in the whole recording go that steep.",
+              "lang": "en-us",
+              "start": 315.15633333333335,
+              "end": 318.93233333333336
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "a2-alarm",
+      "start": 319.1333333333333,
+      "end": 335.76666666666665,
+      "sentences": [
+        {
+          "text": "But a jerk alone is not a fall.",
+          "spoken": "But a jerk alone is not a fall.",
+          "start": 319.3333333333333,
+          "end": 321.1893333333333,
+          "parts": [
+            {
+              "text": "But a jerk alone is not a fall.",
+              "spoken": "But a jerk alone is not a fall.",
+              "lang": "en-us",
+              "start": 319.3333333333333,
+              "end": 321.1893333333333
+            }
+          ]
+        },
+        {
+          "text": "You might just sit down hard.",
+          "spoken": "You might just sit down hard.",
+          "start": 321.6093333333333,
+          "end": 323.06033333333335,
+          "parts": [
+            {
+              "text": "You might just sit down hard.",
+              "spoken": "You might just sit down hard.",
+              "lang": "en-us",
+              "start": 321.6093333333333,
+              "end": 323.06033333333335
+            }
+          ]
+        },
+        {
+          "text": "So the detector works like a careful smoke alarm with stages.",
+          "spoken": "So the detector works like a careful smoke alarm with stages.",
+          "start": 323.4803333333333,
+          "end": 326.8933333333333,
+          "parts": [
+            {
+              "text": "So the detector works like a careful smoke alarm with stages.",
+              "spoken": "So the detector works like a careful smoke alarm with stages.",
+              "lang": "en-us",
+              "start": 323.4803333333333,
+              "end": 326.8933333333333
+            }
+          ]
+        },
+        {
+          "text": "Calm.",
+          "spoken": "Calm.",
+          "start": 327.31333333333333,
+          "end": 328.03833333333336,
+          "parts": [
+            {
+              "text": "Calm.",
+              "spoken": "Calm.",
+              "lang": "en-us",
+              "start": 327.31333333333333,
+              "end": 328.03833333333336
+            }
+          ]
+        },
+        {
+          "text": "Something is moving.",
+          "spoken": "Something is moving.",
+          "start": 328.4583333333333,
+          "end": 329.6533333333333,
+          "parts": [
+            {
+              "text": "Something is moving.",
+              "spoken": "Something is moving.",
+              "lang": "en-us",
+              "start": 328.4583333333333,
+              "end": 329.6533333333333
+            }
+          ]
+        },
+        {
+          "text": "A sudden jerk.",
+          "spoken": "A sudden jerk.",
+          "start": 330.0733333333333,
+          "end": 331.11833333333334,
+          "parts": [
+            {
+              "text": "A sudden jerk.",
+              "spoken": "A sudden jerk.",
+              "lang": "en-us",
+              "start": 330.0733333333333,
+              "end": 331.11833333333334
+            }
+          ]
+        },
+        {
+          "text": "Then: wait, and watch.",
+          "spoken": "Then: wait, and watch.",
+          "start": 331.53833333333336,
+          "end": 332.9463333333333,
+          "parts": [
+            {
+              "text": "Then: wait, and watch.",
+              "spoken": "Then: wait, and watch.",
+              "lang": "en-us",
+              "start": 331.53833333333336,
+              "end": 332.9463333333333
+            }
+          ]
+        },
+        {
+          "text": "Only if the person stays still does it ring.",
+          "spoken": "Only if the person stays still does it ring.",
+          "start": 333.36633333333333,
+          "end": 335.5643333333333,
+          "parts": [
+            {
+              "text": "Only if the person stays still does it ring.",
+              "spoken": "Only if the person stays still does it ring.",
+              "lang": "en-us",
+              "start": 333.36633333333333,
+              "end": 335.5643333333333
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "d2-fsm",
+      "start": 335.76666666666665,
+      "end": 347.96666666666664,
+      "sentences": [
+        {
+          "text": "In code, those stages are a loop over every moment.",
+          "spoken": "In code, those stages are a loop over every moment.",
+          "start": 336.06666666666666,
+          "end": 339.0106666666667,
+          "parts": [
+            {
+              "text": "In code, those stages are a loop over every moment.",
+              "spoken": "In code, those stages are a loop over every moment.",
+              "lang": "en-us",
+              "start": 336.06666666666666,
+              "end": 339.0106666666667
+            }
+          ]
+        },
+        {
+          "text": "If the line is steep enough, the state becomes impact.",
+          "spoken": "If the line is steep enough, the state becomes impact.",
+          "start": 339.43066666666664,
+          "end": 342.24666666666667,
+          "parts": [
+            {
+              "text": "If the line is steep enough, the state becomes impact.",
+              "spoken": "If the line is steep enough, the state becomes impact.",
+              "lang": "en-us",
+              "start": 339.43066666666664,
+              "end": 342.24666666666667
+            }
+          ]
+        },
+        {
+          "text": "On the very next moment, it switches to checking still.",
+          "spoken": "On the very next moment, it switches to checking still.",
+          "start": 342.6666666666667,
+          "end": 345.52566666666667,
+          "parts": [
+            {
+              "text": "On the very next moment, it switches to checking still.",
+              "spoken": "On the very next moment, it switches to checking still.",
+              "lang": "en-us",
+              "start": 342.6666666666667,
+              "end": 345.52566666666667
+            }
+          ]
+        },
+        {
+          "text": "Then it waits, and counts readings.",
+          "spoken": "Then it waits, and counts readings.",
+          "start": 345.9456666666667,
+          "end": 347.73766666666666,
+          "parts": [
+            {
+              "text": "Then it waits, and counts readings.",
+              "spoken": "Then it waits, and counts readings.",
+              "lang": "en-us",
+              "start": 345.9456666666667,
+              "end": 347.73766666666666
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "d2-still",
+      "start": 347.96666666666664,
+      "end": 372.8333333333333,
+      "sentences": [
+        {
+          "text": "It counts 83 readings, which is about two and a half seconds.",
+          "spoken": "It counts 83 readings, which is about two and a half seconds.",
+          "start": 348.26666666666665,
+          "end": 351.72266666666667,
+          "parts": [
+            {
+              "text": "It counts 83 readings, which is about two and a half seconds.",
+              "spoken": "It counts 83 readings, which is about two and a half seconds.",
+              "lang": "en-us",
+              "start": 348.26666666666665,
+              "end": 351.72266666666667
+            }
+          ]
+        },
+        {
+          "text": "Then is still measures how much the line wobbled since the jerk.",
+          "spoken": "Then is still measures how much the line wobbled since the jerk.",
+          "start": 352.1426666666667,
+          "end": 355.5346666666667,
+          "parts": [
+            {
+              "text": "Then is still measures how much the line wobbled since the jerk.",
+              "spoken": "Then is still measures how much the line wobbled since the jerk.",
+              "lang": "en-us",
+              "start": 352.1426666666667,
+              "end": 355.5346666666667
+            }
+          ]
+        },
+        {
+          "text": "Here the wobble is 0.06, far below the limit of 0.2.",
+          "spoken": "Here the wobble is 0.06, far below the limit of 0.2.",
+          "start": 355.95466666666664,
+          "end": 360.39166666666665,
+          "parts": [
+            {
+              "text": "Here the wobble is 0.06, far below the limit of 0.2.",
+              "spoken": "Here the wobble is 0.06, far below the limit of 0.2.",
+              "lang": "en-us",
+              "start": 355.95466666666664,
+              "end": 360.39166666666665
+            }
+          ]
+        },
+        {
+          "text": "The person is not getting up.",
+          "spoken": "The person is not getting up.",
+          "start": 360.81166666666667,
+          "end": 362.34766666666667,
+          "parts": [
+            {
+              "text": "The person is not getting up.",
+              "spoken": "The person is not getting up.",
+              "lang": "en-us",
+              "start": 360.81166666666667,
+              "end": 362.34766666666667
+            }
+          ]
+        },
+        {
+          "text": "Alarm, at about seven seconds.",
+          "spoken": "Alarm, at about seven seconds.",
+          "start": 362.7676666666667,
+          "end": 364.6666666666667,
+          "parts": [
+            {
+              "text": "Alarm, at about seven seconds.",
+              "spoken": "Alarm, at about seven seconds.",
+              "lang": "en-us",
+              "start": 362.7676666666667,
+              "end": 364.6666666666667
+            }
+          ]
+        },
+        {
+          "text": "From the jerk to the alarm took about 3 seconds, a little more than two and a half, because the packets arrived a bit slower right then.",
+          "spoken": "From the jerk to the alarm took about 3 seconds, a little more than two and a half, because the packets arrived a bit slower right then.",
+          "start": 365.08666666666664,
+          "end": 372.61766666666665,
+          "parts": [
+            {
+              "text": "From the jerk to the alarm took about 3 seconds, a little more than two and a half, because the packets arrived a bit slower right then.",
+              "spoken": "From the jerk to the alarm took about 3 seconds, a little more than two and a half, because the packets arrived a bit slower right then.",
+              "lang": "en-us",
+              "start": 365.08666666666664,
+              "end": 372.61766666666665
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "k3-why",
+      "start": 372.8333333333333,
+      "end": 376.3,
+      "sentences": [
+        {
+          "text": "Last step: how the alarm reaches the screen.",
+          "spoken": "Last step: how the alarm reaches the screen.",
+          "start": 373.43333333333334,
+          "end": 375.9723333333333,
+          "parts": [
+            {
+              "text": "Last step: how the alarm reaches the screen.",
+              "spoken": "Last step: how the alarm reaches the screen.",
+              "lang": "en-us",
+              "start": 373.43333333333334,
+              "end": 375.9723333333333
+            }
+          ]
+        }
+      ],
+      "chapter": "On your screen"
+    },
+    {
+      "id": "a3-kitchen",
+      "start": 376.3,
+      "end": 393.26666666666665,
+      "sentences": [
+        {
+          "text": "Think of a restaurant.",
+          "spoken": "Think of a restaurant.",
+          "start": 376.5,
+          "end": 377.716,
+          "parts": [
+            {
+              "text": "Think of a restaurant.",
+              "spoken": "Think of a restaurant.",
+              "lang": "en-us",
+              "start": 376.5,
+              "end": 377.716
+            }
+          ]
+        },
+        {
+          "text": "The kitchen does the heavy cooking in the back, so the dining room never freezes.",
+          "spoken": "The kitchen does the heavy cooking in the back, so the dining room never freezes.",
+          "start": 378.136,
+          "end": 382.317,
+          "parts": [
+            {
+              "text": "The kitchen does the heavy cooking in the back, so the dining room never freezes.",
+              "spoken": "The kitchen does the heavy cooking in the back, so the dining room never freezes.",
+              "lang": "en-us",
+              "start": 378.136,
+              "end": 382.317
+            }
+          ]
+        },
+        {
+          "text": "In the app, the kitchen is a worker called FrameSource.",
+          "spoken": "In the app, the kitchen is a worker called FrameSource.",
+          "start": 382.737,
+          "end": 385.596,
+          "parts": [
+            {
+              "text": "In the app, the kitchen is a worker called FrameSource.",
+              "spoken": "In the app, the kitchen is a worker called FrameSource.",
+              "lang": "en-us",
+              "start": 382.737,
+              "end": 385.596
+            }
+          ]
+        },
+        {
+          "text": "It runs the whole pipeline we just saw, and passes every finished result through a hatch, with a bell, to the window you look at.",
+          "spoken": "It runs the whole pipeline we just saw, and passes every finished result through a hatch, with a bell, to the window you look at.",
+          "start": 386.016,
+          "end": 393.035,
+          "parts": [
+            {
+              "text": "It runs the whole pipeline we just saw, and passes every finished result through a hatch, with a bell, to the window you look at.",
+              "spoken": "It runs the whole pipeline we just saw, and passes every finished result through a hatch, with a bell, to the window you look at.",
+              "lang": "en-us",
+              "start": 386.016,
+              "end": 393.035
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "c3-show",
+      "start": 393.26666666666665,
+      "end": 411.46666666666664,
+      "sentences": [
+        {
+          "text": "When the bell rings, show frame runs.",
+          "spoken": "When the bell rings, show frame runs.",
+          "start": 393.56666666666666,
+          "end": 395.61466666666666,
+          "parts": [
+            {
+              "text": "When the bell rings, show frame runs.",
+              "spoken": "When the bell rings, show frame runs.",
+              "lang": "en-us",
+              "start": 393.56666666666666,
+              "end": 395.61466666666666
+            }
+          ]
+        },
+        {
+          "text": "It updates the room map, two charts, and the status panel, one line each.",
+          "spoken": "It updates the room map, two charts, and the status panel, one line each.",
+          "start": 396.0346666666667,
+          "end": 400.0876666666667,
+          "parts": [
+            {
+              "text": "It updates the room map, two charts, and the status panel, one line each.",
+              "spoken": "It updates the room map, two charts, and the status panel, one line each.",
+              "lang": "en-us",
+              "start": 396.0346666666667,
+              "end": 400.0876666666667
+            }
+          ]
+        },
+        {
+          "text": "And if the result says alarm, it shows the red banner.",
+          "spoken": "And if the result says alarm, it shows the red banner.",
+          "start": 400.5076666666667,
+          "end": 403.47366666666665,
+          "parts": [
+            {
+              "text": "And if the result says alarm, it shows the red banner.",
+              "spoken": "And if the result says alarm, it shows the red banner.",
+              "lang": "en-us",
+              "start": 400.5076666666667,
+              "end": 403.47366666666665
+            }
+          ]
+        },
+        {
+          "text": "One honest detail: the little figure on the map is a drawing of the current stage.",
+          "spoken": "One honest detail: the little figure on the map is a drawing of the current stage.",
+          "start": 403.89366666666666,
+          "end": 408.50166666666667,
+          "parts": [
+            {
+              "text": "One honest detail: the little figure on the map is a drawing of the current stage.",
+              "spoken": "One honest detail: the little figure on the map is a drawing of the current stage.",
+              "lang": "en-us",
+              "start": 403.89366666666666,
+              "end": 408.50166666666667
+            }
+          ]
+        },
+        {
+          "text": "It does not measure where the person really is.",
+          "spoken": "It does not measure where the person really is.",
+          "start": 408.9216666666667,
+          "end": 411.24666666666667,
+          "parts": [
+            {
+              "text": "It does not measure where the person really is.",
+              "spoken": "It does not measure where the person really is.",
+              "lang": "en-us",
+              "start": 408.9216666666667,
+              "end": 411.24666666666667
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "c3-try",
+      "start": 411.46666666666664,
+      "end": 430.5,
+      "sentences": [
+        {
+          "text": "Try it yourself.",
+          "spoken": "Try it yourself.",
+          "start": 411.76666666666665,
+          "end": 412.79066666666665,
+          "parts": [
+            {
+              "text": "Try it yourself.",
+              "spoken": "Try it yourself.",
+              "lang": "en-us",
+              "start": 411.76666666666665,
+              "end": 412.79066666666665
+            }
+          ]
+        },
+        {
+          "text": "From the source folder, run the app in replay mode.",
+          "spoken": "From the source folder, run the app in replay mode.",
+          "start": 413.21066666666667,
+          "end": 415.85566666666665,
+          "parts": [
+            {
+              "text": "From the source folder, run the app in replay mode.",
+              "spoken": "From the source folder, run the app in replay mode.",
+              "lang": "en-us",
+              "start": 413.21066666666667,
+              "end": 415.85566666666665
+            }
+          ]
+        },
+        {
+          "text": "It plays this exact fall on a loop, with no hardware.",
+          "spoken": "It plays this exact fall on a loop, with no hardware.",
+          "start": 416.27566666666667,
+          "end": 419.28366666666665,
+          "parts": [
+            {
+              "text": "It plays this exact fall on a loop, with no hardware.",
+              "spoken": "It plays this exact fall on a loop, with no hardware.",
+              "lang": "en-us",
+              "start": 416.27566666666667,
+              "end": 419.28366666666665
+            }
+          ]
+        },
+        {
+          "text": "Then a challenge: in the fall detector, change the still window from 2.5 to 1.0 seconds.",
+          "spoken": "Then a challenge: in the fall detector, change the still window from 2.5 to 1.0 seconds.",
+          "start": 419.70366666666666,
+          "end": 425.7196666666667,
+          "parts": [
+            {
+              "text": "Then a challenge: in the fall detector, change the still window from 2.5 to 1.0 seconds.",
+              "spoken": "Then a challenge: in the fall detector, change the still window from 2.5 to 1.0 seconds.",
+              "lang": "en-us",
+              "start": 419.70366666666666,
+              "end": 425.7196666666667
+            }
+          ]
+        },
+        {
+          "text": "Does the alarm come sooner?",
+          "spoken": "Does the alarm come sooner?",
+          "start": 426.13966666666664,
+          "end": 427.59066666666666,
+          "parts": [
+            {
+              "text": "Does the alarm come sooner?",
+              "spoken": "Does the alarm come sooner?",
+              "lang": "en-us",
+              "start": 426.13966666666664,
+              "end": 427.59066666666666
+            }
+          ]
+        },
+        {
+          "text": "And does it now ring when someone just sits down?",
+          "spoken": "And does it now ring when someone just sits down?",
+          "start": 428.0106666666667,
+          "end": 430.27166666666665,
+          "parts": [
+            {
+              "text": "And does it now ring when someone just sits down?",
+              "spoken": "And does it now ring when someone just sits down?",
+              "lang": "en-us",
+              "start": 428.0106666666667,
+              "end": 430.27166666666665
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "outro",
+      "start": 430.5,
+      "end": 440.5,
+      "sentences": [
+        {
+          "text": "Ripples, radio stations, letters, a spreadsheet, three clean ups, one steep moment, and a careful alarm.",
+          "spoken": "Ripples, radio stations, letters, a spreadsheet, three clean ups, one steep moment, and a careful alarm.",
+          "start": 430.8,
+          "end": 436.816,
+          "parts": [
+            {
+              "text": "Ripples, radio stations, letters, a spreadsheet, three clean ups, one steep moment, and a careful alarm.",
+              "spoken": "Ripples, radio stations, letters, a spreadsheet, three clean ups, one steep moment, and a careful alarm.",
+              "lang": "en-us",
+              "start": 430.8,
+              "end": 436.816
+            }
+          ]
+        },
+        {
+          "text": "That is the whole idea.",
+          "spoken": "That is the whole idea.",
+          "start": 437.236,
+          "end": 438.58,
+          "parts": [
+            {
+              "text": "That is the whole idea.",
+              "spoken": "That is the whole idea.",
+              "lang": "en-us",
+              "start": 437.236,
+              "end": 438.58
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "card": {
+    "course": "Licenta",
+    "lesson": "How Wi-Fi notices a fall",
+    "sub": "No camera, no wearable: from radio waves to an alarm, line by line",
+    "thumbnail": false
+  },
+  "map": {
+    "kinds": {
+      "hw": {
+        "tone": "violet",
+        "icon": "☁️"
+      },
+      "entry": {
+        "tone": "accent",
+        "icon": "▶"
+      },
+      "module": {
+        "tone": "muted",
+        "icon": "📦"
+      },
+      "gui": {
+        "tone": "muted",
+        "icon": "📦"
+      },
+      "store": {
+        "tone": "cyan",
+        "icon": "🗄️"
+      }
+    },
+    "parts": [
+      {
+        "id": "Firmware",
+        "label": "Firmware",
+        "kind": "hw",
+        "col": 0,
+        "row": 1
+      },
+      {
+        "id": "packets",
+        "label": "packets",
+        "kind": "module",
+        "col": 1,
+        "row": 1
+      },
+      {
+        "id": "dsp",
+        "label": "dsp",
+        "kind": "module",
+        "col": 2,
+        "row": 1
+      },
+      {
+        "id": "fall_detector",
+        "label": "fall_detect",
+        "kind": "module",
+        "col": 3,
+        "row": 1
+      },
+      {
+        "id": "data",
+        "label": "data",
+        "kind": "store",
+        "col": 1,
+        "row": 0
+      },
+      {
+        "id": "FrameSource",
+        "label": "FrameSource",
+        "kind": "gui",
+        "col": 2,
+        "row": 2
+      },
+      {
+        "id": "MainWindow",
+        "label": "MainWindow",
+        "kind": "entry",
+        "col": 0,
+        "row": 2
+      }
+    ],
+    "edges": [
+      {
+        "from": "Firmware",
+        "to": "packets",
+        "label": "UART"
+      },
+      {
+        "from": "packets",
+        "to": "dsp",
+        "label": "hands"
+      },
+      {
+        "from": "dsp",
+        "to": "fall_detector",
+        "label": "calls"
+      },
+      {
+        "from": "data",
+        "to": "packets",
+        "label": "loads"
+      },
+      {
+        "from": "FrameSource",
+        "to": "dsp",
+        "label": "runs"
+      },
+      {
+        "from": "FrameSource",
+        "to": "MainWindow",
+        "label": "emits"
+      }
+    ]
+  }
+}

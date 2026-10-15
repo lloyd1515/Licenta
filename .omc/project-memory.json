@@ -1,0 +1,557 @@
+{
+  "version": "1.0.0",
+  "lastScanned": 1785831099092,
+  "projectRoot": "/home/vlads4r4/dev/Licenta",
+  "techStack": {
+    "languages": [],
+    "frameworks": [],
+    "packageManager": null,
+    "runtime": null
+  },
+  "build": {
+    "buildCommand": null,
+    "testCommand": null,
+    "lintCommand": null,
+    "devCommand": null,
+    "scripts": {}
+  },
+  "conventions": {
+    "namingStyle": null,
+    "importStyle": null,
+    "testPattern": null,
+    "fileOrganization": null
+  },
+  "structure": {
+    "isMonorepo": false,
+    "workspaces": [],
+    "mainDirectories": [
+      "lib",
+      "scripts"
+    ],
+    "gitBranches": null
+  },
+  "customNotes": [],
+  "directoryMap": {
+    "Analysis_Exports": {
+      "path": "Analysis_Exports",
+      "purpose": null,
+      "fileCount": 5,
+      "lastAccessed": 1785831099086,
+      "keyFiles": [
+        "1_Channel_Quality_Heatmap.png",
+        "2_Spatial_Localization_Trend.png",
+        "3_Signal_Stability_CDF.png",
+        "4_Interactive_Topology.html",
+        "4_Static_Topology_Fallback.png"
+      ]
+    },
+    "CoverageMap": {
+      "path": "CoverageMap",
+      "purpose": null,
+      "fileCount": 15,
+      "lastAccessed": 1785831099088,
+      "keyFiles": [
+        "app.py",
+        "coverage_audit.py",
+        "export_analysis.py",
+        "identity.py",
+        "pcap_extractor.py"
+      ]
+    },
+    "Email_Profesor": {
+      "path": "Email_Profesor",
+      "purpose": null,
+      "fileCount": 6,
+      "lastAccessed": 1785831099088,
+      "keyFiles": [
+        "Anexa_Tehnica_Licenta.pdf",
+        "Email_Variante.md",
+        "Rezumat_O_Pagina.pdf",
+        "anexa_tehnica.html",
+        "classic_rf_survey.py"
+      ]
+    },
+    "LicentaVault": {
+      "path": "LicentaVault",
+      "purpose": null,
+      "fileCount": 6,
+      "lastAccessed": 1785831099088,
+      "keyFiles": [
+        "00 - Start aici.md",
+        "01 - Harta proiectului.md",
+        "Harta aplicatiei.canvas",
+        "Home.md",
+        "Intrebari si Tehnici de Triangulare BLE.md"
+      ]
+    },
+    "Materials": {
+      "path": "Materials",
+      "purpose": null,
+      "fileCount": 3,
+      "lastAccessed": 1785831099089,
+      "keyFiles": [
+        "Core_v5.4.pdf",
+        "Core_v5.4_Part_A.pdf",
+        "NIST.SP.800-121r2-upd1.pdf"
+      ]
+    },
+    "Packets": {
+      "path": "Packets",
+      "purpose": null,
+      "fileCount": 4,
+      "lastAccessed": 1785831099089,
+      "keyFiles": [
+        "Bluetooth1.cap",
+        "Bluetooth_HCI_and_OBEX_Transaction_over_USB.ntar.gz",
+        "l2ping.cap",
+        "tcpdumpBluetooth.pcap"
+      ]
+    },
+    "Plans": {
+      "path": "Plans",
+      "purpose": null,
+      "fileCount": 10,
+      "lastAccessed": 1785831099089,
+      "keyFiles": [
+        "BLE_Hacking_Buschbeck_Trinko_Ukleja.pdf",
+        "CVE-2025-32875 Bluetooth vulnerability NVD details.md",
+        "Idee_Licenta.md",
+        "Licenta_Vlad_Sărăndan_UbertoothOneNotes.pdf",
+        "PLAN_Bluetooth_Sniffer.md"
+      ]
+    },
+    "__pycache__": {
+      "path": "__pycache__",
+      "purpose": null,
+      "fileCount": 12,
+      "lastAccessed": 1785831099089,
+      "keyFiles": [
+        "ble_utils.cpython-312.pyc",
+        "ble_utils.cpython-313.pyc",
+        "ble_utils.cpython-314.pyc",
+        "conftest.cpython-314-pytest-9.1.1.pyc",
+        "coverage_audit.cpython-314.pyc"
+      ]
+    },
+    "academic-research-skills": {
+      "path": "academic-research-skills",
+      "purpose": null,
+      "fileCount": 16,
+      "lastAccessed": 1785831099089,
+      "keyFiles": [
+        "CHANGELOG.md",
+        "CONTRIBUTING.md",
+        "LICENSE",
+        "MODE_REGISTRY.md",
+        "NOTICE.md"
+      ]
+    },
+    "agent": {
+      "path": "agent",
+      "purpose": null,
+      "fileCount": 0,
+      "lastAccessed": 1785831099089,
+      "keyFiles": []
+    },
+    "agentmemory": {
+      "path": "agentmemory",
+      "purpose": null,
+      "fileCount": 20,
+      "lastAccessed": 1785831099089,
+      "keyFiles": [
+        "AGENTS.md",
+        "CHANGELOG.md",
+        "CODE_OF_CONDUCT.md",
+        "CONTRIBUTING.md",
+        "DESIGN.md"
+      ]
+    },
+    "chrome": {
+      "path": "chrome",
+      "purpose": null,
+      "fileCount": 1,
+      "lastAccessed": 1785831099090,
+      "keyFiles": []
+    },
+    "classic_bt_experiment": {
+      "path": "classic_bt_experiment",
+      "purpose": null,
+      "fileCount": 0,
+      "lastAccessed": 1785831099090,
+      "keyFiles": []
+    },
+    "lib": {
+      "path": "lib",
+      "purpose": "Library code",
+      "fileCount": 0,
+      "lastAccessed": 1785831099090,
+      "keyFiles": []
+    },
+    "lloyd1515": {
+      "path": "lloyd1515",
+      "purpose": null,
+      "fileCount": 1,
+      "lastAccessed": 1785831099090,
+      "keyFiles": [
+        "README.md"
+      ]
+    },
+    "microworlds": {
+      "path": "microworlds",
+      "purpose": null,
+      "fileCount": 0,
+      "lastAccessed": 1785831099090,
+      "keyFiles": []
+    },
+    "scripts": {
+      "path": "scripts",
+      "purpose": "Build/utility scripts",
+      "fileCount": 5,
+      "lastAccessed": 1785831099090,
+      "keyFiles": [
+        "repair-metaswarm-models.ps1",
+        "run_real_captures_benchmark.py",
+        "test_all_algorithms_live.js",
+        "test_visible_browser.js",
+        "validate-tx-commands.js"
+      ]
+    },
+    "ubertooth-standalone": {
+      "path": "ubertooth-standalone",
+      "purpose": null,
+      "fileCount": 27,
+      "lastAccessed": 1785831099090,
+      "keyFiles": [
+        "$out",
+        "AGENTS.md",
+        "CLAUDE.md",
+        "GEMINI.md",
+        "alternate_scan.ps1"
+      ]
+    },
+    "lloyd1515/assets": {
+      "path": "lloyd1515/assets",
+      "purpose": "Static assets",
+      "fileCount": 6,
+      "lastAccessed": 1785831099091,
+      "keyFiles": [
+        "hand-scanner-banner-dark.svg",
+        "hand-scanner-banner-grid.svg",
+        "hand-scanner-banner-light.svg"
+      ]
+    },
+    "lloyd1515/scripts": {
+      "path": "lloyd1515/scripts",
+      "purpose": "Build/utility scripts",
+      "fileCount": 2,
+      "lastAccessed": 1785831099091,
+      "keyFiles": [
+        "verify-readme-v3.ps1",
+        "verify-readme.ps1"
+      ]
+    }
+  },
+  "hotPaths": [
+    {
+      "path": "positioning.py",
+      "accessCount": 16,
+      "lastAccessed": 1784282654119,
+      "type": "file"
+    },
+    {
+      "path": "render_output.py",
+      "accessCount": 12,
+      "lastAccessed": 1784282704878,
+      "type": "file"
+    },
+    {
+      "path": "presentation-3d/css/style.css",
+      "accessCount": 12,
+      "lastAccessed": 1784650210062,
+      "type": "file"
+    },
+    {
+      "path": "tests/test_pipeline_e2e.py",
+      "accessCount": 11,
+      "lastAccessed": 1784275419168,
+      "type": "file"
+    },
+    {
+      "path": "identity.py",
+      "accessCount": 11,
+      "lastAccessed": 1784282669168,
+      "type": "file"
+    },
+    {
+      "path": "room_config.py",
+      "accessCount": 9,
+      "lastAccessed": 1784282681663,
+      "type": "file"
+    },
+    {
+      "path": "pcap_extractor.py",
+      "accessCount": 7,
+      "lastAccessed": 1784275102381,
+      "type": "file"
+    },
+    {
+      "path": "tests/test_app.py",
+      "accessCount": 6,
+      "lastAccessed": 1784275657326,
+      "type": "file"
+    },
+    {
+      "path": "tests/conftest.py",
+      "accessCount": 6,
+      "lastAccessed": 1784282655029,
+      "type": "file"
+    },
+    {
+      "path": "app.py",
+      "accessCount": 6,
+      "lastAccessed": 1784282705448,
+      "type": "file"
+    },
+    {
+      "path": "tests/test_estimate_position.py",
+      "accessCount": 5,
+      "lastAccessed": 1784195647220,
+      "type": "file"
+    },
+    {
+      "path": "presentation-3d/js/scenes/examRoomScene.js",
+      "accessCount": 5,
+      "lastAccessed": 1784652087964,
+      "type": "file"
+    },
+    {
+      "path": "LicentaVault/My Notes/Scan Session - 2026-06-17.md",
+      "accessCount": 5,
+      "lastAccessed": 1785406447276,
+      "type": "file"
+    },
+    {
+      "path": "LicentaVault/Referinte/Idei viitoare - exploits decryption si limite Bluetooth.md",
+      "accessCount": 5,
+      "lastAccessed": 1785491232226,
+      "type": "file"
+    },
+    {
+      "path": "tests/test_render_output.py",
+      "accessCount": 4,
+      "lastAccessed": 1784195674829,
+      "type": "file"
+    },
+    {
+      "path": "pipeline.py",
+      "accessCount": 4,
+      "lastAccessed": 1784282681261,
+      "type": "file"
+    },
+    {
+      "path": "tests/test_pipeline.py",
+      "accessCount": 4,
+      "lastAccessed": 1784282685887,
+      "type": "file"
+    },
+    {
+      "path": "presentation-3d/CREATIVE_BRIEF.md",
+      "accessCount": 4,
+      "lastAccessed": 1784651696574,
+      "type": "file"
+    },
+    {
+      "path": "presentation-3d/js/sceneManager.js",
+      "accessCount": 4,
+      "lastAccessed": 1784651701996,
+      "type": "file"
+    },
+    {
+      "path": "presentation-3d/js/utils/packetStream.js",
+      "accessCount": 4,
+      "lastAccessed": 1784651708758,
+      "type": "file"
+    },
+    {
+      "path": "tests/test_ground_truth_validation.py",
+      "accessCount": 3,
+      "lastAccessed": 1784195327846,
+      "type": "file"
+    },
+    {
+      "path": "room_config_widget.py",
+      "accessCount": 3,
+      "lastAccessed": 1784274771838,
+      "type": "file"
+    },
+    {
+      "path": "presentation-3d/js/utils/textSprite.js",
+      "accessCount": 3,
+      "lastAccessed": 1784650219600,
+      "type": "file"
+    },
+    {
+      "path": "presentation-3d/js/scenes/attackChainScene.js",
+      "accessCount": 3,
+      "lastAccessed": 1784651703029,
+      "type": "file"
+    },
+    {
+      "path": "presentation-3d/js/scenes/pipelineScene.js",
+      "accessCount": 3,
+      "lastAccessed": 1784651707649,
+      "type": "file"
+    },
+    {
+      "path": "presentation-3d/js/scenes/hybridScene.js",
+      "accessCount": 3,
+      "lastAccessed": 1784651708026,
+      "type": "file"
+    },
+    {
+      "path": "presentation-3d/js/main.js",
+      "accessCount": 3,
+      "lastAccessed": 1784651708862,
+      "type": "file"
+    },
+    {
+      "path": "presentation-3d/index.html",
+      "accessCount": 3,
+      "lastAccessed": 1784651713435,
+      "type": "file"
+    },
+    {
+      "path": "LicentaVault/00 - Start aici.md",
+      "accessCount": 3,
+      "lastAccessed": 1785491196599,
+      "type": "file"
+    },
+    {
+      "path": "requirements-dev.txt",
+      "accessCount": 2,
+      "lastAccessed": 1784194992309,
+      "type": "file"
+    },
+    {
+      "path": "ble_utils.py",
+      "accessCount": 2,
+      "lastAccessed": 1784195320962,
+      "type": "file"
+    },
+    {
+      "path": "presentation-3d/DESIGN.md",
+      "accessCount": 2,
+      "lastAccessed": 1784650026923,
+      "type": "file"
+    },
+    {
+      "path": "presentation-3d/js/dashboard.js",
+      "accessCount": 2,
+      "lastAccessed": 1784650053005,
+      "type": "file"
+    },
+    {
+      "path": "presentation-3d/js/scenes/registry.js",
+      "accessCount": 2,
+      "lastAccessed": 1784651713794,
+      "type": "file"
+    },
+    {
+      "path": "LicentaVault/My Notes/Logs.md",
+      "accessCount": 2,
+      "lastAccessed": 1785322454866,
+      "type": "file"
+    },
+    {
+      "path": "LicentaVault/Intrebari si Tehnici de Triangulare BLE.md",
+      "accessCount": 2,
+      "lastAccessed": 1785491092908,
+      "type": "file"
+    },
+    {
+      "path": "LicentaVault/01 - Harta proiectului.md",
+      "accessCount": 2,
+      "lastAccessed": 1785491093790,
+      "type": "file"
+    },
+    {
+      "path": "LicentaVault/Home.md",
+      "accessCount": 2,
+      "lastAccessed": 1785491093910,
+      "type": "file"
+    },
+    {
+      "path": "tests/test_observability_audit.py",
+      "accessCount": 1,
+      "lastAccessed": 1784194691376,
+      "type": "file"
+    },
+    {
+      "path": "tests/test_match_devices.py",
+      "accessCount": 1,
+      "lastAccessed": 1784194787940,
+      "type": "file"
+    },
+    {
+      "path": "pytest.ini",
+      "accessCount": 1,
+      "lastAccessed": 1784195157700,
+      "type": "file"
+    },
+    {
+      "path": ".claude/commands/start-task.md",
+      "accessCount": 1,
+      "lastAccessed": 1784274656827,
+      "type": "file"
+    },
+    {
+      "path": "tests/test_pcap_extractor.py",
+      "accessCount": 1,
+      "lastAccessed": 1784275621730,
+      "type": "file"
+    },
+    {
+      "path": "presentation-3d/README.md",
+      "accessCount": 1,
+      "lastAccessed": 1784648771305,
+      "type": "file"
+    },
+    {
+      "path": "presentation-3d/js/utils/modelLoader.js",
+      "accessCount": 1,
+      "lastAccessed": 1784652002315,
+      "type": "file"
+    },
+    {
+      "path": "LicentaVault/My Notes/AI Models.md",
+      "accessCount": 1,
+      "lastAccessed": 1785322433460,
+      "type": "file"
+    },
+    {
+      "path": "LicentaVault/AI research/Local LLM for Security Research.md",
+      "accessCount": 1,
+      "lastAccessed": 1785322433796,
+      "type": "file"
+    },
+    {
+      "path": "LicentaVault/AI research/Ce am aflat nou - Caveman style.md",
+      "accessCount": 1,
+      "lastAccessed": 1785322434867,
+      "type": "file"
+    },
+    {
+      "path": "LicentaVault/Referinte/Observatii si riscuri curente.md",
+      "accessCount": 1,
+      "lastAccessed": 1785322435641,
+      "type": "file"
+    },
+    {
+      "path": "LicentaVault/AI research/Dashboard Mapping.md",
+      "accessCount": 1,
+      "lastAccessed": 1785322443465,
+      "type": "file"
+    }
+  ],
+  "userDirectives": []
+}

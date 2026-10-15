@@ -1,0 +1,332 @@
+{
+  "name": "licenta-explained",
+  "title": "How Wi-Fi notices a fall",
+  "voice": "af_heart",
+  "lang": "en-us",
+  "speed": 1.05,
+  "poster": "a1-shape",
+  "readsFine": [
+    "52",
+    "33",
+    "20",
+    "669",
+    "138",
+    "10",
+    "128",
+    "30",
+    "40",
+    "50",
+    "41",
+    "11",
+    "0.2",
+    "12",
+    "17.5",
+    "17.63",
+    "3",
+    "83",
+    "2.5",
+    "0.06",
+    "0.2,",
+    "7",
+    "1.0",
+    "4",
+    "1,",
+    "2.5,",
+    "50.",
+    "41.",
+    "17.5.",
+    "17.63.",
+    "83.",
+    "3.",
+    "12.",
+    "52.",
+    "40,",
+    "50,",
+    "1.",
+    "0.06,",
+    "0.2."
+  ],
+  "source": {
+    "repo": "/home/vlads4r4/dev/Licenta",
+    "document": "build/lesson.md"
+  },
+  "card": {
+    "course": "Licenta",
+    "lesson": "How Wi-Fi notices a fall",
+    "sub": "No camera, no wearable: from radio waves to an alarm, line by line"
+  },
+  "map": {
+    "kinds": {
+      "hw": {
+        "tone": "violet",
+        "icon": "☁️"
+      },
+      "entry": {
+        "tone": "accent",
+        "icon": "▶"
+      },
+      "module": {
+        "tone": "muted",
+        "icon": "📦"
+      },
+      "gui": {
+        "tone": "muted",
+        "icon": "📦"
+      },
+      "store": {
+        "tone": "cyan",
+        "icon": "🗄️"
+      }
+    },
+    "parts": [
+      {
+        "id": "Firmware",
+        "label": "Firmware",
+        "kind": "hw",
+        "col": 0,
+        "row": 1
+      },
+      {
+        "id": "packets",
+        "label": "packets",
+        "kind": "module",
+        "col": 1,
+        "row": 1
+      },
+      {
+        "id": "dsp",
+        "label": "dsp",
+        "kind": "module",
+        "col": 2,
+        "row": 1
+      },
+      {
+        "id": "fall_detector",
+        "label": "fall_detect",
+        "kind": "module",
+        "col": 3,
+        "row": 1
+      },
+      {
+        "id": "data",
+        "label": "data",
+        "kind": "store",
+        "col": 1,
+        "row": 0
+      },
+      {
+        "id": "FrameSource",
+        "label": "FrameSource",
+        "kind": "gui",
+        "col": 2,
+        "row": 2
+      },
+      {
+        "id": "MainWindow",
+        "label": "MainWindow",
+        "kind": "entry",
+        "col": 0,
+        "row": 2
+      }
+    ],
+    "edges": [
+      {
+        "from": "Firmware",
+        "to": "packets",
+        "label": "UART"
+      },
+      {
+        "from": "packets",
+        "to": "dsp",
+        "label": "hands"
+      },
+      {
+        "from": "dsp",
+        "to": "fall_detector",
+        "label": "calls"
+      },
+      {
+        "from": "data",
+        "to": "packets",
+        "label": "loads"
+      },
+      {
+        "from": "FrameSource",
+        "to": "dsp",
+        "label": "runs"
+      },
+      {
+        "from": "FrameSource",
+        "to": "MainWindow",
+        "label": "emits"
+      }
+    ]
+  },
+  "scenes": [
+    {
+      "id": "title",
+      "lead": 0.3,
+      "pad": 0.2,
+      "say": "How Wi-Fi notices a fall."
+    },
+    {
+      "id": "intro",
+      "lead": 0.2,
+      "pad": 0.3,
+      "say": "Someone just fell in this room. No camera saw it. Nobody wore a sensor. The Wi-Fi did. In nine minutes you'll know exactly how, down to the line of code that rang this alarm."
+    },
+    {
+      "id": "k1-why",
+      "chapter": "Why Wi-Fi can see a fall",
+      "lead": 0.6,
+      "pad": 0.3,
+      "say": "First, the idea, with no code at all."
+    },
+    {
+      "id": "a1-care",
+      "lead": 0.2,
+      "pad": 0.2,
+      "say": "Picture an older person who lives alone. They fall, and the phone is across the room. Cameras feel like spying, and a wristband gets left on the nightstand. So here is the question: can the room itself notice the fall?"
+    },
+    {
+      "id": "a1-pond",
+      "lead": 0.2,
+      "pad": 0.2,
+      "say": "Think of a pond. Drop a stone, and ripples spread out and bounce off everything they meet. Someone on the far bank can tell a reed is there, just from how the ripples arrive. Radio waves do the same thing in a room. Three small boards keep sending Wi-Fi messages to each other, and a body in the way changes how each wave arrives. We never look at the person. We watch the ripples wobble. The radio's report of how each wave arrived is called [CSI](C S I)."
+    },
+    {
+      "id": "a1-stations",
+      "lead": 0.2,
+      "pad": 0.2,
+      "say": "And Wi-Fi is not one wave. It is 52 narrow waves sent side by side, like 52 radio stations. For every message, the board measures how loud each station arrived. So every message gives us 52 volume numbers, and about 33 messages arrive every second. Each of those narrow waves is called a subcarrier."
+    },
+    {
+      "id": "a1-shape",
+      "lead": 0.2,
+      "pad": 0.2,
+      "say": "Now squeeze all those numbers into one wiggly line, and compare three rooms. An empty room: calm. Someone walking: busy all the time. A fall: busy, then one sharp jerk, then flat, because the person is lying still. That shape is everything. The whole program hunts for one sharp jerk, followed by stillness. Let's follow one real fall through the code."
+    },
+    {
+      "id": "k2-why",
+      "chapter": "One real fall, line by line",
+      "path": [
+        "Firmware",
+        "packets",
+        "dsp",
+        "fall_detector"
+      ],
+      "lead": 0.6,
+      "pad": 0.3,
+      "say": "This is a real recording: twenty seconds, with one real fall in the middle."
+    },
+    {
+      "id": "a2-envelope",
+      "lead": 0.2,
+      "pad": 0.2,
+      "say": "Each Wi-Fi message reaches the computer like a letter in an envelope. 138 bytes in total. The first 10 are the address on the envelope: which board sent it, how strong it was, and when. The other 128 are the letter itself: the readings."
+    },
+    {
+      "id": "c2-parse",
+      "lead": 0.3,
+      "pad": 0.2,
+      "say": "Here is the function that opens the envelope. The first line reads the address: board number, signal strength, time, and a counter. The next line takes the 128 reading bytes as small whole numbers, called iq. Then the readings are paired up: the first byte of each pair, plus the second byte times j. That j just means: these two numbers belong together as one reading. The last line keeps only the 52 useful stations and drops the rest."
+    },
+    {
+      "id": "a2-arrow",
+      "lead": 0.2,
+      "pad": 0.2,
+      "say": "Why two numbers per reading? Draw each pair as an arrow on graph paper. A pair of 30 and minus 40 means: 30 steps right, 40 steps down. The arrow's length is 50, from the classic three, four, five triangle. That length is how loud the station arrived. The direction we simply throw away."
+    },
+    {
+      "id": "c2-feed",
+      "lead": 0.3,
+      "pad": 0.2,
+      "say": "But the bytes arrive like a conveyor belt with no gaps between letters. So every letter starts with the same stamp, written A five, five A. The feed function looks for the stamp. Anything before it is junk, so it gets deleted. If fewer than 138 bytes have arrived, it waits for more. Otherwise it opens that envelope, cuts it off the belt, and looks for the next stamp."
+    },
+    {
+      "id": "c2-sheet",
+      "lead": 0.3,
+      "pad": 0.2,
+      "say": "Each opened letter becomes one row of a spreadsheet. This line keeps only the arrow lengths, the loudness. About 33 rows a second, for 20 seconds, gives 669 rows of 52 numbers. Every row is one moment, and every column is one station."
+    },
+    {
+      "id": "c2-drop",
+      "lead": 0.3,
+      "pad": 0.2,
+      "say": "Some stations are broken. Think of a choir where a few singers never make a sound and a few just scream. The first line measures how much each column wobbles. That number is called the variance. The next line marks the columns that wobble too little or far too much. The last line removes them. In this recording, 11 columns go, and 41 good ones stay."
+    },
+    {
+      "id": "a2-eq",
+      "lead": 0.2,
+      "pad": 0.2,
+      "say": "Next, think of the equalizer on a music player. Slide down the very slow drift, like a room warming up. Slide down the very fast hiss from the electronics. Keep only the middle: wobbles about as fast as a human body moves."
+    },
+    {
+      "id": "d2-band",
+      "lead": 0.3,
+      "pad": 0.2,
+      "say": "In the code, butter designs that equalizer. It keeps wobbles between 0.2 and 12 times a second. Times per second has a name: hertz. Then filtfilt runs the filter forwards and then backwards, so nothing slides out of place in time."
+    },
+    {
+      "id": "d2-pca",
+      "lead": 0.3,
+      "pad": 0.2,
+      "say": "Now we have 41 lines that mostly move together. Picture 41 fans watching the same match: when something happens, they all lean the same way. So we listen to the lean of the crowd, not to each fan. The first line centres every column on zero. The next lines find the direction the columns lean together most. The last line projects onto it. That leaves one number per moment: the motion line. This trick is called [PCA](P C A)."
+    },
+    {
+      "id": "d2-slope",
+      "lead": 0.3,
+      "pad": 0.2,
+      "say": "Now we look for the jerk. First, the line is rescaled so its biggest swing equals 1. That way a big room and a small room can share one rule. Then gradient measures how steep the line is at every moment, like the steepness of a hill. The rule says: steeper than 17.5 means a hard impact. At this moment, the steepness hits 17.63. A close call: only 3 moments in the whole recording go that steep."
+    },
+    {
+      "id": "a2-alarm",
+      "lead": 0.2,
+      "pad": 0.2,
+      "say": "But a jerk alone is not a fall. You might just sit down hard. So the detector works like a careful smoke alarm with stages. Calm. Something is moving. A sudden jerk. Then: wait, and watch. Only if the person stays still does it ring."
+    },
+    {
+      "id": "d2-fsm",
+      "lead": 0.3,
+      "pad": 0.2,
+      "say": "In code, those stages are a loop over every moment. If the line is steep enough, the state becomes impact. On the very next moment, it switches to checking still. Then it waits, and counts readings."
+    },
+    {
+      "id": "d2-still",
+      "lead": 0.3,
+      "pad": 0.2,
+      "say": "It counts 83 readings, which is about two and a half seconds. Then is still measures how much the line wobbled since the jerk. Here the wobble is 0.06, far below the limit of 0.2. The person is not getting up. Alarm, at about seven seconds. From the jerk to the alarm took about 3 seconds, a little more than two and a half, because the packets arrived a bit slower right then."
+    },
+    {
+      "id": "k3-why",
+      "chapter": "On your screen",
+      "lead": 0.6,
+      "pad": 0.3,
+      "say": "Last step: how the alarm reaches the screen."
+    },
+    {
+      "id": "a3-kitchen",
+      "lead": 0.2,
+      "pad": 0.2,
+      "say": "Think of a restaurant. The kitchen does the heavy cooking in the back, so the dining room never freezes. In the app, the kitchen is a worker called FrameSource. It runs the whole pipeline we just saw, and passes every finished result through a hatch, with a bell, to the window you look at."
+    },
+    {
+      "id": "c3-show",
+      "lead": 0.3,
+      "pad": 0.2,
+      "say": "When the bell rings, show frame runs. It updates the room map, two charts, and the status panel, one line each. And if the result says alarm, it shows the red banner. One honest detail: the little figure on the map is a drawing of the current stage. It does not measure where the person really is."
+    },
+    {
+      "id": "c3-try",
+      "lead": 0.3,
+      "pad": 0.2,
+      "say": "Try it yourself. From the source folder, run the app in replay mode. It plays this exact fall on a loop, with no hardware. Then a challenge: in the fall detector, change the still window from 2.5 to 1.0 seconds. Does the alarm come sooner? And does it now ring when someone just sits down?"
+    },
+    {
+      "id": "outro",
+      "lead": 0.3,
+      "hold": 1.0,
+      "say": "Ripples, radio stations, letters, a spreadsheet, three clean ups, one steep moment, and a careful alarm. That is the whole idea."
+    }
+  ]
+}

@@ -1,0 +1,353 @@
+{
+ "intro": {
+  "start": 2.1666666666666665,
+  "dur": 12.033,
+  "sentences": [
+   [
+    0.2,
+    1.8,
+    "Someone just fell in this room."
+   ],
+   [
+    2.22,
+    3.42,
+    "No camera saw it."
+   ],
+   [
+    3.84,
+    5.2,
+    "Nobody wore a sensor."
+   ],
+   [
+    5.62,
+    6.71,
+    "The Wi-Fi did."
+   ],
+   [
+    7.13,
+    11.71,
+    "In nine minutes you'll know exactly how, down to the line of code that rang this alarm."
+   ]
+  ]
+ },
+ "a1-care": {
+  "start": 17.433333333333334,
+  "dur": 13.5,
+  "sentences": [
+   [
+    0.2,
+    2.44,
+    "Picture an older person who lives alone."
+   ],
+   [
+    2.86,
+    5.14,
+    "They fall, and the phone is across the room."
+   ],
+   [
+    5.56,
+    9.45,
+    "Cameras feel like spying, and a wristband gets left on the nightstand."
+   ],
+   [
+    9.86,
+    13.28,
+    "So here is the question: can the room itself notice the fall?"
+   ]
+  ]
+ },
+ "a1-pond": {
+  "start": 30.933333333333334,
+  "dur": 28.067,
+  "sentences": [
+   [
+    0.2,
+    1.27,
+    "Think of a pond."
+   ],
+   [
+    1.69,
+    5.42,
+    "Drop a stone, and ripples spread out and bounce off everything they meet."
+   ],
+   [
+    5.84,
+    10.19,
+    "Someone on the far bank can tell a reed is there, just from how the ripples arrive."
+   ],
+   [
+    10.61,
+    12.89,
+    "Radio waves do the same thing in a room."
+   ],
+   [
+    13.32,
+    19.91,
+    "Three small boards keep sending Wi-Fi messages to each other, and a body in the way changes how each wave arrives."
+   ],
+   [
+    20.33,
+    21.71,
+    "We never look at the person."
+   ],
+   [
+    22.13,
+    23.65,
+    "We watch the ripples wobble."
+   ],
+   [
+    24.07,
+    27.84,
+    "The radio's report of how each wave arrived is called CSI."
+   ]
+  ]
+ },
+ "a1-stations": {
+  "start": 59.0,
+  "dur": 21.6,
+  "sentences": [
+   [
+    0.2,
+    1.99,
+    "And Wi-Fi is not one wave."
+   ],
+   [
+    2.41,
+    7.28,
+    "It is 52 narrow waves sent side by side, like 52 radio stations."
+   ],
+   [
+    7.7,
+    11.56,
+    "For every message, the board measures how loud each station arrived."
+   ],
+   [
+    11.98,
+    18.23,
+    "So every message gives us 52 volume numbers, and about 33 messages arrive every second."
+   ],
+   [
+    18.65,
+    21.38,
+    "Each of those narrow waves is called a subcarrier."
+   ]
+  ]
+ },
+ "a1-shape": {
+  "start": 80.6,
+  "dur": 22.767,
+  "sentences": [
+   [
+    0.2,
+    4.62,
+    "Now squeeze all those numbers into one wiggly line, and compare three rooms."
+   ],
+   [
+    5.04,
+    6.49,
+    "An empty room: calm."
+   ],
+   [
+    6.91,
+    9.0,
+    "Someone walking: busy all the time."
+   ],
+   [
+    9.42,
+    14.11,
+    "A fall: busy, then one sharp jerk, then flat, because the person is lying still."
+   ],
+   [
+    14.53,
+    15.92,
+    "That shape is everything."
+   ],
+   [
+    16.34,
+    19.94,
+    "The whole program hunts for one sharp jerk, followed by stillness."
+   ],
+   [
+    20.36,
+    22.56,
+    "Let's follow one real fall through the code."
+   ]
+  ]
+ },
+ "a2-envelope": {
+  "start": 108.5,
+  "dur": 16.7,
+  "sentences": [
+   [
+    0.2,
+    4.36,
+    "Each Wi-Fi message reaches the computer like a letter in an envelope."
+   ],
+   [
+    4.78,
+    6.78,
+    "138 bytes in total."
+   ],
+   [
+    7.2,
+    12.37,
+    "The first 10 are the address on the envelope: which board sent it, how strong it was, and when."
+   ],
+   [
+    12.79,
+    16.48,
+    "The other 128 are the letter itself: the readings."
+   ]
+  ]
+ },
+ "a2-arrow": {
+  "start": 153.26666666666668,
+  "dur": 19.4,
+  "sentences": [
+   [
+    0.2,
+    1.71,
+    "Why two numbers per reading?"
+   ],
+   [
+    2.13,
+    4.5,
+    "Draw each pair as an arrow on graph paper."
+   ],
+   [
+    4.92,
+    9.57,
+    "A pair of 30 and minus 40 means: 30 steps right, 40 steps down."
+   ],
+   [
+    9.99,
+    14.11,
+    "The arrow's length is 50, from the classic three, four, five triangle."
+   ],
+   [
+    14.53,
+    16.81,
+    "That length is how loud the station arrived."
+   ],
+   [
+    17.23,
+    19.17,
+    "The direction we simply throw away."
+   ]
+  ]
+ },
+ "a2-eq": {
+  "start": 234.93333333333334,
+  "dur": 14.267,
+  "sentences": [
+   [
+    0.2,
+    2.89,
+    "Next, think of the equalizer on a music player."
+   ],
+   [
+    3.31,
+    6.53,
+    "Slide down the very slow drift, like a room warming up."
+   ],
+   [
+    6.95,
+    9.74,
+    "Slide down the very fast hiss from the electronics."
+   ],
+   [
+    10.16,
+    14.05,
+    "Keep only the middle: wobbles about as fast as a human body moves."
+   ]
+  ]
+ },
+ "a2-alarm": {
+  "start": 319.1333333333333,
+  "dur": 16.633,
+  "sentences": [
+   [
+    0.2,
+    2.06,
+    "But a jerk alone is not a fall."
+   ],
+   [
+    2.48,
+    3.93,
+    "You might just sit down hard."
+   ],
+   [
+    4.35,
+    7.76,
+    "So the detector works like a careful smoke alarm with stages."
+   ],
+   [
+    8.18,
+    8.91,
+    "Calm."
+   ],
+   [
+    9.32,
+    10.52,
+    "Something is moving."
+   ],
+   [
+    10.94,
+    11.99,
+    "A sudden jerk."
+   ],
+   [
+    12.41,
+    13.81,
+    "Then: wait, and watch."
+   ],
+   [
+    14.23,
+    16.43,
+    "Only if the person stays still does it ring."
+   ]
+  ]
+ },
+ "a3-kitchen": {
+  "start": 376.3,
+  "dur": 16.967,
+  "sentences": [
+   [
+    0.2,
+    1.42,
+    "Think of a restaurant."
+   ],
+   [
+    1.84,
+    6.02,
+    "The kitchen does the heavy cooking in the back, so the dining room never freezes."
+   ],
+   [
+    6.44,
+    9.3,
+    "In the app, the kitchen is a worker called FrameSource."
+   ],
+   [
+    9.72,
+    16.74,
+    "It runs the whole pipeline we just saw, and passes every finished result through a hatch, with a bell, to the window you look at."
+   ]
+  ]
+ },
+ "outro": {
+  "start": 430.5,
+  "dur": 10.0,
+  "sentences": [
+   [
+    0.3,
+    6.32,
+    "Ripples, radio stations, letters, a spreadsheet, three clean ups, one steep moment, and a careful alarm."
+   ],
+   [
+    6.74,
+    8.08,
+    "That is the whole idea."
+   ]
+  ]
+ }
+}

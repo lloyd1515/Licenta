@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <title>Raport tehnic de etapă. Sistem pasiv de detecție a căderilor prin Wi-Fi CSI</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            background-color: #f4f4f4;
+            color: #111;
+            font-family: 'Times New Roman', Times, 'Nimbus Roman No9 L', serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 24px;
+            padding: 24px;
+            line-height: 1.34;
+            zoom: 200%;
+        }
+        .page {
+            width: 210mm;
+            min-height: 297mm;
+            background: #ffffff;
+            box-shadow: 0 4px 25px rgba(0,0,0,0.12);
+            padding: 16mm 18mm;
+            position: relative;
+        }
+        header {
+            text-align: center;
+            margin-bottom: 7px;
+        }
+        h1 {
+            font-size: 13pt;
+            font-weight: bold;
+            margin-bottom: 3px;
+            letter-spacing: -0.2px;
+        }
+        .subtitle {
+            font-size: 8.4pt;
+            color: #444;
+            font-style: italic;
+            margin-bottom: 2px;
+        }
+        hr.divider {
+            border: none;
+            border-top: 1px solid #111;
+            margin: 6px 0 9px 0;
+        }
+        .section-item {
+            margin-bottom: 8px;
+            text-align: justify;
+            font-size: 8.9pt;
+        }
+        .section-title {
+            font-size: 9.5pt;
+            font-weight: bold;
+            display: block;
+            margin-bottom: 2px;
+        }
+        .tooltip-target {
+            color: #111;
+            text-decoration: underline;
+            text-decoration-thickness: 1px;
+            text-underline-offset: 2px;
+            cursor: pointer;
+            position: relative;
+            display: inline;
+            font-weight: inherit;
+        }
+        .tooltip-target:hover {
+            background-color: #eee;
+        }
+        
+        /* Table styling */
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 6px 0 9px 0;
+            font-size: 7.6pt;
+            line-height: 1.25;
+        }
+        .comparison-table th, .comparison-table td {
+            border: 1px solid #333;
+            padding: 4px 6px;
+            text-align: left;
+            vertical-align: top;
+        }
+        .comparison-table th {
+            background-color: #ececec;
+            font-weight: bold;
+            color: #000;
+        }
+        .highlight-row {
+            background-color: #f7f7f7;
+            font-weight: bold;
+        }
+
+        /* Floating Popup Box */
+        #tooltip-box {
+            position: fixed;
+            display: none;
+            background: #ffffff;
+            border: 1.5px solid #111;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.22);
+            padding: 10px 14px;
+            max-width: 320px;
+            z-index: 9999;
+            pointer-events: none;
+            border-radius: 2px;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            text-align: left;
+            animation: fadeIn 0.12s ease-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(4px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .tt-badge {
+            font-size: 7.5pt;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            color: #666;
+            margin-bottom: 4px;
+            display: block;
+        }
+        .tt-term {
+            font-size: 10pt;
+            font-weight: bold;
+            color: #000;
+            margin-bottom: 4px;
+            line-height: 1.2;
+        }
+        .tt-desc {
+            font-size: 8.5pt;
+            color: #222;
+            line-height: 1.35;
+            margin-bottom: 6px;
+        }
+        .tt-footer {
+            font-size: 7.5pt;
+            color: #777;
+            border-top: 1px dashed #ccc;
+            padding-top: 4px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .bibliography {
+            margin-top: 8px;
+            border-top: 1px solid #111;
+            padding-top: 5px;
+        }
+        .bib-title {
+            font-size: 8pt;
+            font-weight: bold;
+            margin-bottom: 4px;
+        }
+        .bib-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4px 14px;
+            font-size: 6.8pt;
+            line-height: 1.25;
+            text-align: left;
+        }
+
+        .page-number {
+            position: absolute;
+            bottom: 10mm;
+            right: 18mm;
+            font-size: 7.5pt;
+            color: #777;
+        }
+
+        @media print {
+            body {
+                background: none;
+                padding: 0;
+                gap: 0;
+                zoom: 100% !important;
+            }
+            .page {
+                box-shadow: none;
+                width: 210mm;
+                min-height: 297mm;
+                padding: 13mm 15mm;
+                page-break-after: always;
+                break-after: page;
+            }
+            .page:last-child {
+                page-break-after: auto;
+                break-after: auto;
+            }
+            #tooltip-box {
+                display: none !important;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ========================================== -->
+<!-- PAGINA 1: ARHITECTURĂ, POST-MORTEM & FOND MATEMATIC -->
+<!-- ========================================== -->
+<div class="page">
+    <header>
+        <h1>Raport tehnic de etapă. Sistem pasiv de detecție a căderilor prin Wi-Fi CSI</h1>
+        <div class="subtitle">Arhitectură pe noduri ESP32, model analitic Fresnel, filtrare de semnal și validare experimentală</div>
+    </header>
+
+    <hr class="divider">
+
+    <div class="section-item">
+        <span class="section-title">1. Configurația fizică și fluxul de date</span>
+        Sistemul detectează căderile și localizează persoanele fără senzori purtabili, prin trei noduri <a href="https://www.espressif.com/en/products/socs/esp32" class="tooltip-target" data-term="ESP32" data-badge="Hardware">ESP32</a> DevKit v1 montate perimetral la înălțimea de 1.2 m. Transmisia folosește canalul 6 din banda de <a href="https://en.wikipedia.org/wiki/2.4_GHz_radio_use" class="tooltip-target" data-term="2.4 GHz" data-badge="Fizică RF">2.4 GHz</a> (&lambda; = 12.31 cm). Un emițător transmite cadre continue către cele două receptoare, stabilind trei legături radio independente. Fiecare receptor transmite cadre binare de 138 de octeți prin portul serial la viteza de 921600 baud. Antetul pachetului conține secvența 0xA55A, identificatorul de nod, valoarea <a href="https://en.wikipedia.org/wiki/Received_signal_strength_indication" class="tooltip-target" data-term="RSSI" data-badge="Măsură RF">RSSI</a>, un marcaj temporal în microsecunde și numărul de secvență. Din sarcina utilă de 128 de octeți, receptorul extrage 64 de perechi în fază și cuadratură (I/Q) și construiește matricea <a href="https://en.wikipedia.org/wiki/Channel_state_information" class="tooltip-target" data-term="CSI" data-badge="Fizică RF">CSI</a> pe 52 de <a href="https://en.wikipedia.org/wiki/Orthogonal_frequency-division_multiplexing" class="tooltip-target" data-term="subpurtătoare OFDM" data-badge="Modulație">subpurtătoare OFDM</a> active în formatul HT20.
+    </div>
+
+    <div class="section-item">
+        <span class="section-title">2. Cauzele alertelor false și ale instabilității</span>
+        La testul inițial în cameră goală, telemetria afișa alerte eronate de cădere, iar poziția 2D îngheța. Analiza semnalului a identificat patru cauze:
+        <br>
+        1. <strong>Subpurtătoare oarbe și comutare LNA.</strong> Canalele 21 până la 30 au valori nule în firmware-ul ESP32, iar subpurtătoarea 2 avea o varianță de peste 1200 cauzată de etajul <a href="https://en.wikipedia.org/wiki/Low-noise_amplifier" class="tooltip-target" data-term="LNA" data-badge="Electronică">LNA</a>. Fără filtrarea acestor canale, algoritmul <a href="https://en.wikipedia.org/wiki/Principal_component_analysis" class="tooltip-target" data-term="PCA" data-badge="Statistică">PCA</a> a izolat această perturbație pe prima componentă principală și a produs oscilații mari în absența mișcării.
+        <br>
+        2. <strong>Normalizarea semnalului.</strong> Algoritmul inițial împărțea semnalul la deviația standard locală. În cameră goală, zgomotul termic slab proiectat în intervalul [-1, +1] genera salturi relative mari și depășea pragul numeric al derivatei.
+        <br>
+        3. <strong>Criteriul de imobilitate post-impact.</strong> Modulul cerea ca varianța să scadă sub 0.6. Însă orice semnal mărginit matematic în [-1, +1] are o varianță inferioară valorii de 0.6, ceea ce declanșa alarma după fiecare perturbație tranzitorie.
+        <br>
+        4. <strong>Recepția pe un singur port serial.</strong> Citirea unei singure plăci asigura o singură legătură radio (o elipsă Fresnel). O singură ecuație dă rangul jacobian 1 și nu permite rezolvarea coordonatelor carteziene 2D (x, y). Determinarea poziției cere minim trei legături active.
+    </div>
+
+    <div class="section-item">
+        <span class="section-title">3. Modificările aduse filtrării DSP și automatului de stări</span>
+        Lanțul de procesare a semnalului a fost refăcut pe baza literaturii [P1]-[P4]:
+        <br>
+        1. <strong>Filtrarea subpurtătoarelor și pragul Hampel.</strong> Algoritmul elimină cele 10 subpurtătoare oarbe și purtătoarea 2 de gardă. Un <a href="https://en.wikipedia.org/wiki/Hampel_filter" class="tooltip-target" data-term="filtru Hampel" data-badge="Filtrare Robustă">filtru Hampel</a> bazat pe deviația mediană absolută (MAD) înlătură valorile extreme provocate de etajul LNA.
+        <br>
+        2. <strong>Filtru trece-bandă Butterworth de ordinul 4.</strong> Filtrarea bidirecțională (filtfilt) între 0.2 Hz și 12 Hz elimină componenta continuă și zgomotul de frecvență înaltă fără defazaj.
+        <br>
+        3. <strong>Poarta de activitate în energie brută.</strong> Deviația standard pe prima componentă principală trebuie să depășească pragul de 11.0 unități ADC brute (sau 0.20 pe date normalizate). În cameră goală, automatul rămâne în starea Calm și nu calculează derivata.
+        <br>
+        4. <strong>Pragul fizic de impact.</strong> Viteza anvelopei trebuie să depășească valoarea absolută de 17.5 unități, prag corespunzător unei viteze verticale de cădere de peste 2.5 m/s conform modelului <a href="https://doi.org/10.1145/2639108.2639143" class="tooltip-target" data-term="RT-Fall" data-badge="Lucrare ACM">RT-Fall</a>.
+        <br>
+        5. <strong>Verificarea relativă a imobilității la sol.</strong> Condiția fixă a fost înlocuită cu cerința ca varianța să scadă sub 20% din energia etapei de mers pe o fereastră de 2.5 secunde. Dacă persoana se ridică și pășește, automatul revine în starea de mers.
+    </div>
+
+    <div class="section-item">
+        <span class="section-title">4. Decizii arhitecturale și modelare fizică</span>
+        Justificarea soluțiilor alese:
+        <br>
+        &bull; <strong>Eliminarea reflexiilor statice.</strong> Pereții și mobilierul produc reflexii multiple (<a href="https://en.wikipedia.org/wiki/Multipath_propagation" class="tooltip-target" data-term="multipath" data-badge="Fizică Undelor">multipath</a>) constante, situate la 0 Hz în spectru. Frecvența de tăiere inferioară de 0.2 Hz elimină componenta continuă și păstrează exclusiv semnalul dinamic generat de corpul în mișcare.
+        <br>
+        &bull; <strong>Model analitic FSM față de învățarea automată.</strong> Rețelele neuronale (CNN sau LSTM) se supra-ajustează pe geometria unei încăperi anume. Rearanjarea mobilierului sau schimbarea spațiului reduce frecvent acuratețea sub 60%. Modelul bazat pe <a href="https://en.wikipedia.org/wiki/Fresnel_zone" class="tooltip-target" data-term="zone Fresnel" data-badge="Fizică Undelor">zone Fresnel</a> și cinematică newtoniană depinde de legile propagării undelor, funcționează fără seturi masive de antrenare și nu cere reantrenare la relocare.
+        <br>
+        &bull; <strong>Discriminarea animalelor de companie.</strong> Animalele se deplasează sub înălțimea de 0.3 m și produc deplasări <a href="https://en.wikipedia.org/wiki/Doppler_effect" class="tooltip-target" data-term="Doppler" data-badge="Fizică">Doppler</a> sub 15 Hz. Antenele montate la 1.2 m nu înregistrează atenuări simultane pe toate cele trei legături la trecerea unui animal, iar profilul de mișcare nu atinge viteza unei căderi umane de la 1.7 m.
+    </div>
+
+    <div class="page-number">Pagina 1 din 2</div>
+</div>
+
+<!-- ========================================== -->
+<!-- PAGINA 2: PIAȚĂ, SUITĂ DE VERIFICARE & BIBLIOGRAFIE -->
+<!-- ========================================== -->
+<div class="page">
+    <header>
+        <h1>Comparație cu soluții existente, teste experimentale și validare</h1>
+        <div class="subtitle">Evaluare tehnică și de cost, rezultate de laborator și limitări hardware</div>
+    </header>
+
+    <hr class="divider">
+
+    <div class="section-item">
+        <span class="section-title">5. Comparație cu soluțiile comerciale</span>
+        Tabelul compară arhitectura propusă cu principalele categorii de sisteme pentru detecția căderilor:
+    </div>
+
+    <table class="comparison-table">
+        <thead>
+            <tr>
+                <th>Tehnologie</th>
+                <th>Exemple</th>
+                <th>Confidențialitate</th>
+                <th>Disponibilitate practică</th>
+                <th>Cost hardware</th>
+                <th>Trecere prin obstacole</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>Dispozitive purtabile</strong></td>
+                <td><a href="https://www.apple.com/apple-watch-se/" class="tooltip-target" data-term="Apple Watch" data-badge="Comercial">Apple Watch</a>, Medical Guardian, brățări SOS</td>
+                <td>Fără captură optică; cere purtare continuă</td>
+                <td>Scăzută noaptea și la duș, unde au loc majoritatea căderilor grave</td>
+                <td>150-450 EUR și abonament lunar</td>
+                <td>Direct pe corp (fără obstacole)</td>
+            </tr>
+            <tr>
+                <td><strong>Camere optice și IR</strong></td>
+                <td><a href="https://www.nobi.life/" class="tooltip-target" data-term="Nobi Smart Lamp" data-badge="Comercial">Nobi Smart Lamp</a>, camere inteligente</td>
+                <td>Risc de confidențialitate în dormitor și baie</td>
+                <td>Refuzate adesea în spații private</td>
+                <td>300-800 EUR per cameră</td>
+                <td>Blocate de pereți, perdele sau abur dens</td>
+            </tr>
+            <tr>
+                <td><strong>Radare mmWave</strong></td>
+                <td><a href="https://vayyar.com/" class="tooltip-target" data-term="Vayyar Home" data-badge="Comercial">Vayyar Home</a>, senzori TI IWR6843</td>
+                <td>Fără captură optică</td>
+                <td>Ridicată, monitorizare fixă</td>
+                <td>250-400 EUR per cameră</td>
+                <td>Atenuare puternică în pereți la 60 GHz; cere vizibilitate directă</td>
+            </tr>
+            <tr>
+                <td><strong>Wi-Fi mesh comercial</strong></td>
+                <td><a href="https://www.originwirelessai.com/" class="tooltip-target" data-term="Origin Wireless" data-badge="Comercial">Origin Wireless</a>, Cognitive WiFi Motion</td>
+                <td>Fără captură optică</td>
+                <td>Ridicată, acoperire pe toată locuința</td>
+                <td>300-600 EUR (routere dedicate)</td>
+                <td>Trece prin pereți de cărămidă și gips-carton</td>
+            </tr>
+            <tr class="highlight-row">
+                <td><strong>Sistemul dezvoltat (3x ESP32)</strong></td>
+                <td>Rețea triunghiulară Wi-Fi CSI (3 noduri)</td>
+                <td>Fără captură optică; păstrează intimitatea</td>
+                <td>Pasiv; fără contact pe corp; funcționează permanent</td>
+                <td>Sub 15 EUR (total pentru 3 noduri)</td>
+                <td>Difracție și penetrare prin pereți la 2.4 GHz</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div class="section-item">
+        Dispozitivele purtabile sunt frecvent uitate la încărcat sau scoase înainte de somn și baie, exact mediile în care au loc peste 70% dintre căderile grave. Camerele video sunt respinse în spațiile intime. Radarele în unde milimetrice oferă rezoluție unghiulară bună, dar costul ridicat limitează acoperirea unei locuințe întregi. Sistemul dezvoltat rezolvă aceste neajunsuri: funcționează pasiv fără contact fizic, nu stochează imagini, penetrează pereții interiori la 2.4 GHz și costă sub 15 EUR pentru trei noduri hardware standard.
+    </div>
+
+    <div class="section-item">
+        <span class="section-title">6. Rezultatele testelor de laborator</span>
+        Sistemul a fost testat prin trei module de verificare:
+        <br>
+        1. <strong>Conformitate teoretică (verify-csi-academic).</strong> Modulul confirmă parametrii fizici: lungimea de undă &lambda; = 12.31 cm, raza primei zone Fresnel r<sub>1</sub> = 30.38 cm la 3 m distanță și pasul de modulație spațială &lambda;/2 = 6.15 cm [P1]. Modelul de multilaterare triunghiulară [P4] asigură rangul jacobian 2 și convergența geometrică pe coordonate carteziene.
+        <br>
+        2. <strong>Lanțul de procesare și automatul FSM (verify-csi-backend).</strong> Testele pe seturile de date preluate din hardware au trecut integral (100% PASS):
+        <br>
+        &nbsp;&nbsp;&bull; <em>test_A_camera_goala:</em> Pe 1051 de cadre (20 secunde), automatul FSM rămâne în starea 0 (Calm), fără alarme false.
+        <br>
+        &nbsp;&nbsp;&bull; <em>test_B_mers_normal:</em> Pe 553 de cadre, sistemul detectează mersul (stările 0 și 1) și nu declanșează alarma de cădere.
+        <br>
+        &nbsp;&nbsp;&bull; <em>test_C_cadere_reala:</em> Pe 669 de cadre, sistemul parcurge secvența completă: 0 (Calm) &rarr; 1 (Mers) &rarr; 2 (Impact) &rarr; 3 (Imobilitate) &rarr; 4 (Alarmă activă), cu o latență de confirmare de 2.54 secunde.
+        <br>
+        3. <strong>Interfața grafică (verify-csi-gui).</strong> Modulul a rulat interfața PyQt6 la rezoluția de 1600x950 pixeli pe un ecran virtual și a salvat 24 de capturi PNG pentru fiecare stare de funcționare. Au fost verificate harta zonelor Fresnel, cascada pe 52 de subpurtătoare, spectrul Doppler și afișarea alarmei vizuale.
+    </div>
+
+    <div class="section-item">
+        <span class="section-title">7. Limite hardware și direcții de dezvoltare</span>
+        Sistemul prezintă două limitări hardware:
+        <br>
+        1. <strong>Rata de eșantionare a portului serial.</strong> Cadența de citire pe plăcile ESP32 este de 33.5-52.5 Hz, sub pragul de 100 Hz recomandat în [P2]. Frecvențele Doppler peste 35 Hz pot prezenta aliere parțială. Algoritmul compensează această limită prin corelarea vitezei de impact cu fereastra de imobilitate de 2.5 secunde. Trecerea la un firmware pe pachete UDP prin Wi-Fi sau transfer DMA poate crește cadența peste 150 Hz.
+        <br>
+        2. <strong>Localizarea carteziană 2D în timp real.</strong> Estimarea continuă a poziției pe harta camerei cere citirea simultană a tuturor celor trei legături radio (trei conexiuni seriale sau flux Wi-Fi comun). Rezolvarea numerică stabilă a sistemului de ecuații eliptice devine posibilă doar când sunt disponibile toate cele trei distanțe.
+    </div>
+
+    <div class="bibliography">
+        <div class="bib-title">Bibliografie și lucrări de referință:</div>
+        <div class="bib-grid">
+            <div>[P1] D. Zhang et al., <em>Fresnel Zone Based Indoor Localization and Activity Sensing</em>, IEEE/ACM ToN 2017. <a href="https://doi.org/10.1109/TNET.2017.2721442" class="tooltip-target" data-term="Fresnel Sensing" data-badge="IEEE/ACM">doi:10.1109/TNET.2017.2721442</a></div>
+            <div>[P2] S. M. Hernandez, E. Bulut, <em>Wi-Fi Sensing on the Edge: Who and Where are You?</em>, IEEE IoTJ 2021. <a href="https://doi.org/10.1109/JIOT.2021.3116035" class="tooltip-target" data-term="ESP32-CSI-Tool" data-badge="IEEE IoTJ">doi:10.1109/JIOT.2021.3116035</a></div>
+            <div>[P3] H. Wang et al., <em>RT-Fall: Real-Time Fall Detection using Wi-Fi Radio Frequency Signals</em>, ACM MobiCom 2014. <a href="https://doi.org/10.1145/2639108.2639143" class="tooltip-target" data-term="RT-Fall" data-badge="ACM MobiCom">doi:10.1145/2639108.2639143</a></div>
+            <div>[P4] J. Liu et al., <em>Multi-Link Indoor Localization Based on Wi-Fi CSI</em>, IEEE TVT 2019. <a href="https://doi.org/10.1109/TVT.2019.2941199" class="tooltip-target" data-term="Multi-Link CSI" data-badge="IEEE TVT">doi:10.1109/TVT.2019.2941199</a></div>
+            <div>[P5] F. Adib, D. Katabi, <em>See Through Walls with WiFi!</em>, ACM SIGCOMM 2013. <a href="https://doi.org/10.1145/2486001.2486039" class="tooltip-target" data-term="Wi-Vi" data-badge="ACM SIGCOMM">doi:10.1145/2486001.2486039</a></div>
+            <div>[P6] X. Wang et al., <em>Exploiting CSI Phase for Vital Signs</em>, IEEE TMC 2017. <a href="https://doi.org/10.1109/TMC.2017.2706338" class="tooltip-target" data-term="PhaseBeat" data-badge="IEEE TMC">doi:10.1109/TMC.2017.2706338</a></div>
+            <div>[P7] K. J. R. Liu et al., <em>Time-Reversal Machine: A Wireless IoT Revolution</em>, IEEE SPL 2017. <a href="https://doi.org/10.1109/LSP.2017.2758838" class="tooltip-target" data-term="Time-Reversal" data-badge="IEEE SPL">doi:10.1109/LSP.2017.2758838</a></div>
+            <div>[P8] A. Abedi et al., <em>Non-Cooperative Wi-Fi Localization</em>, ACM MobiCom 2022. <a href="https://doi.org/10.1145/3495243.3560530" class="tooltip-target" data-term="Wi-Peep" data-badge="ACM MobiCom">doi:10.1145/3495243.3560530</a></div>
+        </div>
+    </div>
+
+    <div class="page-number">Pagina 2 din 2</div>
+</div>
+
+<!-- ========================================== -->
+<!-- POPUP INTERACTIV PENTRU DEFINIȚII TEHNICE -->
+<!-- ========================================== -->
+<div id="tooltip-box">
+    <span class="tt-badge" id="tt-badge">CONCEPT</span>
+    <div class="tt-term" id="tt-term">Termen</div>
+    <div class="tt-desc" id="tt-desc">Definiție...</div>
+    <div class="tt-footer">
+        <span>Sursă academică sau comercială</span>
+        <span>Click pentru sursă externă ↗</span>
+    </div>
+</div>
+
+<script>
+    const definitions = {
+        "https://www.espressif.com/en/products/socs/esp32": "Microcontroller pe 32 de biți la 240 MHz cu Wi-Fi și Bluetooth, capabil să extragă pachete CSI din stratul fizic (PHY).",
+        "https://en.wikipedia.org/wiki/2.4_GHz_radio_use": "Bandă ISM fără licență (canalul 6, 2437 MHz) cu lungimea de undă de 12.31 cm pentru comunicații și detecție interioară.",
+        "https://en.wikipedia.org/wiki/Received_signal_strength_indication": "Valoare scalară de putere a semnalului în dBm, utilă pentru atenuarea medie, dar insensibilă la micro-mișcări.",
+        "https://en.wikipedia.org/wiki/Channel_state_information": "Matrice complexă care măsoară atenuarea și defazajul semnalului pe fiecare subpurtătoare a canalului radio.",
+        "https://en.wikipedia.org/wiki/Orthogonal_frequency-division_multiplexing": "Modulație digitală care împarte canalul radio în subpurtătoare ortogonale paralele.",
+        "https://en.wikipedia.org/wiki/Low-noise_amplifier": "Etaj de recepție RF cu control automat al amplificării. Comutarea treptelor de amplificare produce salturi pe subpurtătoarele marginale.",
+        "https://en.wikipedia.org/wiki/Principal_component_analysis": "Transformare liniară care proiectează datele pe axele de variație maximă și izolează mișcarea dinamică în prima componentă.",
+        "https://en.wikipedia.org/wiki/Hampel_filter": "Filtru statistic bazat pe deviația mediană absolută (MAD), care înlocuiește valorile aberante izolate cu mediana ferestrei.",
+        "https://doi.org/10.1145/2639108.2639143": "Articol ACM MobiCom 2014 care separă căderile de mers prin viteza Doppler și fereastra de imobilitate post-impact.",
+        "https://en.wikipedia.org/wiki/Fresnel_zone": "Volume elipsoidale între antene în care obstacolele produc variații constructive și distructive ale semnalului recepționat.",
+        "https://en.wikipedia.org/wiki/Doppler_effect": "Variația în frecvență a undelor reflectate cauzată de viteza corpului față de antenă.",
+        "https://en.wikipedia.org/wiki/Multipath_propagation": "Propagarea semnalului radio pe trasee multiple reflectate de pereți și podea, cu interferențe la receptor.",
+        "https://www.apple.com/apple-watch-se/": "Dispozitiv purtabil cu senzori inerțiali, dependent de purtarea continuă pe corp și încărcarea bateriei.",
+        "https://www.nobi.life/": "Sistem optic de tavan, refuzat frecvent în băi și dormitoare din motive de confidențialitate.",
+        "https://vayyar.com/": "Radar comercial în unde milimetrice (60 GHz), limitat de absorbția în pereți și de costul ridicat.",
+        "https://www.originwirelessai.com/": "Platformă comercială care analizează perturbațiile semnalului radio pe echipamente Wi-Fi mesh dedicate.",
+        "https://doi.org/10.1109/TNET.2017.2721442": "Articol IEEE/ACM ToN 2017 care definește modelul matematic al zonelor Fresnel pentru detecția mișcării în spații interioare.",
+        "https://doi.org/10.1109/JIOT.2021.3116035": "Articol IEEE IoTJ 2021 care descrie extragerea și structura pachetelor CSI pe microcontrollerul ESP32.",
+        "https://doi.org/10.1109/TVT.2019.2941199": "Model de localizare 2D pe legături multiple CSI prin rezolvarea sistemului de ecuații eliptice cu matrice jacobiană de rang 2.",
+        "https://doi.org/10.1145/2486001.2486039": "Articol ACM SIGCOMM 2013 privind detecția mișcării prin pereți cu semnale radio Wi-Fi.",
+        "https://doi.org/10.1109/TMC.2017.2706338": "Metodă de estimare a respirației și pulsului din faza semnalului CSI reflectat de cutia toracică.",
+        "https://doi.org/10.1109/LSP.2017.2758838": "Tehnologie de reversare temporală aplicată la detecția perturbațiilor radio în medii de interior.",
+        "https://doi.org/10.1145/3495243.3560530": "Studiu ACM MobiCom 2022 privind localizarea dispozitivelor Wi-Fi pe baza timpului de răspuns hardware."
+    };
+
+    const tooltipBox = document.getElementById('tooltip-box');
+    const ttBadge = document.getElementById('tt-badge');
+    const ttTerm = document.getElementById('tt-term');
+    const ttDesc = document.getElementById('tt-desc');
+
+    const targets = document.querySelectorAll('.tooltip-target');
+
+    targets.forEach(target => {
+        target.addEventListener('mouseenter', (e) => {
+            const url = target.getAttribute('href');
+            const term = target.getAttribute('data-term') || target.innerText;
+            const badge = target.getAttribute('data-badge') || 'CONCEPT';
+            const desc = definitions[url] || 'Descriere tehnică detaliată disponibilă la sursă.';
+
+            ttBadge.innerText = badge;
+            ttTerm.innerText = term;
+            ttDesc.innerText = desc;
+            
+            tooltipBox.style.display = 'block';
+            positionTooltip(e);
+        });
+
+        target.addEventListener('mousemove', (e) => {
+            positionTooltip(e);
+        });
+
+        target.addEventListener('mouseleave', () => {
+            tooltipBox.style.display = 'none';
+        });
+    });
+
+    function positionTooltip(e) {
+        const zoom = 2;
+        const boxWidth = 320;
+        const offset = 14;
+        let left = (e.clientX + offset) / zoom;
+        let top = (e.clientY + offset) / zoom;
+
+        if (left + boxWidth > (window.innerWidth / zoom) - 10) {
+            left = (e.clientX - offset) / zoom - boxWidth;
+        }
+        if (top + 160 > (window.innerHeight / zoom)) {
+            top = (e.clientY - offset) / zoom - 160;
+        }
+
+        tooltipBox.style.left = left + 'px';
+        tooltipBox.style.top = top + 'px';
+    }
+</script>
+
+</body>
+</html>

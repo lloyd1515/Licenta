@@ -1,0 +1,157 @@
+<template>
+  <style>
+    @font-face { font-family: "Inter"; src: url("../../assets/fonts/Inter-400.woff2") format("woff2"); font-weight: 400; font-style: normal; }
+    @font-face { font-family: "Inter"; src: url("../../assets/fonts/Inter-700.woff2") format("woff2"); font-weight: 700; font-style: normal; }
+
+    #root {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      font-family: "Inter", sans-serif;
+      color: #eef1f7;
+    }
+    .o-ground { position: absolute; inset: 0; background: #0f1420; }
+    .o-art { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; }
+    .o-txt { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; }
+    .o-title {
+      position: absolute;
+      left: 0;
+      top: 130px;
+      width: 1920px;
+      text-align: center;
+      font-weight: 700;
+      font-size: 96px;
+      line-height: 1.1;
+      white-space: nowrap;
+      color: #eef1f7;
+    }
+    .o-label {
+      position: absolute;
+      top: 548px;
+      width: 230px;
+      text-align: center;
+      font-weight: 700;
+      font-size: 44px;
+      line-height: 1.15;
+      color: #eef1f7;
+    }
+  </style>
+
+  <div id="root" data-composition-id="outro" data-start="0" data-duration="10" data-width="1920" data-height="1080">
+    <div id="o-ground" class="clip o-ground" data-start="0" data-duration="10" data-track-index="0"></div>
+
+    <div id="o-art" class="clip o-art" data-start="0" data-duration="10" data-track-index="1">
+      <svg viewBox="0 0 1920 1080" width="1920" height="1080" xmlns="http://www.w3.org/2000/svg">
+        <!-- connecting accent line above the row -->
+        <line id="o-line" x1="210" y1="350" x2="1710" y2="350" stroke="#8ab8ff" stroke-width="3" style="stroke-dasharray: 1500; stroke-dashoffset: 1500;"/>
+
+        <!-- card 0: ripples -->
+        <g id="o-c0">
+          <rect x="95" y="380" width="230" height="290" rx="16" fill="#182133" stroke="#2a3448" stroke-width="2"/>
+          <circle cx="210" cy="460" r="22" fill="none" stroke="#7fd6e6" stroke-width="3"/>
+          <circle cx="210" cy="460" r="44" fill="none" stroke="#7fd6e6" stroke-width="3" opacity="0.7"/>
+          <circle cx="210" cy="460" r="66" fill="none" stroke="#7fd6e6" stroke-width="3" opacity="0.4"/>
+          <circle cx="210" cy="460" r="8" fill="#7fd6e6"/>
+          <circle class="o-dot" cx="210" cy="350" r="7" fill="#8ab8ff"/>
+        </g>
+
+        <!-- card 1: radio dial -->
+        <g id="o-c1">
+          <rect x="345" y="380" width="230" height="290" rx="16" fill="#182133" stroke="#2a3448" stroke-width="2"/>
+          <rect x="400" y="420" width="120" height="80" rx="10" fill="none" stroke="#8ab8ff" stroke-width="3"/>
+          <line x1="420" y1="428" x2="420" y2="440" stroke="#5d6a82" stroke-width="3"/>
+          <line x1="460" y1="428" x2="460" y2="440" stroke="#5d6a82" stroke-width="3"/>
+          <line x1="500" y1="428" x2="500" y2="440" stroke="#5d6a82" stroke-width="3"/>
+          <line x1="430" y1="490" x2="490" y2="440" stroke="#8ab8ff" stroke-width="4" stroke-linecap="round"/>
+          <circle class="o-dot" cx="460" cy="350" r="7" fill="#8ab8ff"/>
+        </g>
+
+        <!-- card 2: envelope -->
+        <g id="o-c2">
+          <rect x="595" y="380" width="230" height="290" rx="16" fill="#182133" stroke="#2a3448" stroke-width="2"/>
+          <rect x="645" y="420" width="130" height="84" rx="8" fill="none" stroke="#c3b1f2" stroke-width="3"/>
+          <path d="M645 420 L710 466 L775 420" fill="none" stroke="#c3b1f2" stroke-width="3" stroke-linejoin="round"/>
+          <circle class="o-dot" cx="710" cy="350" r="7" fill="#8ab8ff"/>
+        </g>
+
+        <!-- card 3: grid (spreadsheet) -->
+        <g id="o-c3">
+          <rect x="845" y="380" width="230" height="290" rx="16" fill="#182133" stroke="#2a3448" stroke-width="2"/>
+          <rect x="895" y="415" width="130" height="90" fill="none" stroke="#a9b3c6" stroke-width="2"/>
+          <line x1="938" y1="415" x2="938" y2="505" stroke="#a9b3c6" stroke-width="2"/>
+          <line x1="982" y1="415" x2="982" y2="505" stroke="#a9b3c6" stroke-width="2"/>
+          <line x1="895" y1="445" x2="1025" y2="445" stroke="#a9b3c6" stroke-width="2"/>
+          <line x1="895" y1="475" x2="1025" y2="475" stroke="#a9b3c6" stroke-width="2"/>
+          <rect x="938" y="445" width="44" height="30" fill="#8ab8ff" opacity="0.9"/>
+          <circle class="o-dot" cx="960" cy="350" r="7" fill="#8ab8ff"/>
+        </g>
+
+        <!-- card 4: three brooms -->
+        <g id="o-c4">
+          <rect x="1095" y="380" width="230" height="290" rx="16" fill="#182133" stroke="#2a3448" stroke-width="2"/>
+          <line x1="1140" y1="400" x2="1140" y2="500" stroke="#8fd6a8" stroke-width="5" stroke-linecap="round"/>
+          <path d="M1118 500 H1162 L1170 532 H1110 Z" fill="#8fd6a8"/>
+          <line x1="1210" y1="400" x2="1210" y2="500" stroke="#8fd6a8" stroke-width="5" stroke-linecap="round"/>
+          <path d="M1188 500 H1232 L1240 532 H1180 Z" fill="#8fd6a8"/>
+          <line x1="1280" y1="400" x2="1280" y2="500" stroke="#8fd6a8" stroke-width="5" stroke-linecap="round"/>
+          <path d="M1258 500 H1302 L1310 532 H1250 Z" fill="#8fd6a8"/>
+          <circle class="o-dot" cx="1210" cy="350" r="7" fill="#8ab8ff"/>
+        </g>
+
+        <!-- card 5: steep slope -->
+        <g id="o-c5">
+          <rect x="1345" y="380" width="230" height="290" rx="16" fill="#182133" stroke="#2a3448" stroke-width="2"/>
+          <line x1="1395" y1="520" x2="1515" y2="400" stroke="#f5c16c" stroke-width="5" stroke-linecap="round"/>
+          <line x1="1395" y1="520" x2="1525" y2="520" stroke="#f5c16c" stroke-width="3" stroke-linecap="round"/>
+          <circle class="o-dot" cx="1460" cy="350" r="7" fill="#8ab8ff"/>
+        </g>
+
+        <!-- card 6: smoke alarm -->
+        <g id="o-c6">
+          <rect x="1595" y="380" width="230" height="290" rx="16" fill="#182133" stroke="#2a3448" stroke-width="2"/>
+          <circle cx="1710" cy="460" r="50" fill="none" stroke="#ff8f87" stroke-width="4"/>
+          <circle cx="1710" cy="460" r="14" fill="#ff8f87"/>
+          <circle cx="1710" cy="460" r="68" fill="none" stroke="#ff8f87" stroke-width="2" opacity="0.4"/>
+          <circle class="o-dot" cx="1710" cy="350" r="7" fill="#8ab8ff"/>
+        </g>
+      </svg>
+    </div>
+
+    <div id="o-txt" class="clip o-txt" data-start="0" data-duration="10" data-track-index="2">
+      <div id="o-title" class="o-title">How Wi-Fi notices a fall</div>
+      <div id="o-l0" class="o-label" style="left: 95px;">ripples</div>
+      <div id="o-l1" class="o-label" style="left: 345px;">radio dial</div>
+      <div id="o-l2" class="o-label" style="left: 595px;">envelope</div>
+      <div id="o-l3" class="o-label" style="left: 845px;">grid</div>
+      <div id="o-l4" class="o-label" style="left: 1095px;">three clean-ups</div>
+      <div id="o-l5" class="o-label" style="left: 1345px;">steep slope</div>
+      <div id="o-l6" class="o-label" style="left: 1595px;">smoke alarm</div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      var tl = gsap.timeline({ paused: true });
+      function el(id) { return document.getElementById(id); }
+
+      // Row builds one card per spoken word group (sentence 1, 0.3 s to 5.5 s).
+      var starts = [0.3, 1.2, 2.2, 2.9, 3.7, 4.7, 5.5];
+      starts.forEach(function (t, i) {
+        tl.fromTo(el("o-c" + i), { opacity: 0, y: 18 }, { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }, t);
+        tl.fromTo(el("o-l" + i), { opacity: 0, y: 18 }, { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }, t);
+      });
+
+      // Sentence 2 (6.74 s): title fades in, accent line connects the row.
+      tl.fromTo(el("o-title"), { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.7, ease: "power2.out" }, 6.74);
+      tl.fromTo(el("o-line"), { strokeDashoffset: 1500 }, { strokeDashoffset: 0, duration: 0.9, ease: "power1.inOut" }, 6.74);
+      tl.fromTo(document.querySelectorAll(".o-dot"), { opacity: 0.35 }, { opacity: 1, duration: 0.5, yoyo: true, repeat: 1, stagger: 0.08, ease: "sine.inOut" }, 8.0);
+
+      // Pin the timeline to the full scene length; last beat holds.
+      tl.to({}, { duration: 10 }, 0);
+
+      window.__timelines["outro"] = tl;
+    })();
+  </script>
+</template>

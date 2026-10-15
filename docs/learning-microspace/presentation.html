@@ -1,0 +1,1169 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wi-Fi CSI: Prezentare Tehnică Licență</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #f54e00;
+            --primary-active: #d04200;
+            --ink: #26251e;
+            --body: #5a5852;
+            --body-strong: #26251e;
+            --muted: #807d72;
+            --muted-soft: #a09c92;
+            --hairline: #e6e5e0;
+            --hairline-soft: #efeee8;
+            --hairline-strong: #cfcdc4;
+            --canvas: #f7f7f4;
+            --canvas-soft: #fafaf7;
+            --surface-card: #ffffff;
+            --surface-strong: #e6e5e0;
+            --on-primary: #ffffff;
+
+            --tl-thinking: #dfa88f;
+            --tl-grep: #9fc9a2;
+            --tl-read: #9fbbe0;
+            --tl-edit: #c0a8dd;
+            --tl-done: #c08532;
+            --semantic-error: #cf2d56;
+            --semantic-success: #1f8a65;
+
+            --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+        }
+
+        body {
+            background-color: var(--canvas);
+            color: var(--body);
+            font-family: var(--font-sans);
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            background-image: 
+                linear-gradient(var(--hairline-soft) 1px, transparent 1px),
+                linear-gradient(90deg, var(--hairline-soft) 1px, transparent 1px);
+            background-size: 40px 40px;
+        }
+
+        /* Top Bar */
+        .top-nav {
+            height: 60px;
+            padding: 0 32px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: var(--canvas);
+            border-bottom: 1px solid var(--hairline);
+            z-index: 100;
+        }
+
+        .brand-box {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .brand-badge {
+            background: var(--primary);
+            color: var(--on-primary);
+            font-size: 11px;
+            font-weight: 600;
+            padding: 2px 7px;
+            border-radius: 4px;
+            font-family: var(--font-mono);
+            letter-spacing: 0.5px;
+        }
+
+        .brand-title {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--ink);
+            letter-spacing: -0.2px;
+        }
+
+        .brand-sub {
+            font-size: 13px;
+            color: var(--muted);
+            margin-left: 6px;
+        }
+
+        .nav-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .cursor-btn {
+            background: var(--surface-card);
+            border: 1px solid var(--hairline);
+            color: var(--ink);
+            padding: 8px 14px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            text-decoration: none;
+        }
+
+        .cursor-btn:hover {
+            border-color: var(--hairline-strong);
+            background: var(--canvas-soft);
+        }
+
+        .cursor-btn.active {
+            background: var(--ink);
+            color: var(--canvas);
+            border-color: var(--ink);
+        }
+
+        .cursor-btn-orange {
+            background: var(--primary);
+            color: var(--on-primary);
+            border: 1px solid var(--primary);
+        }
+
+        .cursor-btn-orange:hover {
+            background: var(--primary-active);
+            border-color: var(--primary-active);
+        }
+
+        /* Slide Stage */
+        .stage {
+            flex: 1;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 28px 48px;
+        }
+
+        .slide {
+            position: absolute;
+            inset: 28px 48px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            pointer-events: none;
+            transform: translateY(12px);
+            transition: opacity 0.35s cubic-bezier(0.16, 1, 0.3, 1), transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .slide.active {
+            opacity: 1;
+            pointer-events: auto;
+            transform: translateY(0);
+        }
+
+        .slide-grid {
+            width: 100%;
+            max-width: 1140px;
+            display: grid;
+            grid-template-columns: 1.15fr 1fr;
+            gap: 36px;
+            align-items: center;
+        }
+
+        @media (max-width: 900px) {
+            .slide-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+        }
+
+        .caption-tag {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.88px;
+            color: var(--muted);
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-family: var(--font-mono);
+        }
+
+        .stage-pill {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            padding: 2px 8px;
+            border-radius: 9999px;
+            color: var(--ink);
+            display: inline-block;
+        }
+
+        .pill-thinking { background: var(--tl-thinking); }
+        .pill-grep { background: var(--tl-grep); }
+        .pill-read { background: var(--tl-read); }
+        .pill-edit { background: var(--tl-edit); }
+        .pill-done { background: var(--tl-done); color: #fff; }
+        .pill-error { background: var(--semantic-error); color: #fff; }
+
+        .display-title {
+            font-size: 32px;
+            font-weight: 400;
+            line-height: 1.25;
+            letter-spacing: -0.72px;
+            color: var(--ink);
+            margin-bottom: 24px;
+        }
+
+        .cards-column {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .granule-card {
+            background: var(--surface-card);
+            border: 1px solid var(--hairline);
+            border-radius: 8px;
+            padding: 14px 18px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            transition: border-color 0.15s, background-color 0.15s;
+        }
+
+        .granule-card:hover {
+            border-color: var(--hairline-strong);
+            background: var(--canvas-soft);
+        }
+
+        .granule-body strong {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--ink);
+            letter-spacing: -0.1px;
+        }
+
+        .granule-body p {
+            font-size: 13px;
+            color: var(--body);
+            line-height: 1.45;
+        }
+
+        /* Visual Pane */
+        .visual-pane {
+            background: var(--surface-card);
+            border: 1px solid var(--hairline);
+            border-radius: 12px;
+            height: 380px;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .visual-pane-header {
+            height: 36px;
+            padding: 0 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--hairline);
+            background: var(--canvas-soft);
+        }
+
+        .pane-dots {
+            display: flex;
+            gap: 6px;
+        }
+
+        .pane-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--hairline-strong);
+        }
+
+        .pane-tag {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            color: var(--muted);
+            letter-spacing: 0.4px;
+        }
+
+        .visual-pane-body {
+            flex: 1;
+            position: relative;
+            background: #ffffff;
+        }
+
+        canvas.cursor-canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        /* Bottom Status & Controls */
+        .bottom-bar {
+            height: 60px;
+            padding: 0 32px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: var(--canvas);
+            border-top: 1px solid var(--hairline);
+            z-index: 100;
+        }
+
+        .slide-counter {
+            font-family: var(--font-mono);
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--muted);
+        }
+
+        .slide-counter span {
+            color: var(--ink);
+            font-weight: 600;
+        }
+
+        .timeline-dots {
+            display: flex;
+            gap: 6px;
+        }
+
+        .dot {
+            width: 22px;
+            height: 4px;
+            border-radius: 2px;
+            background: var(--hairline-strong);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .dot.active {
+            background: var(--primary);
+            width: 32px;
+        }
+
+        .deck-nav-btns {
+            display: flex;
+            gap: 6px;
+        }
+
+        .nav-btn {
+            background: var(--surface-card);
+            border: 1px solid var(--hairline);
+            color: var(--ink);
+            width: 36px;
+            height: 36px;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.15s;
+        }
+
+        .nav-btn:hover {
+            border-color: var(--ink);
+            background: var(--canvas-soft);
+        }
+
+        .progress-line {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            height: 2px;
+            background: var(--primary);
+            width: 0%;
+            transition: width 0.1s linear;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Top Navigation -->
+    <header class="top-nav">
+        <div class="brand-box">
+            <span class="brand-badge">CSI</span>
+            <span class="brand-title">Cartografiere radio și detecție căderi</span>
+            <span class="brand-sub">Licență UTCN, 2026</span>
+        </div>
+
+        <div class="nav-actions">
+            <button id="autoPlayBtn" class="cursor-btn" onclick="toggleAutoPlay()">
+                <span id="playText">Auto-play (7s)</span>
+            </button>
+            <button id="soundBtn" class="cursor-btn" onclick="toggleSound()">
+                <span id="soundText">Sunet activ</span>
+            </button>
+            <a href="DESIGN.md" target="_blank" class="cursor-btn" style="font-family: var(--font-mono); font-size: 12px;">
+                <span>DESIGN.md</span>
+            </a>
+        </div>
+    </header>
+
+    <!-- Stage -->
+    <main class="stage">
+
+        <!-- SLIDE 1: Context & Motivație -->
+        <section class="slide active" id="slide-0">
+            <div class="slide-grid">
+                <div>
+                    <div class="caption-tag">
+                        <span class="stage-pill pill-thinking">01 // Context</span>
+                        <span>Senzori pasivi de interior</span>
+                    </div>
+                    <h1 class="display-title">Detecție de cădere fără camere sau senzori purtați</h1>
+                    <div class="cards-column">
+                        <div class="granule-card">
+                            <div class="granule-body">
+                                <strong>Protecția intimității</strong>
+                                <p>Sistemul nu folosește camere video. Poate monitoriza spații private precum dormitorul sau baia fără stocare de imagini.</p>
+                            </div>
+                        </div>
+                        <div class="granule-card">
+                            <div class="granule-body">
+                                <strong>Funcționare independentă de utilizator</strong>
+                                <p>Sistemul nu cere brățări sau accelerometre. Elimină riscul ca dispozitivul să rămână descărcat sau uitat.</p>
+                            </div>
+                        </div>
+                        <div class="granule-card">
+                            <div class="granule-body">
+                                <strong>Senzor bazat pe perturbații radio</strong>
+                                <p>Corpul uman reflectă undele de 2.4 GHz. Mișcarea modifică atenuarea și faza semnalului pe legăturile radio din încăpere.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="visual-pane">
+                    <div class="visual-pane-header">
+                        <div class="pane-dots">
+                            <div class="pane-dot"></div><div class="pane-dot"></div><div class="pane-dot"></div>
+                        </div>
+                        <span class="pane-tag">radar_ambient.ts</span>
+                    </div>
+                    <div class="visual-pane-body">
+                        <canvas id="canvas-s1" class="cursor-canvas"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 2: Rețeaua Hardware -->
+        <section class="slide" id="slide-1">
+            <div class="slide-grid">
+                <div>
+                    <div class="caption-tag">
+                        <span class="stage-pill pill-read">02 // Hardware</span>
+                        <span>Topologie mesh cu 3 noduri</span>
+                    </div>
+                    <h1 class="display-title">Rețeaua de achiziție pe noduri ESP32</h1>
+                    <div class="cards-column">
+                        <div class="granule-card">
+                            <div class="granule-body">
+                                <strong>Emisie 802.11n HT20</strong>
+                                <p>Trei plăci ESP32 transmit pachete de test pe canalul 6 Wi-Fi la frecvența de 2.437 GHz.</p>
+                            </div>
+                        </div>
+                        <div class="granule-card">
+                            <div class="granule-body">
+                                <strong>Recepție promiscuă</strong>
+                                <p>Nodul receptor captează cadrele fără asociere clasică și extrage matricea CSI din fiecare pachet.</p>
+                            </div>
+                        </div>
+                        <div class="granule-card">
+                            <div class="granule-body">
+                                <strong>Transfer UART la 921600 baud</strong>
+                                <p>Receptorul trimite către calculator cadre binare de 138 octeți marcate cu antetul magic 0xA55A.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="visual-pane">
+                    <div class="visual-pane-header">
+                        <div class="pane-dots">
+                            <div class="pane-dot"></div><div class="pane-dot"></div><div class="pane-dot"></div>
+                        </div>
+                        <span class="pane-tag">mesh_topology.c</span>
+                    </div>
+                    <div class="visual-pane-body">
+                        <canvas id="canvas-s2" class="cursor-canvas"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 3: RSSI vs CSI -->
+        <section class="slide" id="slide-2">
+            <div class="slide-grid">
+                <div>
+                    <div class="caption-tag">
+                        <span class="stage-pill pill-grep">03 // Semnal</span>
+                        <span>Informația de stare a canalului</span>
+                    </div>
+                    <h1 class="display-title">Diferența dintre RSSI și CSI</h1>
+                    <div class="cards-column">
+                        <div class="granule-card">
+                            <div class="granule-body">
+                                <strong>Limitarea indicatorului RSSI</strong>
+                                <p>RSSI oferă o singură valoare scalară de putere, afectată puternic de reflexiile pe pereți și mobilier.</p>
+                            </div>
+                        </div>
+                        <div class="granule-card">
+                            <div class="granule-body">
+                                <strong>Rezoluția spectrală CSI</strong>
+                                <p>CSI măsoară amplitudinea și faza separat pentru 52 de subpurtătoare OFDM independente.</p>
+                            </div>
+                        </div>
+                        <div class="granule-card">
+                            <div class="granule-body">
+                                <strong>Sensibilitate la mișcare</strong>
+                                <p>Deplasarea unei persoane produce defazaje pe subpurtătoare. Căderea provoacă o scădere bruscă de putere pe mai multe legături simultan.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="visual-pane">
+                    <div class="visual-pane-header">
+                        <div class="pane-dots">
+                            <div class="pane-dot"></div><div class="pane-dot"></div><div class="pane-dot"></div>
+                        </div>
+                        <span class="pane-tag">subcarriers_ofdm.py</span>
+                    </div>
+                    <div class="visual-pane-body">
+                        <canvas id="canvas-s3" class="cursor-canvas"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 4: Filtrare DSP -->
+        <section class="slide" id="slide-3">
+            <div class="slide-grid">
+                <div>
+                    <div class="caption-tag">
+                        <span class="stage-pill pill-edit">04 // DSP</span>
+                        <span>Pipeline de procesare a semnalului</span>
+                    </div>
+                    <h1 class="display-title">Filtrarea zgomotului și extragerea componentei utile</h1>
+                    <div class="cards-column">
+                        <div class="granule-card">
+                            <div class="granule-body">
+                                <strong>Filtru Hampel bazat pe MAD</strong>
+                                <p>Elimină valorile aberante apărute la comutarea treptelor de amplificare LNA din cipul radio.</p>
+                            </div>
+                        </div>
+                        <div class="granule-card">
+                            <div class="granule-body">
+                                <strong>Filtru Butterworth trece-bandă (0.2–10.0 Hz)</strong>
+                                <p>Păstrează banda de frecvențe specifică deplasării umane. Elimină deriva termică DC și zgomotul de înaltă frecvență.</p>
+                            </div>
+                        </div>
+                        <div class="granule-card">
+                            <div class="granule-body">
+                                <strong>Componenta principală PC1</strong>
+                                <p>Algoritmul PCA sintetizează cele 52 de subpurtătoare într-un singur semnal cu raport semnal-zgomot optim.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="visual-pane">
+                    <div class="visual-pane-header">
+                        <div class="pane-dots">
+                            <div class="pane-dot"></div><div class="pane-dot"></div><div class="pane-dot"></div>
+                        </div>
+                        <span class="pane-tag">filters_pipeline.py</span>
+                    </div>
+                    <div class="visual-pane-body">
+                        <canvas id="canvas-s4" class="cursor-canvas"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 5: Spectrograma Doppler -->
+        <section class="slide" id="slide-4">
+            <div class="slide-grid">
+                <div>
+                    <div class="caption-tag">
+                        <span class="stage-pill pill-done">05 // Doppler</span>
+                        <span>Analiză spectrală STFT</span>
+                    </div>
+                    <h1 class="display-title">Separarea mersului de cădere prin spectrul Doppler</h1>
+                    <div class="cards-column">
+                        <div class="granule-card">
+                            <div class="granule-body">
+                                <strong>Viteza în mers normal (15–22 Hz)</strong>
+                                <p>Deplasarea obișnuită generează componente Doppler joase, cu variație periodică.</p>
+                            </div>
+                        </div>
+                        <div class="granule-card">
+                            <div class="granule-body">
+                                <strong>Vârful la impact (48.5 Hz)</strong>
+                                <p>Căderea accelerează rapid centrul de masă, producând un salt spectral de scurtă durată.</p>
+                            </div>
+                        </div>
+                        <div class="granule-card">
+                            <div class="granule-body">
+                                <strong>Pragul critic de 35.0 Hz</strong>
+                                <p>Depășirea pragului de 35.0 Hz pe cel puțin două legături simultan declanșează faza de verificare a căderii.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="visual-pane">
+                    <div class="visual-pane-header">
+                        <div class="pane-dots">
+                            <div class="pane-dot"></div><div class="pane-dot"></div><div class="pane-dot"></div>
+                        </div>
+                        <span class="pane-tag">doppler_stft.py</span>
+                    </div>
+                    <div class="visual-pane-body">
+                        <canvas id="canvas-s5" class="cursor-canvas"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 6: FSM Detector -->
+        <section class="slide" id="slide-5">
+            <div class="slide-grid">
+                <div>
+                    <div class="caption-tag">
+                        <span class="stage-pill pill-error">06 // Decizie</span>
+                        <span>Mașina de stări a detectorului</span>
+                    </div>
+                    <h1 class="display-title">Detectorul analitic FSM cu 5 stări</h1>
+                    <div class="cards-column">
+                        <div class="granule-card">
+                            <div class="granule-body">
+                                <strong>Stările S0 (CALM) și S1 (WALKING)</strong>
+                                <p>Sistemul urmărește zgomotul de fond și confirmă mișcarea normală fără a genera alerte.</p>
+                            </div>
+                        </div>
+                        <div class="granule-card">
+                            <div class="granule-body">
+                                <strong>Starea S2 (IMPACT)</strong>
+                                <p>Se activează la depășirea pragului de 35.0 Hz și la colapsul pantei pe două sau mai multe legături radio.</p>
+                            </div>
+                        </div>
+                        <div class="granule-card">
+                            <div class="granule-body">
+                                <strong>Starea S3 (VERIFYING_DORMANCY)</strong>
+                                <p>Sistemul monitorizează 2.0 secunde de imobilitate. Dacă persoana se ridică, revine la S1. Dacă rămâne la sol, confirmă căderea.</p>
+                            </div>
+                        </div>
+                        <div class="granule-card">
+                            <div class="granule-body">
+                                <strong>Starea S4 (FALL_CONFIRMED)</strong>
+                                <p>Declanșează alarma critică după 2.54 secunde de la impactul inițial.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="visual-pane">
+                    <div class="visual-pane-header">
+                        <div class="pane-dots">
+                            <div class="pane-dot"></div><div class="pane-dot"></div><div class="pane-dot"></div>
+                        </div>
+                        <span class="pane-tag">fall_detector_fsm.py</span>
+                    </div>
+                    <div class="visual-pane-body">
+                        <canvas id="canvas-s6" class="cursor-canvas"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 7: Localizare Fresnel -->
+        <section class="slide" id="slide-6">
+            <div class="slide-grid">
+                <div>
+                    <div class="caption-tag">
+                        <span class="stage-pill pill-read">07 // Cartografiere</span>
+                        <span>Modelul elipselor Fresnel</span>
+                    </div>
+                    <h1 class="display-title">Estimarea poziției 2D în cameră</h1>
+                    <div class="cards-column">
+                        <div class="granule-card">
+                            <div class="granule-body">
+                                <strong>Zonele Fresnel</strong>
+                                <p>Fiecare pereche de noduri formează zone elipsoidale. Traversarea lor modulează faza recepționată.</p>
+                            </div>
+                        </div>
+                        <div class="granule-card">
+                            <div class="granule-body">
+                                <strong>Optimizare Levenberg-Marquardt</strong>
+                                <p>Algoritmul rezolvă sistemul neliniar de distanțe pentru a estima coordonatele (x, y) ale persoanei.</p>
+                            </div>
+                        </div>
+                        <div class="granule-card">
+                            <div class="granule-body">
+                                <strong>Eroare de poziționare</strong>
+                                <p>Testele experimentale au obținut o eroare medie pătratică RMSE de 0.043 m.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="visual-pane">
+                    <div class="visual-pane-header">
+                        <div class="pane-dots">
+                            <div class="pane-dot"></div><div class="pane-dot"></div><div class="pane-dot"></div>
+                        </div>
+                        <span class="pane-tag">fresnel_lm_solver.py</span>
+                    </div>
+                    <div class="visual-pane-body">
+                        <canvas id="canvas-s7" class="cursor-canvas"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 8: Status & Rulare -->
+        <section class="slide" id="slide-7">
+            <div class="slide-grid">
+                <div>
+                    <div class="caption-tag">
+                        <span class="stage-pill pill-done">08 // Status</span>
+                        <span>Livrabile și comenzi de test</span>
+                    </div>
+                    <h1 class="display-title">Componente validate și comenzi de rulare</h1>
+                    <div class="cards-column">
+                        <div class="granule-card">
+                            <div class="granule-body">
+                                <strong>Teza scrisă în LaTeX</strong>
+                                <p>Documentul de 39 de pagini este compilat în thesis/thesis_tex/main.pdf.</p>
+                            </div>
+                        </div>
+                        <div class="granule-card">
+                            <div class="granule-body">
+                                <strong>Aplicația desktop PyQt6</strong>
+                                <p>Toate cele 24 de verificări automate au trecut în testul src/gui/verify_gui_evidence.py.</p>
+                            </div>
+                        </div>
+                        <div class="granule-card">
+                            <div class="granule-body">
+                                <strong>Rulare în mod replay</strong>
+                                <p>Comanda de test pe setul de date cu cădere reală: <code>.venv/bin/python src/gui/app.py --replay</code></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="visual-pane" style="justify-content: center; align-items: center; text-align: center; padding: 32px;">
+                    <div style="font-size: 64px; font-weight: 400; color: var(--primary); font-family: var(--font-mono); letter-spacing: -2px;">
+                        100%
+                    </div>
+                    <div style="font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.88px; color: var(--ink); margin-top: 8px;">
+                        Sistem Tehnic Validat
+                    </div>
+                    <p style="font-size: 13px; color: var(--body); margin: 12px 0 24px 0; max-width: 320px; line-height: 1.5;">
+                        Firmware ESP32, filtre DSP, detector FSM și interfață grafică PyQt6 validate pe seturi de date experimentale.
+                    </p>
+                    <div style="display: flex; gap: 10px;">
+                        <button class="cursor-btn cursor-btn-orange" onclick="goToSlide(0)">Reia prezentarea</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Bottom Controls -->
+    <footer class="bottom-bar">
+        <div class="slide-counter">
+            <span id="currentSlideNum">01</span> / 08
+        </div>
+
+        <div class="timeline-dots" id="timelineDots"></div>
+
+        <div class="deck-nav-btns">
+            <button class="nav-btn" onclick="prevSlide()" title="Înapoi (ArrowLeft)">‹</button>
+            <button class="nav-btn" onclick="nextSlide()" title="Înainte (ArrowRight / Space)">›</button>
+        </div>
+
+        <div class="progress-line" id="progressBar"></div>
+    </footer>
+
+<script>
+    const totalSlides = 8;
+    let currentSlide = 0;
+    let autoPlay = false;
+    let autoPlayInterval = null;
+    let autoPlayProgress = 0;
+    let soundEnabled = true;
+    let audioCtx = null;
+
+    const dotsContainer = document.getElementById('timelineDots');
+    for(let i=0; i<totalSlides; i++) {
+        const dot = document.createElement('div');
+        dot.className = i === 0 ? 'dot active' : 'dot';
+        dot.onclick = () => goToSlide(i);
+        dotsContainer.appendChild(dot);
+    }
+
+    function playBeep(freq = 520, duration = 0.05) {
+        if(!soundEnabled) return;
+        try {
+            if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+            gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start();
+            osc.stop(audioCtx.currentTime + duration);
+        } catch(e) {}
+    }
+
+    function toggleSound() {
+        soundEnabled = !soundEnabled;
+        document.getElementById('soundBtn').classList.toggle('active', !soundEnabled);
+        document.getElementById('soundText').innerText = soundEnabled ? 'Sunet activ' : 'Fără sunet';
+    }
+
+    function goToSlide(index) {
+        if(index < 0 || index >= totalSlides) return;
+        document.querySelectorAll('.slide').forEach(s => s.classList.remove('active'));
+        document.querySelectorAll('.dot').forEach(d => d.classList.remove('active'));
+
+        currentSlide = index;
+        document.getElementById(`slide-${index}`).classList.add('active');
+        dotsContainer.children[index].classList.add('active');
+        document.getElementById('currentSlideNum').innerText = String(index + 1).padStart(2, '0');
+
+        autoPlayProgress = 0;
+        document.getElementById('progressBar').style.width = '0%';
+
+        playBeep(480 + index * 40);
+    }
+
+    function nextSlide() {
+        goToSlide((currentSlide + 1) % totalSlides);
+    }
+
+    function prevSlide() {
+        goToSlide((currentSlide - 1 + totalSlides) % totalSlides);
+    }
+
+    function toggleAutoPlay() {
+        autoPlay = !autoPlay;
+        const btn = document.getElementById('autoPlayBtn');
+        const txt = document.getElementById('playText');
+
+        if(autoPlay) {
+            btn.classList.add('active');
+            txt.innerText = 'Pauză auto-play';
+            autoPlayInterval = setInterval(() => {
+                autoPlayProgress += 1;
+                document.getElementById('progressBar').style.width = (autoPlayProgress / 70 * 100) + '%';
+                if(autoPlayProgress >= 70) {
+                    autoPlayProgress = 0;
+                    nextSlide();
+                }
+            }, 100);
+        } else {
+            btn.classList.remove('active');
+            txt.innerText = 'Auto-play (7s)';
+            clearInterval(autoPlayInterval);
+            document.getElementById('progressBar').style.width = '0%';
+        }
+    }
+
+    window.addEventListener('keydown', (e) => {
+        if(e.key === 'ArrowRight' || e.key === ' ') {
+            nextSlide();
+        } else if(e.key === 'ArrowLeft') {
+            prevSlide();
+        }
+    });
+
+    // Canvases
+    let globalTime = 0;
+
+    function renderCanvases() {
+        globalTime += 0.04;
+
+        // Slide 1 Canvas (Radar Waves & Body)
+        const c1 = document.getElementById('canvas-s1');
+        if(c1) {
+            const ctx = c1.getContext('2d');
+            c1.width = c1.clientWidth;
+            c1.height = c1.clientHeight;
+            ctx.fillStyle = '#fafaf7';
+            ctx.fillRect(0, 0, c1.width, c1.height);
+
+            const cx = c1.width * 0.3;
+            const cy = c1.height * 0.5;
+            for(let r = 20; r < 240; r += 35) {
+                const curR = (r + (globalTime * 25) % 35);
+                ctx.strokeStyle = `rgba(38, 37, 30, ${Math.max(0, 1 - curR / 240) * 0.25})`;
+                ctx.lineWidth = 1.5;
+                ctx.beginPath();
+                ctx.arc(cx, cy, curR, -Math.PI*0.4, Math.PI*0.4);
+                ctx.stroke();
+            }
+
+            ctx.fillStyle = '#f54e00';
+            ctx.beginPath();
+            ctx.arc(cx, cy, 7, 0, Math.PI*2);
+            ctx.fill();
+            ctx.fillStyle = '#26251e';
+            ctx.font = '11px JetBrains Mono, monospace';
+            ctx.fillText("AP (Wi-Fi 2.4G)", cx - 35, cy - 14);
+
+            const hx = c1.width * 0.75;
+            const hy = cy + Math.sin(globalTime) * 15;
+            ctx.fillStyle = '#26251e';
+            ctx.beginPath();
+            ctx.arc(hx, hy, 12, 0, Math.PI*2);
+            ctx.fill();
+            ctx.fillStyle = '#5a5852';
+            ctx.font = '12px -apple-system, sans-serif';
+            ctx.fillText("Corp uman", hx - 24, hy + 26);
+        }
+
+        // Slide 2 Canvas (Mesh Topology)
+        const c2 = document.getElementById('canvas-s2');
+        if(c2) {
+            const ctx = c2.getContext('2d');
+            c2.width = c2.clientWidth;
+            c2.height = c2.clientHeight;
+            ctx.fillStyle = '#fafaf7';
+            ctx.fillRect(0, 0, c2.width, c2.height);
+
+            const n1 = { x: c2.width * 0.25, y: c2.height * 0.75, name: "ESP 1" };
+            const n2 = { x: c2.width * 0.75, y: c2.height * 0.75, name: "ESP 2" };
+            const n3 = { x: c2.width * 0.5, y: c2.height * 0.25, name: "ESP 3 (RX)" };
+
+            const links = [[n1, n2], [n2, n3], [n3, n1]];
+            links.forEach(([a, b]) => {
+                ctx.strokeStyle = '#e6e5e0';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(a.x, a.y);
+                ctx.lineTo(b.x, b.y);
+                ctx.stroke();
+
+                const t = (globalTime * 0.5) % 1;
+                const px = a.x + (b.x - a.x) * t;
+                const py = a.y + (b.y - a.y) * t;
+                ctx.fillStyle = '#f54e00';
+                ctx.beginPath();
+                ctx.arc(px, py, 4, 0, Math.PI*2);
+                ctx.fill();
+            });
+
+            [n1, n2, n3].forEach(n => {
+                ctx.fillStyle = n.name.includes("RX") ? '#f54e00' : '#26251e';
+                ctx.beginPath();
+                ctx.arc(n.x, n.y, 8, 0, Math.PI*2);
+                ctx.fill();
+                ctx.fillStyle = '#26251e';
+                ctx.font = '11px JetBrains Mono, monospace';
+                ctx.fillText(n.name, n.x - 20, n.y + 20);
+            });
+        }
+
+        // Slide 3 Canvas (52 Subcarriers)
+        const c3 = document.getElementById('canvas-s3');
+        if(c3) {
+            const ctx = c3.getContext('2d');
+            c3.width = c3.clientWidth;
+            c3.height = c3.clientHeight;
+            ctx.fillStyle = '#fafaf7';
+            ctx.fillRect(0, 0, c3.width, c3.height);
+
+            const numSub = 22;
+            for(let i=0; i<numSub; i++) {
+                const y = (c3.height / (numSub + 1)) * (i + 1);
+                const colors = ['#9fbbe0', '#dfa88f', '#9fc9a2', '#c0a8dd', '#807d72'];
+                ctx.strokeStyle = colors[i % colors.length];
+                ctx.lineWidth = 1.5;
+                ctx.beginPath();
+                for(let x=0; x<c3.width; x+=10) {
+                    const wave = Math.sin(x * 0.03 + globalTime * 2 + i * 0.25) * 5;
+                    if(x === 0) ctx.moveTo(x, y + wave);
+                    else ctx.lineTo(x, y + wave);
+                }
+                ctx.stroke();
+            }
+        }
+
+        // Slide 4 Canvas (Raw vs PC1)
+        const c4 = document.getElementById('canvas-s4');
+        if(c4) {
+            const ctx = c4.getContext('2d');
+            c4.width = c4.clientWidth;
+            c4.height = c4.clientHeight;
+            ctx.fillStyle = '#fafaf7';
+            ctx.fillRect(0, 0, c4.width, c4.height);
+
+            ctx.strokeStyle = '#a09c92';
+            ctx.beginPath();
+            for(let x=0; x<c4.width; x+=5) {
+                let spike = (x % 80 === 0) ? (Math.sin(x) > 0 ? 35 : -35) : 0;
+                let y = c4.height * 0.35 + Math.sin(x * 0.04 + globalTime) * 16 + spike;
+                if(x===0) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
+            }
+            ctx.stroke();
+
+            ctx.strokeStyle = '#f54e00';
+            ctx.lineWidth = 2.5;
+            ctx.beginPath();
+            for(let x=0; x<c4.width; x+=4) {
+                let y = c4.height * 0.65 + Math.sin(x * 0.04 + globalTime) * 18;
+                if(x===0) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
+            }
+            ctx.stroke();
+
+            ctx.fillStyle = '#807d72';
+            ctx.font = '11px JetBrains Mono, monospace';
+            ctx.fillText("Semnal brut cu spike-uri LNA", 15, c4.height * 0.25);
+            ctx.fillStyle = '#f54e00';
+            ctx.fillText("Componenta filtrată PC1", 15, c4.height * 0.85);
+        }
+
+        // Slide 5 Canvas (Doppler Spectrum)
+        const c5 = document.getElementById('canvas-s5');
+        if(c5) {
+            const ctx = c5.getContext('2d');
+            c5.width = c5.clientWidth;
+            c5.height = c5.clientHeight;
+            ctx.fillStyle = '#fafaf7';
+            ctx.fillRect(0, 0, c5.width, c5.height);
+
+            const thY = c5.height * 0.4;
+            ctx.strokeStyle = '#cf2d56';
+            ctx.setLineDash([5, 5]);
+            ctx.beginPath();
+            ctx.moveTo(0, thY);
+            ctx.lineTo(c5.width, thY);
+            ctx.stroke();
+            ctx.setLineDash([]);
+            ctx.fillStyle = '#cf2d56';
+            ctx.font = '10px JetBrains Mono, monospace';
+            ctx.fillText("Prag critic = 35.0 Hz", c5.width - 140, thY - 6);
+
+            ctx.fillStyle = 'rgba(245, 78, 0, 0.15)';
+            ctx.fillRect(c5.width * 0.45, thY - 35, 40, c5.height - thY + 35);
+            ctx.strokeStyle = '#f54e00';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(c5.width * 0.45, thY - 35, 40, c5.height - thY + 35);
+
+            ctx.fillStyle = '#26251e';
+            ctx.font = '11px JetBrains Mono, monospace';
+            ctx.fillText("48.5 Hz (Impact cădere)", c5.width * 0.38, thY - 45);
+
+            ctx.fillStyle = '#9fc9a2';
+            ctx.fillRect(c5.width * 0.15, c5.height * 0.65, 30, c5.height * 0.35);
+            ctx.fillStyle = '#26251e';
+            ctx.fillText("18 Hz (Mers)", c5.width * 0.1, c5.height * 0.6);
+        }
+
+        // Slide 6 Canvas (FSM States)
+        const c6 = document.getElementById('canvas-s6');
+        if(c6) {
+            const ctx = c6.getContext('2d');
+            c6.width = c6.clientWidth;
+            c6.height = c6.clientHeight;
+            ctx.fillStyle = '#fafaf7';
+            ctx.fillRect(0, 0, c6.width, c6.height);
+
+            const states = ["S0 CALM", "S1 WALK", "S2 IMPACT", "S3 DORM", "S4 FALL"];
+            const stepW = c6.width / 5;
+            const activeIdx = Math.floor((globalTime * 0.8) % 5);
+
+            for(let i=0; i<5; i++) {
+                const sx = stepW * i + stepW/2;
+                const sy = c6.height / 2;
+
+                if(i < 4) {
+                    ctx.strokeStyle = '#e6e5e0';
+                    ctx.beginPath();
+                    ctx.moveTo(sx, sy);
+                    ctx.lineTo(sx + stepW, sy);
+                    ctx.stroke();
+                }
+
+                ctx.fillStyle = (i === activeIdx) ? (i >= 2 ? '#cf2d56' : '#f54e00') : '#efeee8';
+                ctx.beginPath();
+                ctx.arc(sx, sy, (i === activeIdx) ? 20 : 14, 0, Math.PI*2);
+                ctx.fill();
+
+                ctx.fillStyle = (i === activeIdx) ? '#ffffff' : '#5a5852';
+                ctx.font = '10px JetBrains Mono, monospace';
+                ctx.fillText(states[i], sx - 22, sy + 36);
+            }
+        }
+
+        // Slide 7 Canvas (Fresnel Ellipses)
+        const c7 = document.getElementById('canvas-s7');
+        if(c7) {
+            const ctx = c7.getContext('2d');
+            c7.width = c7.clientWidth;
+            c7.height = c7.clientHeight;
+            ctx.fillStyle = '#fafaf7';
+            ctx.fillRect(0, 0, c7.width, c7.height);
+
+            const cx = c7.width / 2;
+            const cy = c7.height / 2;
+
+            for(let i=1; i<=4; i++) {
+                ctx.strokeStyle = `rgba(38, 37, 30, ${0.3 / i})`;
+                ctx.lineWidth = 1.2;
+                ctx.beginPath();
+                ctx.ellipse(cx, cy, 45 * i, 28 * i, Math.PI * 0.15, 0, Math.PI*2);
+                ctx.stroke();
+            }
+
+            const px = cx + Math.sin(globalTime) * 28;
+            const py = cy + Math.cos(globalTime) * 14;
+            ctx.fillStyle = '#f54e00';
+            ctx.beginPath();
+            ctx.arc(px, py, 6, 0, Math.PI*2);
+            ctx.fill();
+
+            ctx.fillStyle = '#26251e';
+            ctx.font = '11px JetBrains Mono, monospace';
+            ctx.fillText("RMSE = 0.043 m", px + 10, py - 6);
+        }
+
+        requestAnimationFrame(renderCanvases);
+    }
+
+    renderCanvases();
+</script>
+</body>
+</html>

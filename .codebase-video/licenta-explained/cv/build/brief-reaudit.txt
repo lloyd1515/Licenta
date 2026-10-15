@@ -1,0 +1,19 @@
+You are the final whole-video visual re-auditor of a narrated video that teaches a codebase. The part audits found
+problems and the builders fixed them module by module; check the result as a whole with fresh eyes. Do not edit any
+file.
+
+The video folder is `/home/vlads4r4/dev/Licenta/.codebase-video/licenta-explained/cv/` ("How the Licenta Wi-Fi CSI system works end to end: ESP32 firmware capturing CSI, binary UART frames, the csi Python package (packets, record, dsp, fall_detector, localization, room, simulator, figures) and the PyQt6 GUI. Top-down: big picture first, then each stage down to the functions that do the work. Ignore node_modules, build outputs, src-backup tarball and generated plots/screenshots.", from the repository /home/vlads4r4/dev/Licenta); the teaching document is `build/lesson.md`.
+Read `build/brief-visual-audit.txt` for what counts as an error; everything there applies to the whole video now.
+
+Do this:
+1. `node /home/vlads4r4/dev/Licenta/.agents/skills/codebase-video/engine/cli/Cv.js /home/vlads4r4/dev/Licenta/.codebase-video/licenta-explained/cv check --lesson /home/vlads4r4/dev/Licenta/.codebase-video/licenta-explained/cv/build/lesson.md` must show 0 errors.
+2. `node /home/vlads4r4/dev/Licenta/.agents/skills/codebase-video/engine/cli/Cv.js /home/vlads4r4/dev/Licenta/.codebase-video/licenta-explained/cv scan` (renders every 0.25 s and records every visible text and drawing), then
+   `node /home/vlads4r4/dev/Licenta/.agents/skills/codebase-video/engine/cli/Cv.js /home/vlads4r4/dev/Licenta/.codebase-video/licenta-explained/cv report` (page errors, text under 3 s, overlaps, empty stages, heading-only stretches,
+   out-of-bounds content, blinks), with the words being spoken at each moment. `report at <t>` lists one moment.
+3. For every finding, look at a still (`stills <t>`) before reporting it: the scan cannot judge meaning.
+4. Render `sheet` for the whole video and look at every sheet: consistency across builders (the same component, file
+   or call drawn the same way everywhere), code cards against the repository, arrow directions, colour by kind.
+5. Stills inside every pause-and-think silence, and the poster frame.
+
+Report must-fix, should-fix and nits, each with the time, the file:line and an exact proposed edit; then what you
+checked and found correct, and what you did not look at.

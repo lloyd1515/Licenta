@@ -1,0 +1,125 @@
+<template>
+  <style>
+    @font-face { font-family: "Inter"; src: url("../../assets/fonts/Inter-400.woff2") format("woff2"); font-weight: 400; font-display: block; }
+    @font-face { font-family: "Inter"; src: url("../../assets/fonts/Inter-700.woff2") format("woff2"); font-weight: 700; font-display: block; }
+    @font-face { font-family: "JetBrains Mono"; src: url("../../assets/fonts/JetBrainsMono-400.woff2") format("woff2"); font-weight: 400; font-display: block; }
+
+    #root { position: absolute; inset: 0; width: 100%; height: 100%; overflow: hidden; background: #0f1420; }
+    .eq-stage { position: absolute; inset: 0; background: #0f1420; }
+    .eq-stage svg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+    .eq-stage text { font-family: "Inter", sans-serif; fill: #a9b3c6; }
+    .eq-stage .eq-title { font-size: 56px; font-weight: 700; fill: #eef1f7; }
+    .eq-stage .eq-end { font-size: 44px; fill: #5d6a82; }
+  </style>
+
+  <div id="root" data-composition-id="a2-eq" data-start="0" data-duration="14.267" data-width="1920" data-height="1080">
+    <div id="eq-stage" class="clip eq-stage" data-start="0" data-duration="14.267" data-track-index="0">
+      <svg viewBox="0 0 1920 1080" xmlns="http://www.w3.org/2000/svg">
+        <text id="eq-title" class="eq-title" x="960" y="110" text-anchor="middle" style="opacity:0">Equalizer</text>
+
+        <!-- The noisy signal, then the same signal with slow drift removed, then mid only -->
+        <path id="eq-raw" d="" fill="none" stroke="#a9b3c6" stroke-width="4" stroke-linejoin="round"/>
+        <path id="eq-B" d="" fill="none" stroke="#a9b3c6" stroke-width="4" stroke-linejoin="round" style="opacity:0"/>
+        <path id="eq-C" d="" fill="none" stroke="#8ab8ff" stroke-width="5" stroke-linejoin="round" style="opacity:0"/>
+
+        <!-- Slow / mid / fast sliders: x = 450, 620, 790, 960, 1130, 1300, 1470 -->
+        <g id="eq-rig" style="opacity:0">
+          <rect x="444" y="430" width="12" height="330" rx="6" fill="#2a3448"/>
+          <rect x="614" y="430" width="12" height="330" rx="6" fill="#2a3448"/>
+          <rect x="784" y="430" width="12" height="330" rx="6" fill="#2a3448"/>
+          <rect x="954" y="430" width="12" height="330" rx="6" fill="#2a3448"/>
+          <rect x="1124" y="430" width="12" height="330" rx="6" fill="#2a3448"/>
+          <rect x="1294" y="430" width="12" height="330" rx="6" fill="#2a3448"/>
+          <rect x="1464" y="430" width="12" height="330" rx="6" fill="#2a3448"/>
+
+          <rect id="eq-g2" x="746" y="420" width="88" height="350" rx="14" fill="none" stroke="#8ab8ff" stroke-width="4" style="opacity:0"/>
+          <rect id="eq-g3" x="916" y="420" width="88" height="350" rx="14" fill="none" stroke="#8ab8ff" stroke-width="4" style="opacity:0"/>
+          <rect id="eq-g4" x="1086" y="420" width="88" height="350" rx="14" fill="none" stroke="#8ab8ff" stroke-width="4" style="opacity:0"/>
+
+          <rect id="eq-k0" x="420" y="470" width="60" height="28" rx="8" fill="#a9b3c6"/>
+          <rect id="eq-k1" x="590" y="470" width="60" height="28" rx="8" fill="#a9b3c6"/>
+          <rect id="eq-k2" x="760" y="470" width="60" height="28" rx="8" fill="#a9b3c6"/>
+          <rect id="eq-k3" x="930" y="470" width="60" height="28" rx="8" fill="#a9b3c6"/>
+          <rect id="eq-k4" x="1100" y="470" width="60" height="28" rx="8" fill="#a9b3c6"/>
+          <rect id="eq-k5" x="1270" y="470" width="60" height="28" rx="8" fill="#a9b3c6"/>
+          <rect id="eq-k6" x="1440" y="470" width="60" height="28" rx="8" fill="#a9b3c6"/>
+
+          <text class="eq-end" x="450" y="410" text-anchor="middle">slow</text>
+          <text class="eq-end" x="1470" y="410" text-anchor="middle">fast</text>
+        </g>
+
+        <g id="eq-lab-slow" style="opacity:0">
+          <text x="535" y="850" font-size="44" text-anchor="middle">slow drift</text>
+          <text x="535" y="906" font-size="44" text-anchor="middle">(room warming)</text>
+        </g>
+        <g id="eq-lab-fast" style="opacity:0">
+          <text x="1385" y="850" font-size="44" text-anchor="middle">fast hiss</text>
+          <text x="1385" y="906" font-size="44" text-anchor="middle">(electronics)</text>
+        </g>
+        <g id="eq-lab-mid" style="opacity:0">
+          <text x="960" y="850" font-size="44" text-anchor="middle" fill="#8ab8ff">body speed</text>
+          <g id="eq-walker" stroke="#8ab8ff" stroke-width="6" stroke-linecap="round" fill="none">
+            <circle cx="960" cy="935" r="12" stroke="none" fill="#8ab8ff"/>
+            <line x1="960" y1="952" x2="960" y2="978"/>
+            <line x1="944" y1="962" x2="976" y2="962"/>
+            <polyline points="960,978 944,1000"/>
+            <polyline points="960,978 976,1000"/>
+          </g>
+        </g>
+      </svg>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      var tl = gsap.timeline({ paused: true });
+
+      // Deterministic signal: slow drift (1 cycle), mid wobble (9 cycles), fast hiss (2 mixed frequencies).
+      var X0 = 300, W = 1320, N = 330, CY = 260;
+      var slowA = 58, midA = 30, fastA = 13;
+      var rawD = "", bD = "", cD = "";
+      var i, t, x, slow, mid, fast;
+      for (i = 0; i <= N; i++) {
+        t = i / N;
+        x = X0 + W * t;
+        slow = slowA * Math.sin(2 * Math.PI * 1 * t);
+        mid = midA * Math.sin(2 * Math.PI * 9 * t + 0.6);
+        fast = fastA * Math.sin(2 * Math.PI * 83 * t) + 7 * Math.sin(2 * Math.PI * 131 * t + 1.1);
+        var cmd = i === 0 ? "M" : "L";
+        rawD += cmd + x.toFixed(1) + " " + (CY + slow + mid + fast).toFixed(1) + " ";
+        bD += cmd + x.toFixed(1) + " " + (CY + mid + fast).toFixed(1) + " ";
+        cD += cmd + x.toFixed(1) + " " + (CY + mid).toFixed(1) + " ";
+      }
+      document.getElementById("eq-raw").setAttribute("d", rawD);
+      document.getElementById("eq-B").setAttribute("d", bD);
+      document.getElementById("eq-C").setAttribute("d", cD);
+
+      // Scene 0 (0.2-2.9): the equalizer and the noisy line.
+      tl.fromTo("#eq-title", { opacity: 0 }, { opacity: 1, duration: 0.6, ease: "power2.out" }, 0.2);
+      tl.fromTo("#eq-rig", { opacity: 0 }, { opacity: 1, duration: 0.6, ease: "power2.out" }, 0.4);
+
+      // Scene 1 (3.31-6.53): slow sliders drop, the slow wander leaves the line.
+      tl.to(["#eq-k0", "#eq-k1"], { y: 190, duration: 0.9, ease: "power2.inOut" }, 3.31);
+      tl.fromTo("#eq-lab-slow", { opacity: 0 }, { opacity: 1, duration: 0.6, ease: "power1.out" }, 3.5);
+      tl.to("#eq-raw", { opacity: 0, duration: 0.8, ease: "power2.inOut" }, 3.6);
+      tl.to("#eq-B", { opacity: 1, duration: 0.8, ease: "power2.inOut" }, 3.6);
+
+      // Scene 2 (6.95-9.74): fast sliders drop, the jitter leaves the line.
+      tl.to(["#eq-k5", "#eq-k6"], { y: 190, duration: 0.9, ease: "power2.inOut" }, 6.95);
+      tl.fromTo("#eq-lab-fast", { opacity: 0 }, { opacity: 1, duration: 0.6, ease: "power1.out" }, 7.1);
+      tl.to("#eq-B", { opacity: 0, duration: 0.8, ease: "power2.inOut" }, 7.3);
+      tl.to("#eq-C", { opacity: 1, duration: 0.8, ease: "power2.inOut" }, 7.3);
+
+      // Scene 3 (10.16-14.05): middle sliders glow, the line is smooth body-speed wobble.
+      tl.to(["#eq-k2", "#eq-k3", "#eq-k4"], { fill: "#8ab8ff", duration: 0.6, ease: "power1.out" }, 10.16);
+      tl.to(["#eq-g2", "#eq-g3", "#eq-g4"], { opacity: 1, duration: 0.6, ease: "power1.out" }, 10.16);
+      tl.fromTo("#eq-lab-mid", { opacity: 0 }, { opacity: 1, duration: 0.6, ease: "power1.out" }, 10.3);
+
+      // Pin the timeline to the full scene length (hold, no exit).
+      tl.to({}, { duration: 14.267 }, 0);
+
+      window.__timelines = window.__timelines || {};
+      window.__timelines["a2-eq"] = tl;
+    })();
+  </script>
+</template>

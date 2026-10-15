@@ -1,0 +1,7 @@
+{
+  "tool_name": "Bash",
+  "tool_input_preview": "{\"command\":\"pkill -f \\\"streamlit run app.py\\\" 2>/dev/null; sleep 1; echo done\",\"description\":\"Stop the background streamlit server\"}",
+  "error": "Exit code 144",
+  "timestamp": "2026-07-17T08:08:11.754Z",
+  "retry_count": 1
+}

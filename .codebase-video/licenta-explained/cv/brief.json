@@ -1,0 +1,10 @@
+{
+  "name": "licenta-explained",
+  "subject": "How the Licenta Wi-Fi CSI system works end to end: ESP32 firmware capturing CSI, binary UART frames, the csi Python package (packets, record, dsp, fall_detector, localization, room, simulator, figures) and the PyQt6 GUI. Top-down: big picture first, then each stage down to the functions that do the work. Ignore node_modules, build outputs, src-backup tarball and generated plots/screenshots.",
+  "repo": "/home/vlads4r4/dev/Licenta",
+  "length": "tour",
+  "audience": "a complete newcomer who has never heard of Wi-Fi sensing, signal processing or Qt",
+  "care": "go deepest on the fall-detection path: a raw 138-byte UART frame becoming CSI amplitudes, Hampel then Butterworth then PCA PC1, and the 5-state FSM deciding an alarm, with real thresholds and timings from the code; check filter parameters, FSM thresholds and state transitions exactly; README claims (latency ~3.0 s, RMSE 0.043 m) must be traced to code or marked unverified",
+  "colours": "ESP32 node / radio hardware = violet ☁️; UART receiver and FrameSource entry points = accent ▶ box with function name in mono; csi package modules (dsp, fall_detector, localization, room, packets) = neutral 📦 with file path as mono sub; .npz datasets and recordings = cyan 🗄️; PyQt6 GUI widgets = neutral 📦 tagged GUI; constants and thresholds = muted ⚙️; a CSI frame travelling the pipeline = muted packet; FSM states as boxes with arrows only along real transitions; red ✕ only for the alarm or error paths the narration calls errors; code cards titled with file path, verbatim",
+  "visual": "YouTube explainer: real-life analogy before every term; code walked one line at a time with a plain-words callout per variable; nothing static over 5 s"
+}

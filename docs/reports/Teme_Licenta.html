@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <title>Cinci Teme de Licență Aplicate - Ubertooth One & ESP32</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            background-color: #f4f4f4;
+            color: #111;
+            font-family: 'Times New Roman', Times, 'Nimbus Roman No9 L', serif;
+            display: flex;
+            justify-content: center;
+            padding: 24px;
+            line-height: 1.35;
+            zoom: 200%;
+        }
+        .page {
+            width: 210mm;
+            min-height: 297mm;
+            background: #ffffff;
+            box-shadow: 0 4px 25px rgba(0,0,0,0.12);
+            padding: 16mm 18mm;
+            position: relative;
+        }
+        header {
+            text-align: center;
+            margin-bottom: 8px;
+        }
+        h1 {
+            font-size: 13.5pt;
+            font-weight: bold;
+            margin-bottom: 3px;
+            letter-spacing: -0.2px;
+        }
+        .subtitle {
+            font-size: 8.5pt;
+            color: #444;
+            font-style: italic;
+        }
+        hr.divider {
+            border: none;
+            border-top: 1px solid #111;
+            margin: 6px 0 10px 0;
+        }
+        .section-item {
+            margin-bottom: 9px;
+            text-align: justify;
+            font-size: 9.2pt;
+        }
+        .section-title {
+            font-size: 9.8pt;
+            font-weight: bold;
+            display: block;
+            margin-bottom: 2px;
+        }
+        /* Monochrome link styling */
+        .tooltip-target {
+            color: #111;
+            text-decoration: underline;
+            text-decoration-thickness: 1px;
+            text-underline-offset: 2px;
+            cursor: pointer;
+            position: relative;
+            display: inline;
+            font-weight: inherit;
+        }
+        .tooltip-target:hover {
+            background-color: #eee;
+        }
+        
+        /* Floating Popup Box */
+        #tooltip-box {
+            position: fixed;
+            display: none;
+            background: #ffffff;
+            border: 1.5px solid #111;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.22);
+            padding: 10px 14px;
+            max-width: 320px;
+            z-index: 9999;
+            pointer-events: none;
+            border-radius: 2px;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            text-align: left;
+            animation: fadeIn 0.12s ease-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(4px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .tt-badge {
+            font-size: 7.5pt;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            color: #666;
+            margin-bottom: 4px;
+            display: block;
+        }
+        .tt-term {
+            font-size: 10pt;
+            font-weight: bold;
+            color: #000;
+            margin-bottom: 4px;
+            line-height: 1.2;
+        }
+        .tt-desc {
+            font-size: 8.5pt;
+            color: #222;
+            line-height: 1.35;
+            margin-bottom: 6px;
+        }
+        .tt-footer {
+            font-size: 7.5pt;
+            color: #777;
+            border-top: 1px dashed #ccc;
+            padding-top: 4px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .bibliography {
+            margin-top: 10px;
+            border-top: 1px solid #111;
+            padding-top: 6px;
+        }
+        .bib-title {
+            font-size: 8pt;
+            font-weight: bold;
+            margin-bottom: 4px;
+        }
+        .bib-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4px 14px;
+            font-size: 6.8pt;
+            line-height: 1.25;
+            text-align: left;
+        }
+
+        @media print {
+            body {
+                background: none;
+                padding: 0;
+                zoom: 100% !important;
+            }
+            .page {
+                box-shadow: none;
+                width: 100%;
+                min-height: auto;
+                padding: 10mm 12mm;
+            }
+            #tooltip-box {
+                display: none !important;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="page">
+    <header>
+        <h1>Cinci teme de licență aplicate: 
+            <a href="https://greatscottgadgets.com/ubertoothone/" class="tooltip-target" data-term="Ubertooth One" data-badge="Hardware SDR">1x Ubertooth One</a> 
+            (<a href="https://en.wikipedia.org/wiki/2.4_GHz_radio_use" class="tooltip-target" data-term="2.4 GHz" data-badge="Fizică RF">2.4 GHz</a> 
+            <a href="https://en.wikipedia.org/wiki/Software-defined_radio" class="tooltip-target" data-term="SDR" data-badge="Tehnologie">SDR</a>) și 
+            <a href="https://www.espressif.com/en/products/socs/esp32" class="tooltip-target" data-term="ESP32" data-badge="Hardware">3x ESP32</a> 
+            (<a href="https://en.wikipedia.org/wiki/Wi-Fi" class="tooltip-target" data-term="Wi-Fi" data-badge="Protocol">Wi-Fi</a> 
+            <a href="https://en.wikipedia.org/wiki/Channel_state_information" class="tooltip-target" data-term="CSI" data-badge="Fizică RF">CSI</a>)
+        </h1>
+    </header>
+
+    <hr class="divider">
+
+    <div class="section-item">
+        <span class="section-title">1. <a href="https://arxiv.org/abs/2403.15739" class="tooltip-target" data-term="Detecția adreselor MAC clonate" data-badge="Securitate">Detecția adreselor MAC clonate</a> prin interferometrie <a href="https://en.wikipedia.org/wiki/Channel_state_information" class="tooltip-target" data-term="CSI" data-badge="Fizică RF">CSI</a> (<a href="https://en.wikipedia.org/wiki/Physical_layer_security" class="tooltip-target" data-term="Securitate fizică" data-badge="Securitate">Securitate fizică</a>)</span>
+        Un <a href="https://en.wikipedia.org/wiki/ESP32" class="tooltip-target" data-term="ESP32" data-badge="Hardware">ESP32</a> injectează un cadru <a href="https://en.wikipedia.org/wiki/IEEE_802.11_RTS/CTS" class="tooltip-target" data-term="802.11 RTS" data-badge="Protocol 802.11">802.11 RTS</a> către adresa MAC țintă. Cipul de pe dispozitiv răspunde instant cu un <a href="https://en.wikipedia.org/wiki/Acknowledgement_(data_networks)" class="tooltip-target" data-term="Cadru ACK" data-badge="Protocol 802.11">cadru ACK</a> în <a href="https://en.wikipedia.org/wiki/Short_Interframe_Space" class="tooltip-target" data-term="10 µs SIFS" data-badge="Standard 802.11">10 &mu;s SIFS</a>, reacție forțată direct din siliciu. Trei plăci ESP32 ascultă în mod promiscuu și extrag matricea <a href="https://en.wikipedia.org/wiki/Channel_state_information" class="tooltip-target" data-term="CSI" data-badge="Fizică RF">CSI</a> pe 52 de <a href="https://en.wikipedia.org/wiki/Orthogonal_frequency-division_multiplexing" class="tooltip-target" data-term="OFDM" data-badge="Modulație">subpurtătoare OFDM</a>. Scăderea fazei între receptoare curăță <a href="https://en.wikipedia.org/wiki/Multipath_propagation" class="tooltip-target" data-term="Multipath" data-badge="Fizică Undelor">multipath-ul</a> din încăpere. Când cineva clonează MAC-ul de pe alt laptop, faza calculată intră în coliziune cu poziția geometrică reală și aprinde alarma. În paralel, modulul <a href="https://greatscottgadgets.com/ubertoothone/" class="tooltip-target" data-term="Ubertooth One" data-badge="Hardware SDR">Ubertooth One</a> citește ecartul de frecvență al <a href="https://en.wikipedia.org/wiki/Crystal_oscillator" class="tooltip-target" data-term="Oscilator" data-badge="Electronică">oscilatorului</a> pe pachetele <a href="https://en.wikipedia.org/wiki/Bluetooth" class="tooltip-target" data-term="Bluetooth" data-badge="Protocol">Bluetooth</a>. Spre deosebire de <a href="https://doi.org/10.1145/3495243.3560530" class="tooltip-target" data-term="Wi-Peep" data-badge="Lucrare ACM">Wi-Peep</a> (ACM MobiCom 2022) care doar măsoară <a href="https://en.wikipedia.org/wiki/Time_of_flight" class="tooltip-target" data-term="ToF" data-badge="Măsură RF">timp de zbor (ToF)</a> pe drone, sau <a href="https://arxiv.org/abs/2403.15739" class="tooltip-target" data-term="DeepCRF" data-badge="Lucrare IEEE">DeepCRF</a> (IEEE INFOCOM 2024) care folosește o singură antenă vulnerabilă la pașii din cameră, matricea noastră triunghiulară anulează complet ecourile parazite prin fază diferențială.
+    </div>
+
+    <div class="section-item">
+        <span class="section-title">2. <a href="https://doi.org/10.1109/TMC.2017.2706338" class="tooltip-target" data-term="PhaseBeat" data-badge="Lucrare IEEE">Monitorizarea respirației și a pulsului</a> prin <a href="https://en.wikipedia.org/wiki/Reflection_(physics)" class="tooltip-target" data-term="Reflexii radio" data-badge="Fizică">reflexii radio</a> (<a href="https://en.wikipedia.org/wiki/Biomedical_engineering" class="tooltip-target" data-term="Biomedical" data-badge="Domeniu">Biomedical</a>)</span>
+        Cutia toracică pulsează sub un milimetru la fiecare bătaie de inimă. Mișcarea induce un defazaj detectabil în undele Wi-Fi ambientale. Trei plăci ESP32 citesc frontul de undă din trei unghiuri diferite (<a href="https://en.wikipedia.org/wiki/Antenna_diversity" class="tooltip-target" data-term="Diversitate spațială" data-badge="Tehnică RF">diversitate spațială</a>). Fiind plăci ieftine, au un zgomot de fază (<a href="https://en.wikipedia.org/wiki/Phase_noise" class="tooltip-target" data-term="Phase noise" data-badge="Zgomot RF">phase noise</a>) considerabil. Rezolvarea: Ubertooth One injectează periodic un <a href="https://en.wikipedia.org/wiki/Pilot_signal" class="tooltip-target" data-term="Semnal pilot" data-badge="Sincronizare">semnal pilot</a> pe 2.4 GHz, oferind o referință comună over-the-air. Filtrul extrage bătăile inimii și respirația prin perete. Lucrări precum <a href="https://doi.org/10.1109/TMC.2017.2706338" class="tooltip-target" data-term="PhaseBeat" data-badge="Lucrare IEEE">PhaseBeat</a> (IEEE TMC 2017) și <a href="https://doi.org/10.1109/INFOCOM.2018.8486241" class="tooltip-target" data-term="CSI-Ratio" data-badge="Lucrare IEEE">CSI-Ratio</a> (IEEE INFOCOM 2018) cer routere comerciale cu mai multe antene legate la același <a href="https://en.wikipedia.org/wiki/Local_oscillator" class="tooltip-target" data-term="Oscilator local" data-badge="Electronică">oscilator local</a>. Aici, semnalul pilot elimină necesitatea cablurilor coaxiale de ceas dintre noduri.
+    </div>
+
+    <div class="section-item">
+        <span class="section-title">3. <a href="https://doi.org/10.1145/3372224.3419207" class="tooltip-target" data-term="WiVib" data-badge="Lucrare ACM">Vibrometrie radio pentru diagnostic mecanic</a> (<a href="https://en.wikipedia.org/wiki/Condition_monitoring" class="tooltip-target" data-term="Mentenanță industrială" data-badge="Industrie">Mentenanță industrială</a>)</span>
+        Rulmenții sau axele descentrate transmit vibrații de zeci de herți în carcasa metalică a mașinii. Semnalul de 2.4 GHz ricoșează din tablă și capătă o modulație <a href="https://en.wikipedia.org/wiki/Micro-Doppler_effect" class="tooltip-target" data-term="Micro-Doppler" data-badge="Fizică Doppler">micro-Doppler</a>. Nodurile ESP32 măsoară defazajul CSI și rezolvă deplasări de zeci de micrometri. Traficul normal Wi-Fi este însă prea lent pentru semnale rapide, așa că Ubertooth One injectează pachete scurte la cadență ridicată pentru a crește <a href="https://en.wikipedia.org/wiki/Sampling_(signal_processing)" class="tooltip-target" data-term="Rata de eșantionare" data-badge="Procesare Semnal">rata de eșantionare</a>. Spre deosebire de <a href="https://doi.org/10.1109/SP40001.2021.00030" class="tooltip-target" data-term="Radio-Mic" data-badge="Lucrare IEEE">Radio-Mic</a> (IEEE S&amp;P 2021) care implică radare în <a href="https://en.wikipedia.org/wiki/Extremely_high_frequency" class="tooltip-target" data-term="Unde milimetrice" data-badge="Frecvență RF">unde milimetrice</a> de mii de euro, sau <a href="https://doi.org/10.1145/3372224.3419207" class="tooltip-target" data-term="WiVib" data-badge="Lucrare ACM">WiVib</a> (ACM MobiCom 2020), cele trei noduri plasate în jurul utilajului filtrează oscilațiile ambientale și permit diagnosticarea fără oprirea motorului.
+    </div>
+
+    <div class="section-item">
+        <span class="section-title">4. <a href="https://doi.org/10.1109/ACCESS.2019.2941246" class="tooltip-target" data-term="DroneRF" data-badge="Lucrare IEEE">Detecția pasivă a dronelor</a> în spații închise (<a href="https://en.wikipedia.org/wiki/Counter-unmanned_aircraft_system" class="tooltip-target" data-term="Securitate aeriană" data-badge="Securitate">Securitate aeriană</a>)</span>
+        O dronă în zbor lasă două urme distincte: traficul de telemetrie și turbulența elicelor. Telecomanda sare continuu între frecvențe (<a href="https://en.wikipedia.org/wiki/Frequency-hopping_spread_spectrum" class="tooltip-target" data-term="FHSS" data-badge="Modulație">FHSS</a> pe 79 de canale Bluetooth), iar rotația elicelor taie undele Wi-Fi din încăpere. Ubertooth One capturează exploziile de pachete de control. În același timp, ESP32-urile monitorizează pulsațiile Doppler specifice turației motorului pe subpurtătoarele CSI. Proiectul <a href="https://doi.org/10.1109/ACCESS.2019.2941246" class="tooltip-target" data-term="DroneRF" data-badge="Lucrare IEEE">DroneRF</a> (IEEE Access 2019) folosește stații SDR voluminoase, iar <a href="https://arxiv.org/abs/2308.10651" class="tooltip-target" data-term="CiUAV" data-badge="Cercetare">CiUAV</a> (2023) depinde de un emițător Wi-Fi activ pe dronă. Arhitectura noastră interceptează zborul combinând ascultarea spectrului cu analiza perturbațiilor mecanice din aer.
+    </div>
+
+    <div class="section-item">
+        <span class="section-title">5. <a href="https://doi.org/10.1145/2486001.2486039" class="tooltip-target" data-term="Wi-Vi" data-badge="Lucrare ACM">Cartografiere radio pasivă și detecție căderi</a> (<a href="https://en.wikipedia.org/wiki/Integrated_sensing_and_communication" class="tooltip-target" data-term="ISAC" data-badge="Tehnologie ISAC">Sensing ambiental / ISAC</a>)</span>
+        Corpul uman e plin de apă și obstrucționează <a href="https://en.wikipedia.org/wiki/Fresnel_zone" class="tooltip-target" data-term="Zone Fresnel" data-badge="Fizică Undelor">zonele Fresnel</a> când traversează camera. Ubertooth One transmite un flux continuu de cadre în banda de 2.4 GHz. Cele trei ESP32-uri loghează <a href="https://en.wikipedia.org/wiki/Attenuation" class="tooltip-target" data-term="Atenuare" data-badge="Fizică RF">atenuarea</a> și faza pe 52 de subpurtătoare. Intersecția geometriei eliptice a celor trei legături dă poziția pe o hartă 2D, iar o variație bruscă de amplitudine pe toate nodurile marchează o <a href="https://en.wikipedia.org/wiki/Fall_detection" class="tooltip-target" data-term="Cadere la sol" data-badge="Detecție Biometrică">cădere la sol</a>. În timp ce <a href="https://doi.org/10.1145/2486001.2486039" class="tooltip-target" data-term="Wi-Vi" data-badge="Lucrare ACM">Wi-Vi</a> (ACM SIGCOMM 2013) apelează la echipamente USRP greoaie cu <a href="https://en.wikipedia.org/wiki/Directional_antenna" class="tooltip-target" data-term="Antene directive" data-badge="Antene">antene directive</a>, iar experimentele tipice pe ESP32 (2023) oferă doar detecție binară (prezent/absent), rețeaua triunghiulară reconstruiește traiectoria în coordonate carteziene.
+    </div>
+
+    <div class="bibliography">
+        <div class="bib-title">Bibliografie și surse de inspirație:</div>
+        <div class="bib-grid">
+            <div>1. <strong>Wi-Peep:</strong> A. Abedi et al., <em>Non-Cooperative Wi-Fi Localization</em>, ACM MobiCom 2022. <a href="https://doi.org/10.1145/3495243.3560530" class="tooltip-target" data-term="Wi-Peep" data-badge="DOI">doi:10.1145/3495243.3560530</a></div>
+            <div>2. <strong>DeepCRF:</strong> R. Kong et al., <em>Towards Channel-Resilient CSI RF Fingerprinting</em>, IEEE INFOCOM 2024. <a href="https://arxiv.org/abs/2403.15739" class="tooltip-target" data-term="DeepCRF" data-badge="arXiv">arXiv:2403.15739</a></div>
+            <div>3. <strong>AUTHFi:</strong> W. Wang et al., <em>Cross-Technology Device Authentication</em>, IEEE TMC 2025. <a href="https://doi.org/10.1109/TMC.2025.3547010" class="tooltip-target" data-term="AUTHFi" data-badge="DOI">doi:10.1109/TMC.2025.3547010</a></div>
+            <div>4. <strong>PhaseBeat:</strong> X. Wang et al., <em>Exploiting CSI Phase for Vital Signs</em>, IEEE TMC 2017. <a href="https://doi.org/10.1109/TMC.2017.2706338" class="tooltip-target" data-term="PhaseBeat" data-badge="DOI">doi:10.1109/TMC.2017.2706338</a></div>
+            <div>5. <strong>CSI-Ratio:</strong> Y. Zeng et al., <em>WiFi-based Respiration Sensing</em>, IEEE INFOCOM 2018. <a href="https://doi.org/10.1109/INFOCOM.2018.8486241" class="tooltip-target" data-term="CSI-Ratio" data-badge="DOI">doi:10.1109/INFOCOM.2018.8486241</a></div>
+            <div>6. <strong>WiVib:</strong> Y. Zhang et al., <em>Vibration Sensing with Commodity Wi-Fi</em>, ACM MobiCom 2020. <a href="https://doi.org/10.1145/3372224.3419207" class="tooltip-target" data-term="WiVib" data-badge="DOI">doi:10.1145/3372224.3419207</a></div>
+            <div>7. <strong>Radio-Mic:</strong> S. Wang et al., <em>Sound Recovery using mmWave Radars</em>, IEEE S&amp;P 2021. <a href="https://doi.org/10.1109/SP40001.2021.00030" class="tooltip-target" data-term="Radio-Mic" data-badge="DOI">doi:10.1109/SP40001.2021.00030</a></div>
+            <div>8. <strong>DroneRF:</strong> M. F. Al-Sa'd et al., <em>RF-Based Drone Identification</em>, IEEE Access 2019. <a href="https://doi.org/10.1109/ACCESS.2019.2941246" class="tooltip-target" data-term="DroneRF" data-badge="DOI">doi:10.1109/ACCESS.2019.2941246</a></div>
+            <div>9. <strong>ESPARGOS:</strong> M. Schön et al., <em>CSI-Based Direction Finding</em>, arXiv 2023. <a href="https://arxiv.org/abs/2308.10651" class="tooltip-target" data-term="CiUAV" data-badge="arXiv">arXiv:2308.10651</a></div>
+            <div>10. <strong>Wi-Vi:</strong> F. Adib, D. Katabi, <em>See Through Walls with WiFi!</em>, ACM SIGCOMM 2013. <a href="https://doi.org/10.1145/2486001.2486039" class="tooltip-target" data-term="Wi-Vi" data-badge="DOI">doi:10.1145/2486001.2486039</a></div>
+        </div>
+    </div>
+</div>
+
+<div id="tooltip-box">
+    <span class="tt-badge" id="tt-badge">CONCEPT</span>
+    <div class="tt-term" id="tt-term">Termen</div>
+    <div class="tt-desc" id="tt-desc">Definitie...</div>
+    <div class="tt-footer">
+        <span>Sursă academică externă</span>
+        <span>Click pentru deschidere ↗</span>
+    </div>
+</div>
+
+<script>
+    const definitions = {"https://greatscottgadgets.com/ubertoothone/": "Platforma radio SDR pe 2.4 GHz capabila sa intercepteze si sa injecteze cadre Bluetooth Classic si BLE.", "https://en.wikipedia.org/wiki/2.4_GHz_radio_use": "Banda radio libera fara licenta folosita masiv de standardele Wi-Fi, Bluetooth si telecomenzi casnice.", "https://en.wikipedia.org/wiki/Software-defined_radio": "Tehnologie radio unde procesarea si demodularea undelor se realizeaza prin software in procesor, nu in cipuri fixe.", "https://www.espressif.com/en/products/socs/esp32": "Microcontroler de 240 MHz cu module radio Wi-Fi si Bluetooth integrate si acces direct la stratul fizic.", "https://en.wikipedia.org/wiki/Wi-Fi": "Tehnologie de retea fara fir bazata pe unde radio conform standardului international IEEE 802.11.", "https://en.wikipedia.org/wiki/Channel_state_information": "Matrice complexa ce descrie atenuarea si defazajul undelor radio pe fiecare subpurtatoare dintr-o incapere.", "https://en.wikipedia.org/wiki/Physical_layer_security": "Autentificare bazata pe proprietatile electromagnetice ale semnalului si tolerantele hardware, fara chei software criptografice.", "https://en.wikipedia.org/wiki/ESP32": "Microcontroler de 240 MHz cu module radio Wi-Fi si Bluetooth integrate si acces direct la stratul fizic.", "https://en.wikipedia.org/wiki/IEEE_802.11_RTS/CTS": "Cadru scurt trimis pentru rezervarea canalului radio inainte de a transmite pachete de date.", "https://en.wikipedia.org/wiki/Acknowledgement_(data_networks)": "Raspuns de confirmare emis automat de receptor pentru a valida sosirea intacta a pachetului.", "https://en.wikipedia.org/wiki/Short_Interframe_Space": "Interval minim obligatoriu de 10 microsecunde in care siliciul raspunde automat cu ACK fara software.", "https://en.wikipedia.org/wiki/Orthogonal_frequency-division_multiplexing": "Schema de modulatie ce imparte banda radio in zeci de subpurtatoare paralele rezistente la ecouri.", "https://en.wikipedia.org/wiki/Multipath_propagation": "Fenomenul fizic prin care undele ajung la antena pe cai multiple reflectate de pereti si obstacole.", "https://en.wikipedia.org/wiki/Crystal_oscillator": "Circuit electronic pe baza de cristal de cuart care genereaza frecventa stabila de ceas a modulului radio.", "https://en.wikipedia.org/wiki/Bluetooth": "Standard de comunicatie radio de raza scurta pe 2.4 GHz cu salturi rapide de frecventa.", "https://doi.org/10.1145/3495243.3560530": "Lucrare care forteaza raspunsuri ACK pentru localizarea dispozitivelor Wi-Fi fara ca acestea sa fie asociate.", "https://en.wikipedia.org/wiki/Time_of_flight": "Timpul necesar unei unde radio sa parcurga distanta dintre emitator si receptor la viteza luminii.", "https://arxiv.org/abs/2403.15739": "Sistem de amprentare hardware a emitatoarelor pe baza variatiilor microscopice din canalul CSI.", "https://doi.org/10.1109/TMC.2017.2706338": "Metoda ce extrage pulsul si respiratia prin analiza defazajului undelor reflectate pe Wi-Fi.", "https://en.wikipedia.org/wiki/Reflection_(physics)": "Schimbarea directiei undelor electromagnetice la impactul cu pereti sau obiecte care reflecta energia radio.", "https://en.wikipedia.org/wiki/Biomedical_engineering": "Inginerie aplicata in sanatate pentru detectarea semnelor vitale umane prin unde radio fara senzori pe corp.", "https://en.wikipedia.org/wiki/Antenna_diversity": "Utilizarea mai multor antene distantate pentru a prinde semnale independente si a curata zgomotul.", "https://en.wikipedia.org/wiki/Phase_noise": "Fluctuatiile aleatorii de frecventa ale oscilatoarelor ieftine care introduc erori in masuratorile de defazaj.", "https://en.wikipedia.org/wiki/Pilot_signal": "Semnal radio stabil emis prin aer folosit ca referinta comuna pentru sincronizarea nodurilor.", "https://doi.org/10.1109/INFOCOM.2018.8486241": "Tehnologie ce divide fazele a doua antene pentru a anula zgomotul intern al receptorului.", "https://en.wikipedia.org/wiki/Local_oscillator": "Sursa interna de frecventa sinusoidala dintr-un receptor folosita pentru a cobori semnalul radio in banda de baza.", "https://doi.org/10.1145/3372224.3419207": "Diagnostic mecanic ce masoara vibratiile motoarelor prin perturbatiile semnalului Wi-Fi reflectat de carcasa.", "https://en.wikipedia.org/wiki/Condition_monitoring": "Monitorizarea continua a vibratiilor mecanice pentru a depista defectiunile utilajelor inainte de avarii.", "https://en.wikipedia.org/wiki/Micro-Doppler_effect": "Variatia fina a frecventei radio cauzata de vibratiile sau rotatiile microscopice ale unei suprafete.", "https://en.wikipedia.org/wiki/Sampling_(signal_processing)": "Numarul de masuratori inregistrate pe secunda pentru a reconstrui fidel oscilatiile rapide ale semnalului.", "https://doi.org/10.1109/SP40001.2021.00030": "Recuperarea sunetului si a vibratiilor din incapere folosind radare de laborator in unde milimetrice.", "https://en.wikipedia.org/wiki/Extremely_high_frequency": "Semnale radio de frecventa foarte inalta (30-300 GHz) cu lungimi de unda sub un centimetru.", "https://doi.org/10.1109/ACCESS.2019.2941246": "Identificarea dronelor prin clasificarea automata a semnalelor radio de control interceptate cu receptoare SDR.", "https://en.wikipedia.org/wiki/Counter-unmanned_aircraft_system": "Detectarea si neutralizarea dronelor neautorizate prin interceptarea transmisiilor radio si a undelor perturbate de elici.", "https://en.wikipedia.org/wiki/Frequency-hopping_spread_spectrum": "Schimbarea rapida si continua a frecventei radio intre 79 de canale pentru a preveni interceptarea.", "https://arxiv.org/abs/2308.10651": "Urmarirea dronelor in spatii inchise prin analiza CSI a semnalului Wi-Fi emis de drona.", "https://doi.org/10.1145/2486001.2486039": "Radar Wi-Fi prin pereti ce anuleaza reflexiile statice pentru a urmari miscarea umana.", "https://en.wikipedia.org/wiki/Integrated_sensing_and_communication": "Tehnologie ce foloseste aceleasi semnale radio simultan pentru transfer de date si ca radar ambiental.", "https://en.wikipedia.org/wiki/Fresnel_zone": "Regiuni elipsoidale dintre emitator si receptor in care orice obstacol interpus provoaca scaderi brute de semnal.", "https://en.wikipedia.org/wiki/Attenuation": "Scaderea intensitatii undei radio pe masura ce traverseaza aerul sau este absorbita de corpuri.", "https://en.wikipedia.org/wiki/Fall_detection": "Identificarea prabusirii la sol a unei persoane prin scaderea brusca a semnalului pe legaturile radio.", "https://en.wikipedia.org/wiki/Directional_antenna": "Antene proiectate sa concentreze undele radio pe o directie preferata, marind raza si precizia receptiei.", "https://doi.org/10.1109/TMC.2025.3547010": "Autentificare multi-dispozitiv prin corelarea canalelor radio Wi-Fi pe echipamente comerciale."};
+    
+    const tooltipBox = document.getElementById('tooltip-box');
+    const ttBadge = document.getElementById('tt-badge');
+    const ttTerm = document.getElementById('tt-term');
+    const ttDesc = document.getElementById('tt-desc');
+
+    const targets = document.querySelectorAll('.tooltip-target');
+
+    targets.forEach(target => {
+        target.addEventListener('mouseenter', (e) => {
+            const url = target.getAttribute('href');
+            const term = target.getAttribute('data-term') || target.innerText;
+            const badge = target.getAttribute('data-badge') || 'CONCEPT';
+            const desc = definitions[url] || 'Definiție tehnică disponibilă la sursă.';
+
+            ttBadge.innerText = badge;
+            ttTerm.innerText = term;
+            ttDesc.innerText = desc;
+            
+            tooltipBox.style.display = 'block';
+            positionTooltip(e);
+        });
+
+        target.addEventListener('mousemove', (e) => {
+            positionTooltip(e);
+        });
+
+        target.addEventListener('mouseleave', () => {
+            tooltipBox.style.display = 'none';
+        });
+    });
+
+    function positionTooltip(e) {
+        const zoom = 2;
+        const boxWidth = 320;
+        const offset = 14;
+        let left = (e.clientX + offset) / zoom;
+        let top = (e.clientY + offset) / zoom;
+
+        if (left + boxWidth > (window.innerWidth / zoom) - 10) {
+            left = (e.clientX - offset) / zoom - boxWidth;
+        }
+        if (top + 160 > (window.innerHeight / zoom)) {
+            top = (e.clientY - offset) / zoom - 160;
+        }
+
+        tooltipBox.style.left = left + 'px';
+        tooltipBox.style.top = top + 'px';
+    }
+</script>
+
+</body>
+</html>

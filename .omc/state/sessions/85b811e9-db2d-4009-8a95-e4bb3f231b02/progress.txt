@@ -1,0 +1,778 @@
+RALPH PROGRESS LOG -- Triangulare BT/BLE 4 colturi
+Plan sursa: .omc/plans/ble-triangulation-consensus-plan.md
+PRD: .omc/state/sessions/85b811e9-db2d-4009-8a95-e4bb3f231b02/prd.json
+
+Context de mediu confirmat la iteratia 1:
+- NU e repo git (fatal: not a git repository) -- fara commit-uri necesare.
+- pytest, pytest-cov, scapy NU sunt instalate (ModuleNotFoundError confirmat).
+- .coverage-thresholds.json: total=100, enforce_command="pytest --cov --cov-fail-under=100".
+- .omc/prd.json legacy e dintr-un proiect NEREGLAT (Ubertooth Standalone Tauri) -- ignorat, nu reutilizat.
+- ble_utils.py existent are: parse_kv_logs (asteapta .txt KV, NU pcap direct), estimate_distance(rssi, tx_power=-59, n=3.0), process_signal_trends, calculate_channel_quality.
+- Fixture ales pentru integrare: btle_ch37_20260617_085225.pcap (local 08:52, se suprapune cu ferestrele stanga-jos/stanga-sus din Logs.md).
+
+Iteratia 1: PRD creat si rafinat (11 povesti specifice, nu boilerplate). Incepe US-001.
+
+=== US-001: Mediu de dezvoltare si scaffolding teste -- COMPLET ===
+
+Environment:
+- python3 --version -> Python 3.14.6 (sistem, foarte recent -- am verificat compatibilitatea fiecarui pachet cu `pip index versions <pkg>` inainte de a pinui).
+- Am creat venv la radacina: `.venv/` (python3 -m venv .venv). Motiv: nu exista EXTERNALLY-MANAGED marker deci pip global ar fi mers, dar venv izoleaza dependintele proiectului fara sa polueze sistemul si e reproductibil pentru orice cine ruleaza testele viitoare. Testele/comenzile viitoare trebuie rulate cu `.venv/bin/pytest`, `.venv/bin/python` etc. (sau `source .venv/bin/activate` intai).
+
+requirements-dev.txt (la radacina):
+  scapy==2.7.0
+  pytest==9.1.1
+  pytest-cov==7.1.0
+  matplotlib==3.11.0
+Decizie netriviala: criteriul de acceptare US-001 mentioneaza explicit doar scapy/pytest/pytest-cov, dar AC3 cere ca tests/conftest.py sa forteze `matplotlib.use('Agg')` -- linia asta necesita ca pachetul matplotlib sa fie instalat (altfel `import matplotlib` pica si AC5 -- collect-only fara erori -- e imposibil de indeplinit). Am adaugat matplotlib==3.11.0 (ultima versiune stabila compatibila cu py3.14) ca dependinta tranzitiva necesara, nu ca scope creep -- fara ea AC3+AC5 sunt imposibil de satisfacut simultan. matplotlib a adus si numpy 2.5.1 ca dependinta proprie, ceea ce ajuta si povestile viitoare (ble_utils.py foloseste deja numpy/pandas).
+`.venv/bin/pip install -r requirements-dev.txt` -> exit 0, confirmat de doua ori (rulare initiala cu 3 pachete, apoi re-rulare dupa adaugarea matplotlib).
+
+tests/conftest.py creat cu:
+- `import matplotlib; matplotlib.use('Agg')` la varful fisierului, inaintea oricarui alt import care ar putea trage pyplot.
+- CORNERS dict + fixture `room_8x6` (returneaza length/width/corners, nu muta CORNERS global -- foloseste dict(CORNERS) copie).
+- helper `rssi_from_distance(d) = -59 - 30*log10(d)` -- verificat manual ca e inversul exact al `BLEAnalyzerUtils.estimate_distance` din ble_utils.py:68-77 cu tx_power=-59, n=3.0 (rssi_from_distance(1) == -59.0, coerent cu estimate_distance(-59) == 1.0).
+- fixture `corner_schedule` cu cele 4 ferestre din LicentaVault/My Notes/Logs.md, convertite la datetime pe 2026-06-17: stanga_sus 08:50-09:10, stanga_jos 08:55-09:15, dreapta_jos 09:00-09:20, dreapta_sus 09:05-09:25.
+Verificat manual (fara test_*.py, doar `python -c` import direct + apel .__wrapped__() pe fixtures) ca toate valorile sunt corecte.
+
+tests/fixtures/tiny_btle_sample.pcap:
+- Sursa: ubertooth-standalone/data/captures/btle_ch37_20260617_085225.pcap (11042 pachete total, linktype 256 = BLUETOOTH_LE_LL_WITH_PHDR / DLT256).
+- Prima incercare cu `scapy.utils.rdpcap` + `wrpcap` a picat: scapy nu are un layer2 class inregistrat pentru DLT256 necunoscut -> il incarca ca Raw, iar wrpcap arunca KeyError la scriere (`layer2num[Raw]` lipseste). Nu e un bug al nostru, e o limitare scapy pentru linktype-uri necunoscute la scriere (desi citirea functiona).
+- Solutie: `scapy.utils.RawPcapReader` + `RawPcapWriter` (pastreaza linktype si bytes brute exact, fara sa incerce sa decodeze/re-encodeze pachetul intr-o clasa scapy). Script folosit (documentat exact, rulat cu `.venv/bin/python -c "..."`):
+  ```python
+  from scapy.utils import RawPcapReader, RawPcapWriter
+  reader = RawPcapReader('ubertooth-standalone/data/captures/btle_ch37_20260617_085225.pcap')
+  writer = RawPcapWriter('tests/fixtures/tiny_btle_sample.pcap', linktype=reader.linktype)
+  writer._write_header(None)
+  count = 0
+  for pkt_data, pkt_metadata in reader:
+      if count >= 50:
+          break
+      writer.write_packet(pkt_data, sec=pkt_metadata.sec, usec=pkt_metadata.usec,
+                           caplen=pkt_metadata.caplen, wirelen=pkt_metadata.wirelen)
+      count += 1
+  writer.close(); reader.close()
+  ```
+- Verificat prin re-citire cu RawPcapReader: 50 pachete, linktype=256 pastrat corect. Fisier rezultat: tests/fixtures/tiny_btle_sample.pcap (3159 bytes).
+- Nota pentru US-006 (extractor): implementarea trebuie sa foloseasca la fel RawPcapReader (nu scapy layer decode direct din rdpcap) pentru DLT256, sau sa inregistreze manual clasa/linktype la scapy inainte de rdpcap.
+
+pytest.ini creat la radacina (`[pytest]\ntestpaths = tests`):
+- Necesar pentru ca `pytest --collect-only` din radacina, fara scoping, incerca sa colecteze si teste dintr-un subdirector nerelevant (`academic-research-skills/`, un toolkit vendored cu propriile teste si conftest.py, care lipseste dependinta `yaml` si arunca INTERNALERROR). Acesta nu are legatura cu proiectul BLE si nu trebuie rulat de suita noastra. Am scopat pytest la `tests/` in loc sa instalez pyyaml (ar fi fost scope creep sa "reparam" alt proiect). Acest fisier de config e necesar si pentru `enforce_command: "pytest --cov --cov-fail-under=100"` din .coverage-thresholds.json sa functioneze corect pe viitor (fara pytest.ini ar fi lovit aceeasi eroare).
+
+Verificare finala:
+- `.venv/bin/pytest --collect-only` -> exit 5 ("no tests collected"), FARA erori de import/INTERNALERROR. Exit 5 e asteptat si OK conform AC5 (0 teste colectate e explicit permis pentru US-001).
+
+Fisiere create/modificate:
+- requirements-dev.txt (nou, radacina)
+- pytest.ini (nou, radacina)
+- tests/conftest.py (nou)
+- tests/fixtures/tiny_btle_sample.pcap (nou, binar)
+- .venv/ (nou, mediu virtual -- nu e fisier de proiect, e mediu local)
+
+Toate cele 5 criterii de acceptare US-001 verificate cu comenzi reale, output proaspat (nu presupuneri). prd.json actualizat: US-001.passes = true.
+
+=== US-005: build_room_config() -- configurare sala -- COMPLET ===
+
+Fisier nou: room_config.py (radacina) -- NU s-a modificat ble_utils.py (evita conflicte cu alte povesti).
+
+build_room_config(length, width, corner_mode) -> RoomConfig:
+- RoomConfig e un typing.NamedTuple cu campuri length, width, corner_mode, corners (dict).
+- Colturi calculate cu originea la un colt: stanga_jos=(0,0), dreapta_jos=(length,0), stanga_sus=(0,width), dreapta_sus=(length,width).
+- Validare: length<=0 sau width<=0 -> ValueError. corner_mode nu in {'per_window','cross_window'} -> ValueError.
+
+TDD respectat: tests/test_room_config.py scris intai (RED confirmat -- ModuleNotFoundError: No module named 'room_config'), apoi room_config.py implementat (GREEN).
+
+Problema descoperita si rezolvata: rularea initiala a testelor dupa scrierea implementarii tot pica cu ModuleNotFoundError -- pytest.ini avea `testpaths = tests` dar radacina proiectului nu era pe sys.path (pytest insereaza doar directorul tests/ ca rootdir de import, nu radacina). Am adaugat `pythonpath = .` in pytest.ini (o singura linie, scope minim, necesara pentru orice modul viitor din radacina importat de teste, nu doar room_config.py).
+
+tests/test_room_config.py (7 teste):
+- corners exacte pentru 8x6 'cross_window' la toate cele 4 chei
+- length/width/corner_mode stocate corect in RoomConfig
+- ValueError pentru length=0, length=-1, width=0, width=-1
+- ValueError pentru corner_mode='invalid'
+
+Verificare finala: `.venv/bin/pytest tests/test_room_config.py -v` -> 7 passed in 0.01s (output proaspat).
+Nota: `.venv/bin/pytest` (suita completa, fara scoping) intalneste 2 erori de colectare PREEXISTENTE si nelegate de US-005: tests/test_coverage_audit.py si tests/test_observability_audit.py cer `pandas`, care nu e instalat (dependinta pentru alte povesti, nu US-005). Confirmat cu grep ca niciunul dintre aceste fisiere nu refera room_config.
+
+prd.json actualizat: US-005.passes = true.
+
+=== US-003: estimate_position() -- model de pozitionare (centroid ponderat) -- COMPLET ===
+
+Fisier nou: positioning.py (radacina) -- NU s-a modificat ble_utils.py (decizie explicita de orchestrare, evita conflicte cu alte povesti rulate in paralel pe ble_utils.py; AC-ul original din prd.json zice "implementata in ble_utils.py" dar instructiunea de executie a suprascris explicit aceasta decizie de fisier -- pattern consistent cu US-005/room_config.py).
+
+estimate_position(corner_distances: dict, corner_coords: dict) -> tuple[float|None, float|None, str]:
+- Functie pura: valid = intersectia cheilor prezente in ambele dict-uri cu distance is not None; nu muta corner_distances/corner_coords (verificat cu test dedicat, comparatie dict inainte/dupa apel).
+- Precondiere Fable (Step 2 din plan): daca len(valid) < 3 -> (None, None, 'insufficient_corners'), formula NU se aplica deloc (nu doar "incredere redusa").
+- Formula: weight_i = 1 / max(distance_i, EPSILON) cu EPSILON=0.1 (guard div-by-zero pentru distance_i=0), pozitie = suma ponderata / suma ponderilor, pe fiecare axa separat.
+- Scheme confidence ales: string "{n_valid}/{n_total}" (ex. "4/4", "3/4") -- ales pentru ca reflecta EXACT notatia literala din tabelul de teste al planului (Axa 2: "confidence=4/4", "confidence=3/4 (medie)"), documentat in docstring.
+
+TDD respectat: tests/test_estimate_position.py scris intai (RED confirmat -- ModuleNotFoundError: No module named 'positioning'), apoi positioning.py implementat (GREEN).
+
+tests/test_estimate_position.py (9 cazuri, 28 teste colectate cu parametrizare):
+1. echidistant (toate 4 distantele=5.0) -> centroid exact (4.0,3.0) +-1e-9, confidence="4/4"
+2. aproape de un colt ({sj:0.5,dj:9,ss:7,ds:11}) -> distanta la (0,0) < distanta la centroid
+3. 3 din 4 colturi -> pozitie valida in [0,8]x[0,6], confidence="3/4"
+4. 2 din 4 colturi -> (None,None,'insufficient_corners')
+5. toate lipsa (dict gol) -> (None,None,'insufficient_corners')
+6. imutabilitate -- dict-urile de intrare comparate cu copii dinainte de apel
+7. invariant hull convex -- parametrizat pe 20 seed-uri random.Random(seed) fixe (0-19), distante uniforme (0.1,20.0) pe toate 4 colturi, verifica mereu 0<=x<=8 si 0<=y<=6
+8. pull monoton -- distanta la un colt tinta scade progresiv (9,7,5,3,1,0.5) cu ceilalti 3 fixati la 9.0, verifica distanta rezultat->colt strict descrescatoare la fiecare pas
+9. distanta zero -- un colt cu distance=0.0, verifica nicio exceptie si pozitia rezultata foarte aproape de acel colt (prag <0.3m, ajustat o data dupa rulare reala -- pragul initial de 0.2m era prea strans fata de matematica ponderarii cu ceilalti 3 colturi la 9.0m)
+
+Verificare finala: `.venv/bin/pytest tests/test_estimate_position.py -v` -> 28 passed in 0.03s (output proaspat, toate cele 9 cazuri din plan acoperite).
+Nota: `.venv/bin/pytest` (suita completa) intalneste 3 erori de colectare PREEXISTENTE nelegate de US-003 (test_coverage_audit.py, test_observability_audit.py -- lipsa pandas; test_render_output.py -- modul render_output.py inexistent, alta poveste). Confirmat ca niciunul nu refera positioning.py.
+
+prd.json actualizat: US-003.passes = true.
+
+=== US-007: Output -- tabel si harta vizuala 2D -- COMPLET ===
+
+Fisier nou: render_output.py (radacina) -- NU s-a modificat ble_utils.py.
+
+Context: US-003 (estimate_position) si US-004 (match_devices) ruleaza in paralel;
+schema finala exacta a results_df consumat de US-007 nu era inca fixata la
+momentul implementarii. Decizie: functiile sunt tolerante la schema, nu
+presupun o singura forma rigida de DataFrame.
+
+SCHEMA PRESUPUSA pentru results_df (documentata si in docstring-ul modulului,
+relevanta pentru alinierea US-009 la pipeline-ul e2e):
+- O coloana identificator de device, incercata in ordine: device_group_id
+  (produsa de match_devices, US-004) -> device_id -> mac_or_lap -> mac.
+  Prima gasita in results_df.columns e folosita.
+- Coloane obligatorii: x, y, confidence (produse de estimate_position, US-003
+  -- confidence e string ca "4/4"/"3/4"/"insufficient_corners" per plan).
+- DataFrame gol (0 randuri) e acceptat explicit -- nu arunca exceptie.
+
+render_position_table(results_df) -> pd.DataFrame:
+- Rezolva coloana de identificator via _resolve_id_column (ValueError daca
+  niciuna dintre candidate nu exista -- fail-fast, nu silent).
+- Intoarce DataFrame NOU (nu muta results_df) cu coloane normalizate:
+  device_id, x, y, confidence.
+
+render_position_map(results_df, room_config) -> matplotlib.figure.Figure:
+- room_config.corners (accepta atat obiect cu atribut .corners -- ex.
+  RoomConfig din room_config.py US-005 -- cat si dict cu cheia "corners", ca
+  sa nu depinda strict de tipul exact).
+- Plot 2D: cele 4 colturi ca scatter distinct (marker patrat, negru),
+  device-urile ca scatter separat (marker cerc, albastru), fiecare device
+  adnotat cu valoarea coloanei confidence langa punct.
+- Caz gol: doar colturile sunt desenate, fara eroare.
+
+TDD respectat: tests/test_render_output.py scris intai (RED confirmat --
+ModuleNotFoundError: No module named 'render_output'), apoi render_output.py
+implementat (GREEN).
+
+tests/test_render_output.py (6 teste):
+- render_position_table: coloane asteptate prezente + tip DataFrame corect
+- render_position_table: accepta coloana id alternativa (mac_or_lap)
+- render_position_table: input gol -> tabel gol valid, coloane corecte
+- render_position_map: intoarce matplotlib.figure.Figure
+- render_position_map: numar puncte scatter = 4 colturi + N device-uri
+  (verificat via fig.axes[0].collections[*].get_offsets(), nu string parsing)
+- render_position_map: results_df gol -> figura valida cu doar cele 4 colturi
+
+Verificare finala: `.venv/bin/pytest tests/test_render_output.py -v` ->
+6 passed in 0.28s (output proaspat). Suita completa `.venv/bin/pytest` ->
+55 passed in 0.28s, nicio regresie pe US-001/003/005 (US-002/004/006 inca
+nu au module implementate, doar teste -- fara legatura cu aceasta poveste).
+
+prd.json actualizat: US-007.passes = true.
+
+=== US-002: Audit acoperire temporala si observabilitate (Step 0) -- COMPLET ===
+
+Fisier nou: coverage_audit.py (radacina) -- NU s-a modificat ble_utils.py (evita conflicte cu US-005/alte povesti pe ble_utils.py, cerinta explicita din task). Importa doar pandas, nu ble_utils (nu a fost nevoie de nimic din BLEAnalyzerUtils pentru aceste doua functii pure).
+
+TDD respectat: tests/test_coverage_audit.py + tests/test_observability_audit.py scrise intai. RED confirmat in doi pasi:
+1. ModuleNotFoundError: No module named 'pandas' (pandas lipsea complet din .venv si din requirements-dev.txt, desi ble_utils.py deja il importa la nivel de modul -- alta poveste probabil il va fi nevoie si ea). L-am instalat (.venv/bin/pip install pandas -> 3.0.3) si adaugat in requirements-dev.txt ca dependinta reala, nu scope creep -- e o dependinta preexistenta nedeclarata.
+2. Dupa fix pandas: ModuleNotFoundError: No module named 'coverage_audit' (asteptat, modulul inca nu exista).
+Apoi implementat coverage_audit.py -> GREEN, 14/14 teste trecute.
+
+audit_temporal_coverage(df, corner_schedule):
+- df asteapta coloane timestamp/rssi/corner. Pentru fiecare colt din corner_schedule, filtreaza STRICT per-pachet (df["corner"]==colt AND start<=timestamp<end), apoi numara cate din acele pachete au rssi non-null (notna) drept "usable_rssi_count", plus "total_packets" (util pt DLT256-cu-RSSI vs DLT255-fara-RSSI: DLT255 va avea rssi=NaN per contractul din plan, deci filtrarea pe notna(rssi) separa deja cele doua clase fara sa mai fie nevoie de o coloana dlt/bt_type explicita in audit).
+- Contract fereastra [start, end) testat explicit la limita: pachet la exact 08:50:00 -> inclus; pachet la exact 09:10:00 -> exclus.
+- Caz concret din AC verificat: pachete la 08:40, 09:00, 08:45 pentru fereastra stanga_sus (08:50-09:10) -> usable_rssi_count=1 (doar 09:00), NU 3. Confirma explicit ca filtrarea nu foloseste intervalul [min,max] al setului de pachete.
+
+audit_observability(df, min_corners=3):
+- df asteapta coloane device_group_id/corner. Grupeaza pe device_group_id, numara colturi distincte (nunique, deci sighting-uri duplicate la acelasi colt nu umfla numaratoarea -- testat explicit). Device cu >=min_corners colturi -> triangulable_device_ids; altfel -> excluded_device_ids. Returneaza si triangulable_count.
+- Testat: device la 3 colturi -> triangulabil=True; device la 2 colturi -> exclus; device la toate 4 -> triangulabil; prag min_corners configurabil (testat cu min_corners=2).
+- Modurile per_window/cross_window simulate ca liste diferite de device_group_id (per_window: id-uri distincte per fereastra care nu ating individual pragul; cross_window: un singur id stabil care il atinge) -- functia audit_observability e agnostica la cum au fost generate id-urile, doar numara colturi distincte per id, exact cum cere AC.
+
+Decizie netriviala: nu am adaugat o coloana/parametru dlt sau bt_type explicit in audit_temporal_coverage desi AC mentioneaza "DLT256-cu-RSSI vs DLT255-doar" -- rssi.notna() e proxy-ul direct si suficient per contractul deja documentat in plan (DLT255 intoarce explicit rssi=NaN), evita sa introduc un parametru redundant neexercitat de niciun test.
+
+Verificare finala: `.venv/bin/pytest tests/test_coverage_audit.py tests/test_observability_audit.py -v` -> 14 passed (output proaspat, iteratie curenta).
+Nota: `.venv/bin/pytest` (suita completa) intalneste acum o eroare de colectare PREEXISTENTA si nelegata de US-002: tests/test_render_output.py cere modulul `render_output` care nu exista inca (alta poveste, nu US-002). Confirmat ca nu are legatura cu coverage_audit.py.
+
+Fisiere create/modificate:
+- coverage_audit.py (nou)
+- tests/test_coverage_audit.py (nou)
+- tests/test_observability_audit.py (nou)
+- requirements-dev.txt (adaugat pandas==3.0.3)
+- .venv/ (pandas instalat)
+
+Toate cele 5 criterii de acceptare US-002 verificate cu comenzi reale, output proaspat. prd.json actualizat: US-002.passes = true.
+
+=== US-006: Extractor pcap -> DataFrame (scapy DLT256 + manual DLT255) -- COMPLET ===
+
+Fisier nou: pcap_extractor.py (radacina) -- NU s-a modificat ble_utils.py (evita conflicte cu poveste paralele).
+
+DESCOPERIRE TEHNICA CHEIE (pentru US-009/US-010) -- scapy suporta COMPLET DLT256:
+- Nota din US-001 ("scapy nu are layer2 class pentru DLT256, il citeste ca Raw") era valabila DOAR pentru scriere (wrpcap) si pentru citirea Raw. La CITIRE/DECODARE scapy 2.7.0 DISECA perfect DLT256: `scapy.layers.bluetooth4LE` are BTLE, BTLE_RF (pseudo-header PHDR), BTLE_ADV, BTLE_ADV_IND etc. si DLT_BLUETOOTH_LE_LL_WITH_PHDR e inregistrat. `PcapReader(path)` (nu rdpcap Raw) intoarce pachete decodate: `BTLE_RF / BTLE / BTLE_ADV / BTLE_ADV_IND`.
+- RSSI: `pkt.getlayer(BTLE_RF).signal` (SignedByteField, dBm). Pe tiny_btle_sample.pcap semnal in [-83, -55] dBm -- ancora RSSI=-55 din US-001 e prezenta (nu pe primul pachet, ci in interval; primul pachet al fixture-ului e -83). Canal: `BTLE_RF.rf_channel` (0-39; pe fixture toate 0 -- ubertooth nu umple campul rf_channel in PHDR, dar coloana exista cu dtype corect; canalul real 37/38/39 e in numele fisierului, NU in PHDR pentru aceste capturi).
+- Adresa device: `getattr(pkt, 'AdvA', None)` -- scapy __getattr__ cauta prin toate layer-ele. Toate cele 50 pachete din fixture au AdvA (chiar si BTLE_SCAN_REQ). Format string MAC 'aa:bb:cc:dd:ee:ff'.
+- Pachet DLT256 fara BTLE_RF (payload prea scurt, <~10 bytes PHDR) -> scapy il face `Raw`, `getlayer(BTLE_RF)` e None -> il sarim (guard testat).
+
+DLT255 (rx_*.pcap) -- CONFIRMAT: NU are RSSI utilizabil (finding de nivel spec pentru dreapta-sus):
+- scapy nu disecа linktype 255 ("unknown LL type [255]/[0xff]. Using Raw packets"). Folosit RawPcapReader (reader manual subtire) -> bytes bruti + metadata timestamp.
+- Structura reala rx_*.pcap: inregistrari FIXE de 22 bytes, ex. `01 cfc90000 00000000 d5ae7700 ffffffff 00000000 0700`. Primul byte variaza (01/04/3d -- posibil tip/stare), rest fara camp RSSI identificabil. Concluzie empirica: NICIUN camp RSSI extractibil. => marcate rssi=NaN, bt_type='classic_no_rssi', channel=NaN, mac_or_lap=None -- NU excluse. IMPLICATIE PENTRU TEZA: coltul dreapta-sus (9:05-9:25), care e efectiv rx-only conform planului, NU poate fi triangulat (fara date RSSI). De raportat explicit ca "harta partiala", nu ascuns (Principiul 1 din plan).
+
+CORELARE COLT<->PACHET (strict pe timestamp, niciodata pe nume fisier):
+- packet.time (epoch pcap, absolut UTC) -> `datetime.fromtimestamp()` da datetime LOCAL naiv (TZ sistem = Europe/Bucharest EEST +0300, confirmat cu timedatectl). corner_schedule din conftest sunt datetime naive LOCALE (08:50-09:25) -> comparatie directa corecta pe aceasta masina. Fixture-ul (btle_ch37_...085225) are pachete la ~08:58 local (05:58 UTC), cad in ferestrele stanga_sus [08:50,09:10) SI stanga_jos [08:55,09:15) care se SUPRAPUN.
+- DECIZIE DE DESIGN (ambiguitate reala documentata): ferestrele de colt se suprapun temporal (fiecare colt 20min, decalate 5min). Un pachet dintr-un singur interval fizic nu poate fi dezambiguizat pe colt doar din timestamp cand ferestrele se suprapun. Alegere: emit UN RAND per (pachet x fereastra suprapusa) -- adica 50 pachete fixture x 2 ferestre = 100 randuri. Pastreaza toata informatia, coerent cu Step 0 (numara pachete per fereastra), nu alege silentios un singur colt. Downstream (US-009) trebuie sa fie constient ca acelasi pachet poate aparea sub 2 corner_label.
+- Granita fereastra: [start, end) half-open, testat la limita exacta (pachet la end exact -> exclus).
+
+CONTRACT OUTPUT:
+- extract_windowed_packets(pcap_dir, corner_schedule) -> pd.DataFrame, coloane exacte [timestamp, corner_label, mac_or_lap, rssi, channel, bt_type]. Doar pachetele care cad intr-o fereastra produc randuri (functia e "windowed").
+- Metadata prin df.attrs (nu stare globala mutabila -- coerent cu imutabilitatea din coding-style, spre deosebire de BLEAnalyzerUtils._errors global): df.attrs['errors'] = list {file, error}; df.attrs['empty_windows'] = list de corner_label cu 0 pachete suprapuse (flag-ul de "partial" cerut de AC).
+- Director inexistent -> FileNotFoundError("pcap directory not found: ..."). Director gol -> DataFrame gol cu coloanele corecte. Pcap corupt (header invalid) -> RawPcapReader arunca Scapy_Exception la deschidere -> prins per-fisier (`except Exception`, ca in ble_utils), inregistrat in df.attrs['errors'], pipeline continua. Linktype != 255/256 -> inregistrat ca "unsupported linktype N".
+
+Routing linktype: `_linktype(path)` deschide RawPcapReader doar pt global header (.linktype), inchide. Apoi 256 -> _ble_rows (PcapReader decodat), 255 -> _classic_rows (RawPcapReader bytes bruti).
+
+TDD respectat: tests/test_pcap_extractor.py scris intai (RED confirmat -- ModuleNotFoundError: No module named 'pcap_extractor'), apoi pcap_extractor.py (GREEN). 11 teste: coloane+tipuri pe fixture real, corelare pe timestamp NU pe nume fisier, dir gol, dir inexistent, pcap corupt (10 bytes random) inregistrat+continua, DLT255 sintetic->classic_no_rssi, fereastra goala flagata, granita half-open, pachet DLT256 fara BTLE_RF sarit, linktype nesuportat, imutabilitate schedule.
+
+Nota mediu: pytest.ini avea deja `pythonpath = .` (adaugat de US-005) -> importul modulelor din radacina de catre teste functioneaza fara conftest suplimentar. Am creat initial un conftest.py la radacina apoi l-am STERS ca redundant (surgical).
+
+Verificare finala (output proaspat):
+- `.venv/bin/pytest tests/test_pcap_extractor.py -v` -> 11 passed in 0.27s.
+- `.venv/bin/pytest tests/test_pcap_extractor.py --cov=pcap_extractor` -> pcap_extractor.py 62 stmts, 0 miss, 100%.
+- `.venv/bin/pytest` (suita completa) -> 66 passed in 0.48s (fara regresii pe celelalte povesti).
+
+Fisiere create:
+- pcap_extractor.py (nou, radacina, ~130 linii)
+- tests/test_pcap_extractor.py (nou, 11 teste)
+
+Toate cele 6 criterii de acceptare US-006 verificate cu comenzi reale. prd.json actualizat: US-006.passes = true.
+
+=== US-004: match_devices() -- rezolvare identitate device -- COMPLET ===
+
+Fisier nou: identity.py (radacina) -- NU s-a modificat ble_utils.py (acelasi motiv de orchestrare ca US-002/003/005/006/007: fisiere noi mici pentru a evita conflicte intre povesti paralele care ating acelasi fisier).
+
+TDD respectat: tests/test_match_devices.py scris intai (RED confirmat -- ModuleNotFoundError: No module named 'identity'), apoi identity.py implementat (GREEN).
+
+match_devices(df, mode='cross_window'|'per_window') -> pd.DataFrame:
+- Functie pura: intoarce mereu `df.copy()` + coloane noi, nu muta df-ul primit (verificat cu test dedicat pe ambele moduri, `pd.testing.assert_frame_equal(df, original)` dupa apel).
+- mode='per_window': `device_group_id = f"{corner_label}_{mac_or_lap}"`, fara unire cross-fereastra (id-ul include mereu corner_label, deci structural nu se poate suprapune intre colturi). Coloana `confidence` adaugata: pentru fiecare `mac_or_lap` brut, numar colturi distincte in care apare (`groupby('mac_or_lap')['corner_label'].nunique()`); daca ==1 -> confidence='single_corner_only' (device netriangulabil, pozitia lui ar fi doar coordonata acelui colt); daca >1 -> confidence='multi_corner_unmerged' (vazut la mai multe colturi, dar per_window tot nu le uneste -- valoare aleasa pentru claritate, nu ceruta explicit de AC dar necesara ca sa nu lase coloana confidence goala/None pentru cazul complementar).
+- mode='cross_window': grupare euristica pe (nume advertising normalizat lower+strip) SI/SAU (set UUID servicii normalizat lower+strip). Citeste coloanele optionale `adv_name` si `service_uuids` (iterabil de string) din df -- daca lipsesc din schema (nu sunt produse inca de pcap_extractor.py din US-006), sunt tratate ca "fara info" pentru toate randurile, nu arunca eroare. Cheie de matching: nume normalizat daca exista, altfel set de UUID-uri daca exista, altfel None (identitate anonima, ramane in propriul grup `anon_{mac_or_lap}`, NU se uneste cu alte identitati anonime -- verificat explicit prin test cu 2 device-uri fara nume/UUID care primesc device_group_id diferite).
+- Docstring-ul modulului documenteaza explicit, in tonul deja stabilit de positioning.py/pcap_extractor.py, ca gruparea cross_window e best-effort si NON-CRIPTOGRAFICA: nu poate rezolva BLE RPA (rotatie ~15min, necesita IRK indisponibil pasiv) si va functiona practic doar pe beacon-uri/wearables cu nume/UUID stabile in advertising, nu pe majoritatea telefoanelor moderne.
+- Metrica "matching fraction" (ceruta de plan si AC): fractia de identitati brute (dupa `mac_or_lap`) care au fost unite cu cel putin o alta identitate, din totalul de identitati observate. Raportata prin `result.attrs["matching_fraction"]` (coerent cu conventia deja folosita in pcap_extractor.py pentru metadate non-coloana: `df.attrs['errors']`, `df.attrs['empty_windows']`) -- NU ca o coloana in DataFrame, pentru ca e o metrica agregata la nivel de set de date, nu per-rand. Caz concret testat exact ca in AC: 5 identitati (mac-1..mac-5), mac-1 si mac-2 au acelasi nume normalizat "beacon" (matched, 2 identitati), mac-3 are nume unic, mac-4 are UUID unic, mac-5 e anonim (toate 3 ramase unmatched) -> matching_fraction = 2/5 = 0.4 (assert cu pytest.approx).
+- Coloana `confidence` adaugata si pentru cross_window: 'matched' pentru identitatile unite cu altele, 'unmatched' pentru cele ramase singure (fie prin lipsa de nume/UUID, fie prin nume/UUID unic care nu s-a potrivit cu nimeni).
+- mode necunoscut (nu in {'per_window','cross_window'}) -> ValueError (testat explicit, coerent cu build_room_config din US-005).
+
+tests/test_match_devices.py (10 teste): no_cross_merge, single_corner_flagged (confidence='single_corner_only'), immutable (parametrizat pe ambele moduri), cross_merges_by_name, cross_merges_by_uuid, normalizes_name ('Tile' == 'tile '), anonymous_not_merged, matching_fraction_metric (caz concret 5/2->0.4), unknown_mode_raises_value_error.
+
+Verificare finala (output proaspat, aceasta iteratie):
+- `.venv/bin/pytest tests/test_match_devices.py -v` -> 10 passed in 0.12s.
+- `.venv/bin/pytest -q` (suita completa) -> 76 passed in 0.47s (66 anterior + 10 noi, nicio regresie).
+- `.venv/bin/pytest tests/test_match_devices.py --cov=identity --cov-report=term-missing` -> identity.py 71 stmts, 0 miss, 100%.
+
+Fisiere create:
+- identity.py (nou, radacina, ~140 linii)
+- tests/test_match_devices.py (nou, 10 teste)
+
+Toate cele 5 criterii de acceptare US-004 verificate cu comenzi reale, output proaspat. prd.json actualizat: US-004.passes = true.
+
+=== US-008: Interfata de configurare (popup) -- COMPLET ===
+
+Fisier nou: room_config_widget.py (radacina) -- NU s-a modificat room_config.py
+si NU s-a modificat ble_utils.py. Wrapper subtire ipywidgets peste
+build_room_config() (US-005): tot input-ul (lungime, latime, mod identitate)
+este colectat din widget-uri, dar validarea si calculul colturilor raman
+exclusiv in room_config.py -- modulul de widget nu reimplementeaza logica.
+
+Nota coerenta cu export_analysis.py: export_analysis.py NU foloseste
+ipywidgets (e un script plat, nu un notebook interactiv) -- deci nu exista
+un precedent direct de stil ipywidgets in acest fisier. Am urmat totusi
+recomandarea explicita din plan (.omc/plans/ble-triangulation-consensus-plan.md,
+sectiunea "Interfata de configurare (popup)"): "tehnologie la alegerea
+implementatorului -- recomandare: ipywidgets daca lucrul se face in
+notebook, coerent cu export_analysis.py". ipywidgets nu era instalat in
+.venv -> instalat (.venv/bin/pip install ipywidgets -> 8.1.8) si adaugat in
+requirements-dev.txt pinned exact, ca celelalte dependinte.
+
+make_room_config_popup(on_apply=None) -> (box, submit_handler):
+- box: ipywidgets.VBox cu FloatText lungime (implicit 8.0), FloatText latime
+  (implicit 6.0) -- valorile standard sala examen din fixture-ul canonic
+  room_8x6 (tests/conftest.py, L=8m, W=6m, coerent cu plan), Dropdown mod
+  identitate (optiuni VALID_CORNER_MODES din room_config.py: per_window/
+  cross_window, implicit per_window), Button "Aplica", Output pentru
+  rezultat/eroare.
+- submit_handler: citeste valorile curente din widget-uri, apeleaza
+  build_room_config(length, width, corner_mode). La succes: afiseaza
+  RoomConfig in output, apeleaza on_apply(room_config) daca a fost dat,
+  returneaza RoomConfig. La ValueError (dimensiuni <=0 sau corner_mode
+  invalid): afiseaza mesajul de eroare in output, NU propaga exceptia,
+  returneaza None. submit_handler e atasat butonului via on_click, dar e
+  intors si separat exact ca sa poata fi apelat direct (fara eveniment de
+  click real) pentru smoke test / verificare programatica.
+- Functia pura din spate (build_room_config) ramane testabila fara a
+  instantia niciun widget -- deja acoperita 100% de tests/test_room_config.py
+  (US-005), nicio modificare acolo.
+
+SMOKE TEST MANUAL (nu pytest -- widget UI, per filozofia proiectului de a
+izola codul greu de testat in adaptoare subtiri si a-l verifica manual, nu
+prin CI headless). Rulat cu `.venv/bin/python` pe un script temporar,
+output real capturat mai jos:
+
+  box type: VBox
+  children: ['FloatText', 'FloatText', 'Dropdown', 'Button', 'Output']
+  defaults: 8.0 6.0 per_window
+  dropdown options: ('cross_window', 'per_window')
+  RoomConfig: RoomConfig(length=8.0, width=6.0, corner_mode='cross_window',
+    corners={'stanga_jos': (0, 0), 'dreapta_jos': (8.0, 0),
+    'stanga_sus': (0, 6.0), 'dreapta_sus': (8.0, 6.0)})
+  submit_handler2() returned: RoomConfig(length=8.0, width=6.0,
+    corner_mode='cross_window', corners={...})
+  on_apply captured: RoomConfig(length=8.0, width=6.0, corner_mode='cross_window', ...)
+  ValueError correctly raised for bad corner_mode: corner_mode must be one
+    of {'cross_window', 'per_window'}, got 'bad_mode'
+  Eroare configurare: length must be positive, got -1.0
+  submit_handler3() returned (should be None on error): None
+  SMOKE TEST OK
+
+Pasi verificati concret:
+1. Popup se deschide: make_room_config_popup() ruleaza fara eroare, box e
+   un ipywidgets.VBox valid cu cele 5 sub-widget-uri asteptate (2x
+   FloatText, Dropdown, Button, Output), valorile implicite sunt 8.0/6.0/
+   per_window (sala standard de examen).
+2. Popup accepta input: valorile FloatText/Dropdown au fost schimbate
+   programatic (simuland interactiune utilizator: length=8.0, width=6.0,
+   corner_mode='cross_window'), widget-urile le-au retinut corect.
+3. Apeleaza build_room_config corect: submit_handler() apelat direct (fara
+   eveniment de click) a produs un RoomConfig identic cu apelul direct
+   build_room_config(8.0, 6.0, 'cross_window'), iar callback-ul on_apply a
+   primit acelasi obiect.
+4. Cale de eroare: length=-1.0 -> submit_handler() prinde ValueError-ul din
+   build_room_config, afiseaza mesajul in output, NU crapa, returneaza None.
+
+Verificare finala (output proaspat, aceasta iteratie):
+- `.venv/bin/pytest -q` (suita completa) -> 76 passed in 0.45s (identic cu
+  baseline-ul anterior US-004 -- nicio regresie, niciun test nou de pytest
+  adaugat intentionat pentru acest fisier, per AC #3: functia pura e deja
+  acoperita de US-005).
+
+Fisiere create/modificate:
+- room_config_widget.py (nou, radacina, ~55 linii)
+- requirements-dev.txt (adaugat ipywidgets==8.1.8)
+- .venv/ (ipywidgets 8.1.8 instalat)
+
+Toate cele 4 criterii de acceptare US-008 verificate cu comenzi reale,
+output proaspat. prd.json actualizat: US-008.passes = true.
+
+=== US-010: Validare acuratete date (Axa 3 -- ground truth) -- COMPLET ===
+
+Fisier nou: tests/test_ground_truth_validation.py (7 teste) -- NU s-a modificat positioning.py sau ble_utils.py (poveste test-only, ambele module exercitate ca black box, per cerinta explicita din task; nu s-a gasit niciun bug in ele).
+
+TDD: fisierul de test a fost scris direct impotriva positioning.estimate_position / ble_utils.BLEAnalyzerUtils.estimate_distance deja implementate si testate (US-003/US-005/US-006); nu a fost nevoie de un ciclu RED separat pe cod de productie nou, pentru ca povestea nu introduce cod de productie -- singurul RED intalnit a fost o greseala proprie de test (vezi mai jos), nu o lipsa de implementare.
+
+Cele 3 validari cerute de AC (per Axa 3 din plan, insight Fable: cele 4 colturi sunt deja ground-truth exact cunoscut, nu trebuie device de referinta extern):
+
+1. MONTE CARLO PE MODELUL INVERS (test_monte_carlo_inverse_model_median_error):
+   - Punct sintetic cunoscut (3.0, 2.0) in room_8x6. Distante reale calculate geometric la cele 4 colturi.
+   - Pentru fiecare din N=1000 tageri: RSSI = rssi_from_distance(distanta_reala) + zgomot gaussian N(0, sigma=4dB) (numpy Generator, seed=42 fix pentru reproductibilitate), apoi estimate_distance(rssi_zgomotos) -> distanta noisy -> estimate_position pe toate 4 colturi.
+   - Eroare per tragere = distanta euclidiana intre pozitia estimata si punctul real.
+   - REZULTAT NUMERIC (rulare proaspata, output de mai jos): EROAREA MEDIANA = 0.8980 m (N=1000, sigma=4dB, punct (3.0, 2.0)). Aceasta e limita inferioara teoretica a erorii (cel mai bun caz posibil, fara alte surse de eroare din pipeline) -- numar citabil direct in teza.
+
+2. LEAVE-ONE-CORNER-OUT PE COORDONATELE COLTURILOR (test_loco_corners_bias_error):
+   - Pentru fiecare din cele 4 colturi, tratat ca "device" pozitionat exact in acel colt: distantele geometrice reale la ceilalti 3 colturi -> estimate_position cu doar cei 3 colturi ramase.
+   - Verificat ca predictia ramane in bounding-box-ul celorlalte 3 colturi (garantie matematica: un centroid ponderat a 3 puncte e mereu in interiorul infasuratorii lor convexe / triunghiului -- confirmat, nu doar asertat).
+   - Bias = distanta euclidiana intre predictie si coordonata reala a coltului lasat afara.
+   - REZULTAT NUMERIC (rulare proaspata): EROAREA DE BIAS = 6.1489 m, IDENTICA pentru toate cele 4 colturi (simetria dreptunghiului 8x6 face ca fiecare colt sa fie la aceeasi "distanta structurala" fata de triunghiul celorlalte 3). Acesta cuantifica exact cat "trage" harta spre centru la margini -- raportat direct ca bias caracterizat al modelului de centroid ponderat, nu ascuns (rezultat asteptat, nu esec, per plan).
+
+3. VERIFICARE ORDINALA ARGMAX-RSSI (test_ordinal_argmax_rssi_matches_closest_corner, 5 cazuri parametrizate seed=0..4):
+   - Pentru pozitii sintetice de device (uniform random in interiorul salii), coltul cu RSSI maxim (= distanta reala minima) trebuie sa fie coltul geometric cel mai apropiat de pozitia estimata de estimate_position.
+   - REZULTAT: 5/5 cazuri parametrizate trec (echivalent 100% pe esantionul testat).
+
+Verificare finala (output proaspat, aceasta iteratie):
+- `.venv/bin/pytest tests/test_ground_truth_validation.py -v` -> 7 passed in 0.12s.
+- `.venv/bin/pytest -q` (suita completa) -> 86 passed in 0.53s (fara regresii; alte povesti concurente US-008/US-009 prezente si verzi).
+
+Fisiere create:
+- tests/test_ground_truth_validation.py (nou, 7 teste)
+
+Toate cele 3 criterii de acceptare US-010 verificate cu comenzi reale, output proaspat, numere reale (nu estimate) transcrise mai sus pentru citare in teza. prd.json actualizat: US-010.passes = true.
+
+=== US-009: Pipeline end-to-end -- COMPLET ===
+
+Fisier nou: tests/test_pipeline_e2e.py -- NU s-a modificat pcap_extractor.py,
+coverage_audit.py, identity.py, positioning.py, render_output.py sau room_config.py
+(niciun bug real gasit in oricare, doar mismatch-uri de interfata intre povesti
+paralele -- rezolvate cu glue local in fisierul de test, per instructiuni).
+
+MISMATCH-URI DE SCHEMA DESCOPERITE SI PODURILE FOLOSITE:
+
+1. extract_windowed_packets (US-006) produce coloana `corner_label`, dar
+   audit_temporal_coverage/audit_observability (US-002) asteapta o coloana
+   numita exact `corner`. Pod: adaug o coloana noua `corner` (alias, NU
+   redenumire) inainte de a apela audit_observability -- `df['corner'] =
+   df['corner_label']`. Nu modific extractorul (contractul lui ramane
+   `corner_label`, documentat explicit in propriul progress).
+
+2. estimate_position (US-003) e o functie pura pe doua dict-uri
+   (corner->distance, corner->coords), NU pe DataFrame. Pod (helper local
+   `_build_results_df` in test): pentru fiecare device_group_id triangulabil
+   (din audit_observability["triangulable_device_ids"]), agreg randurile lui
+   pe corner_label (media RSSI per colt observat), convertesc fiecare medie
+   RSSI->distanta cu `BLEAnalyzerUtils.estimate_distance(rssi)` (ble_utils.py,
+   tx_power/n default -59/3.0, exact formula documentata in US-001/US-003),
+   apoi apelez `estimate_position(corner_distances, room_config.corners)` o
+   singura data per device. Rezultatele (x,y,confidence) + device_group_id
+   sunt asamblate intr-un results_df nou cu exact coloanele pe care
+   render_output.py (US-007) le asteapta (device_group_id/x/y/confidence).
+
+3. Ordinea reala a pipeline-ului (dupa investigare, difera usor de ordinea
+   naiva "extract -> audit -> match"): match_devices trebuie rulat INAINTE
+   de audit_observability, pentru ca audit_observability grupeaza pe
+   `device_group_id`, coloana care nu exista decat dupa match_devices.
+   Ordinea implementata: extract_windowed_packets -> match_devices (adauga
+   device_group_id) -> audit_observability (Step 0, gateway triangulabil
+   >=3 colturi, pe coloana device_group_id) -> estimate_position (doar pt
+   id-urile triangulabile) -> render_position_table + render_position_map.
+   AC-ul original lista audit inaintea lui match_devices ca ordine
+   conceptuala Step 0, dar tehnic Step 0 (numararea colturilor distincte per
+   identitate) NU poate rula fara ca identitatile sa fi fost deja rezolvate
+   de match_devices -- altfel ai numara pe mac_or_lap brut, nu pe
+   identitatea rezolvata ceruta de contractul audit_observability (care
+   cere explicit coloana device_group_id, nu mac_or_lap). Nu e o
+   discrepanta intre povesti, e o dependinta de date reala.
+
+DESCOPERIRE IMPORTANTA (verificata cu rulare reala pe fixture, nu presupusa):
+- Cu corner_schedule real (ferestrele suprapuse din conftest), fixture-ul
+  tiny_btle_sample.pcap (50 pachete) produce 108 randuri dupa extract_windowed_packets:
+  stanga_sus=50, stanga_jos=50, dreapta_jos=8, dreapta_sus=0 (empty_windows).
+  Mai multe mac_or_lap ating 3 colturi distincte (stanga_sus+stanga_jos+dreapta_jos)
+  gratie ferestrelor care se suprapun -- deci exista date reale triangulabile
+  pe fixture-ul mic, fara sinteza suplimentara.
+- IMPORTANT: cu mode='per_window', device_group_id = f"{corner_label}_{mac_or_lap}"
+  e structural imposibil sa atinga >=3 colturi distincte (fiecare id contine
+  DEJA numele coltului lui, deci nunique(corner) e mereu 1 per id) ->
+  triangulable_count=0 garantat pentru per_window, indiferent de date. Testat
+  explicit in `test_per_window_and_cross_window_produce_different_device_group_ids`.
+  Doar mode='cross_window' poate produce identitati triangulabile pe acest
+  fixture. Pipeline-ul e2e principal foloseste deci mode='cross_window'.
+
+tests/test_pipeline_e2e.py (3 teste):
+1. test_pipeline_runs_end_to_end_without_exception -- lantul complet ruleaza
+   fara exceptie pe tests/fixtures (director, nu fisier -- extract_windowed_packets
+   asteapta un director cu *.pcap, confirmat citind semnatura reala), audit
+   gaseste >=1 device triangulabil, tabelul are >=1 rand, figura e
+   matplotlib.figure.Figure.
+2. test_pipeline_table_columns_and_map_axes -- coloanele exacte ale tabelului
+   (device_id/x/y/confidence, normalizate de render_position_table) si ca
+   figura are exact 1 axa.
+3. test_per_window_and_cross_window_produce_different_device_group_ids --
+   acelasi df extras, doua apeluri match_devices cu mode diferit -> seturile
+   de device_group_id sunt DIFERITE (assert !=), plus verificarea structurala
+   ca per_window da triangulable_count=0 (dovada suplimentara ca distinctia
+   per_window/cross_window e reala si are consecinte functionale, nu doar
+   nume diferite).
+
+Niciun bug real gasit in pcap_extractor.py/coverage_audit.py/identity.py/
+positioning.py/render_output.py/room_config.py -- toate mismatch-urile au
+fost pur de interfata (nume coloane, forma dict vs DataFrame), rezolvate cu
+glue minimal, surgical, in fisierul de test (fara helper extern nou).
+
+Verificare finala (output proaspat, aceasta iteratie):
+- `.venv/bin/pytest tests/test_pipeline_e2e.py -v` -> 3 passed in 0.38s.
+- `.venv/bin/pytest -q` (suita completa) -> 79 passed in 0.63s (76 anterioare
+  + 3 noi din US-009, nicio regresie; contorul de 76 confirmat cu rulare
+  separata inainte de a incepe lucrul la US-009).
+
+Fisiere create:
+- tests/test_pipeline_e2e.py (nou, 3 teste)
+
+Toate cele 4 criterii de acceptare US-009 verificate cu comenzi reale, output
+proaspat. prd.json actualizat: US-009.passes = true (re-citit fisierul chiar
+inainte de editare pentru a nu suprascrie eventuale modificari concurente de
+la alta poveste -- doar campul US-009.passes a fost schimbat).
+
+=== US-011: Poarta finala de coverage 100% -- COMPLET ===
+
+COMANDA CARE CONSTITUIE POARTA (scop, nu comanda bara din
+.coverage-thresholds.json rulata fara argumente):
+
+  .venv/bin/pytest --cov=coverage_audit --cov=positioning --cov=identity \
+    --cov=room_config --cov=pcap_extractor --cov=render_output \
+    --cov-report=term-missing --cov-fail-under=100
+
+DE CE E SCOPATA ASA (nu bara `pytest --cov --cov-fail-under=100`):
+
+AC #1 al US-011 spune explicit: "pytest --cov --cov-fail-under=100 (comanda
+din .coverage-thresholds.json) ruleaza verde pe toate fisierele
+noi/modificate" -- cuvintele "noi/modificate" limiteaza scopul poartei la
+fisierele atinse de aceasta sesiune de povesti (US-001..US-011), NU la
+intregul depozit. Am rulat comanda bara literala
+(`.venv/bin/python -m pytest --cov --cov-fail-under=100`) ca sa vad exact ce
+raporteaza pe tot repo-ul: coverage total 93.22%, esuata din cauza
+ble_utils.py (29%, 69 stmts/49 miss). ble_utils.py e fisier PRE-EXISTENT
+(anterior acestei sesiuni de lucru, mentionat explicit ca atare in
+instructiunile task-ului si folosit doar indirect, prin
+BLEAnalyzerUtils.estimate_distance, ca glue in tests/test_pipeline_e2e.py si
+tests/test_ground_truth_validation.py din US-009/US-010) -- conform
+instructiunilor explicite ("Do NOT modify pre-existing files' business logic
+to fix unrelated coverage gaps"), NU l-am modificat pentru a inchide acel
+gap. export_analysis.py si verify_cdf.py sunt de asemenea pre-existente si
+nu apar deloc in raportul de coverage (nimic din suita pytest nu le
+importa), deci nu afecteaza poarta.
+
+room_config_widget.py (US-008, fisier NOU din aceasta sesiune) e exclus
+DELIBERAT din masuratoarea de coverage pytest, nu din cauza unui gap
+nedescoperit: US-008 a documentat explicit ca acest wrapper ipywidgets e
+verificat printr-un smoke test manual (nu pytest), coerent cu filozofia
+proiectului mentionata si in CLAUDE.md/AC #2 al US-011 ("Cod greu de
+acoperit ... e izolat in adaptoare subtiri"). Fisierul nu e importat de
+niciun test, deci nu apare in raportul --cov=<module list> de mai sus si nu
+necesita niciun `# pragma: no cover` (nu exista nicio linie masurata de
+exclus). Nu s-a adaugat niciun .coveragerc/omit -- scoparea se face simplu
+prin lista explicita de --cov=<modul> in comanda poartei, care acopera
+exact cele 6 fisiere Python noi/modificate din radacina de aceasta sesiune
+cu logica pura testabila prin pytest.
+
+GAP INCHIS (render_output.py, singura linie neacoperita gasita):
+render_output.py:22 -- ramura `raise ValueError(...)` din
+`_resolve_id_column()`, apelata cand results_df nu contine nicio coloana
+dintre _ID_COLUMN_CANDIDATES. Era o ramura reala, atingibila, netestata (nu
+cod defensiv imposibil de atins) -- am adaugat un test TDD real in
+tests/test_render_output.py:
+`test_render_position_table_raises_when_no_id_column_present` -- construieste
+un DataFrame doar cu x/y/confidence (fara nicio coloana id candidata) si
+verifica `pytest.raises(ValueError, match="device identifier column")`.
+Niciun pragma folosit -- gap-ul a fost inchis printr-un test real, nu ocolit.
+
+VERIFICARE FINALA (output proaspat, aceasta iteratie):
+
+1. Poarta scopata (comanda de mai sus):
+```
+........................................................................ [ 82%]
+...............                                                          [100%]
+================================ tests coverage ================================
+_______________ coverage: platform linux, python 3.14.6-final-0 ________________
+
+Name                Stmts   Miss  Cover   Missing
+-------------------------------------------------
+coverage_audit.py      16      0   100%
+identity.py            71      0   100%
+pcap_extractor.py      62      0   100%
+positioning.py         13      0   100%
+render_output.py       26      0   100%
+room_config.py         12      0   100%
+-------------------------------------------------
+TOTAL                 200      0   100%
+Required test coverage of 100% reached. Total coverage: 100.00%
+87 passed in 0.60s
+```
+
+2. `.venv/bin/pytest -q` (suita completa) -> 87 passed in 0.55s (86 anterioare
+   + 1 test nou din US-011, nicio regresie).
+
+Fisiere modificate:
+- tests/test_render_output.py (+1 test: test_render_position_table_raises_when_no_id_column_present)
+
+Toate cele 3 criterii de acceptare US-011 verificate cu comenzi reale, output
+proaspat, niciun test skip/xfail, niciun pragma nou adaugat. prd.json
+actualizat: US-011.passes = true (re-citit fisierul chiar inainte de editare).
+
+=== POST-REVIEW FIX: architect findings #1 (NaN phantom positions) and #2 (window-overlap disclosure) -- COMPLET ===
+
+Remediere post-hoc a poartii de review architect (cele 11 povesti Ralph raman
+neschimbate ca scop -- NU s-a atins prd.json, per instructiuni explicite;
+aceasta e o poarta de calitate obligatorie, nu o poveste noua).
+
+--- Finding #1 (HIGH): NaN RSSI produce pozitii fantoma, incalca AC explicit ---
+
+Bug confirmat inainte de fix: `distance is not None` e True pentru
+`float('nan')` in Python (NaN nu e None), deci predicatul de validitate din
+estimate_position() (positioning.py) trata distantele NaN ca valide.
+Rezultat: estimate_position({a: nan, b: nan, c: nan}, coords) intorcea
+(nan, nan, '3/4') -- o pozitie numerica fantoma, in loc de flag-ul explicit
+cerut de plan ("functia nu trebuie sa produca o pozitie falsa -- returneaza
+None/NaN + flag").
+
+Fix (positioning.py, functia estimate_position, filtrul `valid`):
+predicatul de validitate a devenit
+`distance is not None and not math.isnan(distance)` (adaugat `import math`
+la varful fisierului). Colturile cu distanta NaN sunt acum excluse exact ca
+cele lipsa: daca raman >=3 colturi reale, triangularea foloseste doar acelea
+(confidence reflecta corect numaratorul redus, ex. "3/4"); daca raman <3,
+cade pe calea deja existenta (None, None, 'insufficient_corners'). Nicio
+alta ramura a functiei nu s-a schimbat (formula de ponderare, EPSILON,
+imutabilitatea -- neatinse).
+
+TDD: tests/test_estimate_position.py, 5 teste noi:
+- test_all_nan_distances_returns_insufficient_corners_not_phantom_position
+  (cazul exact raportat de architect, 3 chei toate NaN)
+- test_nan_corners_are_excluded_like_missing_ones_when_enough_valid_remain
+  (3 valide + 1 NaN -> confidence '3/4', pozitie reala non-NaN)
+- test_nan_plus_missing_below_threshold_is_still_insufficient_corners
+- clasa TestDistanceSpread (4 teste, vezi finding #2 mai jos)
+RED confirmat manual inainte de fix (rulare `.venv/bin/python -c` cu codul
+vechi arata (nan, nan, '3/4')), apoi GREEN dupa fix. Cele 9 cazuri
+pre-existente din US-003 (echidistant, aproape de colt, 3/4, 2/4
+insuficient, toate lipsa, imutabilitate, hull convex, pull monoton, distanta
+zero) raman toate verzi, neschimbate.
+
+--- Finding #2 (HIGH): artefact de suprapunere ferestre nedivulgat in output ---
+
+Context confirmat: ferestrele corner_schedule se suprapun puternic (20 min,
+decalate 5 min) -- pcap_extractor.py emite corect (per US-006, prin design)
+un rand per (pachet x fereastra suprapusa), deci acelasi device poate primi
+RSSI aproape identic la mai multe "colturi" care sunt de fapt acelasi pachet
+fizic relabelat. Pozitia rezultata din centroidul ponderat e atunci un
+artefact geometric de suprapunere temporala, nu triangulare spatiala reala
+-- si nimic in output nu dezvaluia asta. NU s-a atins pcap_extractor.py (nu
+e un bug, e comportamentul corect al ferestrelor suprapuse, per AC-ul
+propriu al US-006) -- fix-ul e strict de divulgare/observabilitate.
+
+Fix parte 1 (semnal opt-in de variatie -- positioning.py):
+functie noua `distance_spread(corner_distances: dict) -> Optional[float]`,
+independenta de estimate_position (nu o modifica, nu-i schimba semnatura de
+retur -- ar fi rupt toate apelurile existente de tip `x, y, confidence =
+estimate_position(...)`). Calculeaza varianta populatiei distantelor
+utilizabile (exclude None/NaN, acelasi filtru ca estimate_position).
+Returneaza None (nu 0.0) pentru <2 distante utilizabile (varianta
+nedefinita). Niciun prag fix de "asta e suprapunere" impus in cod --
+docstring-ul documenteaza explicit ca pragul "suspect de uniform" depinde de
+zgomotul RSSI real al mediului si ramane la latitudinea apelantului (decizie
+explicita, per cerinta task-ului: "if the plan doesn't prescribe one,
+implement the simplest honest solution... so downstream code MUST make a
+decision rather than silently trusting the number"). 4 teste noi in
+TestDistanceSpread (test_estimate_position.py): varianta zero pentru
+distante uniforme, varianta pozitiva pentru distante variate, ignora
+None/NaN, None pentru <2 valori utilizabile.
+
+Fix parte 2 (mai important -- divulgarea matching_fraction, render_output.py):
+identity.match_devices() (US-004) calculeaza deja
+`result.attrs["matching_fraction"]` pentru mode='cross_window', dar aceasta
+metrica nu era niciodata afisata downstream de render_position_table/
+render_position_map (US-007) -- exact gap-ul semnalat de architect
+("the report must show the cross_window matching fraction, already
+computed... but never displayed"). Fix surgical, fara redesign:
+- render_position_table(results_df, matching_fraction=None) -- parametru
+  nou opt-in (implicit None, deci toate apelurile existente raman
+  neschimbate in comportament). Cand furnizat, e stampilat pe
+  `table.attrs["matching_fraction"]` -- vizibil oricarui cod care
+  inspecteaza tabelul rezultat, coerent cu conventia .attrs deja folosita in
+  pcap_extractor.py/identity.py pentru metadate non-coloana.
+- render_position_map(results_df, room_config, matching_fraction=None) --
+  acelasi parametru opt-in; cand furnizat, e afisat direct in titlul
+  figurii (`ax.set_title(f"cross-window identity matching fraction:
+  {matching_fraction:.0%}")`) -- vizibil oricui priveste harta randata, nu
+  doar cod care inspecteaza attrs. Cand None (ex. mode='per_window', care nu
+  face matching cross-window si nu seteaza deloc attrs), titlul ramane gol
+  -- nu se inventeaza o valoare falsa.
+- tests/test_pipeline_e2e.py: `_run_pipeline()` acum extrage
+  `matched.attrs.get("matching_fraction")` din rezultatul match_devices() si
+  il paseaza explicit catre ambele functii de randare -- inchide bucla de
+  la calculul metricii (US-004) pana la afisarea ei in output-ul final al
+  pipeline-ului (US-007), care era ruptura raportata de architect. Test nou
+  `test_pipeline_discloses_cross_window_matching_fraction_in_output` verifica
+  end-to-end ca table.attrs["matching_fraction"] e populat cu o valoare reala
+  in [0,1] SI ca titlul figurii contine exact acea valoare formatata.
+
+Identity.py NEATINS: matching_fraction era deja calculata si expusa corect
+prin .attrs (US-004); problema era exclusiv lipsa de propagare in aval, nu
+un defect in calculul ei. Nu a fost nevoie de nicio schimbare acolo.
+
+Nota: instrumentul de identificare cross_window degenereaza in `anon_{mac}`
+pe date reale pentru ca pcap_extractor.py nu populeaza adv_name/
+service_uuids (nicio extractie de nume/UUID din advertising implementata) --
+confirmat ca limitare exacta si asteptata per progress.txt (US-004/US-006),
+NU un bug de reparat aici; NU s-a atins pcap_extractor.py per cerinta
+explicita a task-ului de remediere.
+
+VERIFICARE FINALA (output proaspat, aceasta iteratie):
+
+1. Suita completa: `.venv/bin/pytest -q` -> 99 passed in 0.55s (87 anterioare
+   + 12 noi: 7 in test_estimate_position.py [3 pt finding #1 +
+   4 in clasa TestDistanceSpread pt finding #2 partea 1], 4 in
+   test_render_output.py pt finding #2 partea 2, 1 in test_pipeline_e2e.py
+   [test end-to-end de divulgare -- `_run_pipeline` a fost si el modificat
+   pentru wiring, dar fara test nou suplimentar dincolo de acesta]). Nicio
+   regresie.
+
+2. Poarta de coverage scopata (aceeasi comanda ca US-011):
+```
+.venv/bin/pytest --cov=coverage_audit --cov=positioning --cov=identity \
+  --cov=room_config --cov=pcap_extractor --cov=render_output \
+  --cov-report=term-missing --cov-fail-under=100
+
+Name                Stmts   Miss  Cover   Missing
+-------------------------------------------------
+coverage_audit.py      16      0   100%
+identity.py            71      0   100%
+pcap_extractor.py      62      0   100%
+positioning.py         20      0   100%
+render_output.py       30      0   100%
+room_config.py         12      0   100%
+-------------------------------------------------
+TOTAL                 211      0   100%
+Required test coverage of 100% reached. Total coverage: 100.00%
+99 passed in 0.60s
+```
+   (positioning.py a crescut de la 13 la 20 stmts -- functia distance_spread
+   noua; render_output.py de la 26 la 30 stmts -- parametrii matching_fraction
+   noi; ambele 100% acoperite, niciun pragma folosit.)
+
+3. Re-verificare manuala directa a cazului exact raportat de architect
+   (`.venv/bin/python -c "..."`, output real):
+```
+all-NaN 3 keys result: (None, None, 'insufficient_corners')
+all-NaN 4 keys result: (None, None, 'insufficient_corners')
+mixed 3 valid + 1 NaN result: (2.6666666666666665, 2.0, '3/4')
+```
+   Inainte de fix, primele doua ar fi intors (nan, nan, '3/4') /
+   (nan, nan, '4/4') -- comportamentul fantoma raportat de architect e
+   confirmat disparut.
+
+Fisiere modificate:
+- positioning.py (`import math`; predicat validitate NaN-safe in
+  estimate_position; functie noua distance_spread; docstring actualizat)
+- render_output.py (parametru opt-in matching_fraction=None pe
+  render_position_table si render_position_map; propagare in title)
+- tests/test_estimate_position.py (+5 teste: 3 pt finding #1, clasa
+  TestDistanceSpread cu 4 teste pt finding #2 partea 1 -- 7 teste noi net,
+  vezi cod pentru numarul exact)
+- tests/test_render_output.py (+4 teste pt finding #2 partea 2: default
+  None, matching_fraction furnizat pe tabel, titlu cu procent pe harta,
+  titlu gol cand nefurnizat)
+- tests/test_pipeline_e2e.py (`_run_pipeline` acum extrage si paseaza
+  matching_fraction; +1 test end-to-end de divulgare)
+
+Niciun fisier interzis atins (pcap_extractor.py, coverage_audit.py,
+room_config.py, room_config_widget.py -- toate neschimbate). prd.json
+NEATINS (remediere post-hoc a poartii de review, nu poveste noua) -- ambele
+findings HIGH ale architect-ului sunt acum rezolvate si verificate cu output
+real, nu presupuneri.
+
+=== ai-slop-cleaner pass -- COMPLET ===
+Scope: coverage_audit.py, positioning.py, identity.py, room_config.py, room_config_widget.py, pcap_extractor.py, render_output.py + teste asociate.
+Rezultat: codul era deja curat (fisiere mici, docstring-uri care explica DE CE nu CE, fara duplicare/wrappere inutile/abstractii speculative). Singura modificare: eliminat `import pandas as pd` neutilizat din coverage_audit.py.
+Verificare finala: `.venv/bin/pytest -q` -> 99 passed. `.venv/bin/pytest --cov=coverage_audit --cov=positioning --cov=identity --cov=room_config --cov=pcap_extractor --cov=render_output --cov-fail-under=100` -> TOTAL 210 stmts, 0 miss, 100%.
+
+=== RALPH RUN COMPLET ===
+Toate cele 11 povesti (US-001..US-011) trec. Review de arhitect executat (mandatory Step 7) -- a gasit 2 probleme HIGH (pozitii fantoma NaN, lipsa disclosure pentru artefactul de suprapunere a ferestrelor) si 4 MEDIUM/LOW, remediate integral pentru cele HIGH. Deslop pass executat (Step 7.5). Regresie finala verificata verde (99 teste, 100% coverage pe modulele noi).
+Riscuri MEDIUM ramase, documentate dar nerezolvate (scop viitor optional): schema drift corner_label/corner lipit doar in test_pipeline_e2e.py (nu la sursa); nu exista un modul de pipeline importabil (glue-ul traieste doar in test); timestamp-urile din pcap_extractor.py sunt dependente de fusul orar local al masinii (Europe/Bucharest), nu explicit UTC -- testul e2e ar putea pica pe alta masina.
+
+=== Webapp Streamlit (pipeline.py + app.py) -- COMPLET ===
+Cerinta: webapp Streamlit ce combina configurarea salii (echivalent room_config_widget.py, dar web) si vizualizarea rezultatelor triangularii (harta+tabel, echivalent render_output.py, cu disclosure matching_fraction). Executie orchestrata: planner -> 3 review-uri adversariale in paralel (fezabilitate/completitudine/scop, via agentii oh-my-claudecode: critic/architect/code-reviewer, plugin-ul metaswarm real nefiind instalat) -> TDD -> implementare -> validare.
+
+Gap arhitectural inchis: glue-ul de pipeline traia doar in tests/test_pipeline_e2e.py (_build_results_df/_run_pipeline private). Extras in pipeline.py (run_triangulation_pipeline, _build_results_df, PipelineResult namedtuple), reutilizat acum atat de test_pipeline_e2e.py (refactorizat sa importe din pipeline.py) cat si de app.py.
+
+Decizii cheie din review:
+- mode pentru match_devices() derivat mereu din room_config.corner_mode (nu parametru separat) -- elimina riscul de divergenta semnalat de scope review.
+- extraction_errors/empty_windows capturate din attrs-ul df-ului EXTRAS, inainte de match_devices() (care returneaza alt df) -- gasit de feasibility review.
+- 2 ramuri de cod eliminate ca fiind moarte/neatinse in practica: except ValueError la run_triangulation_pipeline in app.py (imposibil, corner_mode e deja validat de build_room_config la acelasi set de valori) si caption-ul "matching_fraction N/A" pe ramura de succes (per_window e structural intotdeauna 0 dispozitive triangulabile, deci acea combinatie nu poate aparea).
+
+app.py: formular sala (build_room_config, validare ValueError->st.error), 8 campuri datetime (date_input+time_input combinate) pentru ferestrele de captura per colt cu validare start<end, input cale pcap, buton ce ruleaza run_triangulation_pipeline si afiseaza tabel+harta (st.dataframe/st.pyplot) + avertismente pentru erori de extragere/ferestre goale + info pentru rezultat gol.
+
+Teste noi: tests/test_pipeline.py (8 teste, unitare pe pipeline.py) + tests/test_app.py (8 teste, AppTest pe app.py, acopera toate ramurile reale ale UI-ului). Total suita: 115 teste, toate verzi.
+
+Coverage: gate-ul scopat extins acum la 8 module (coverage_audit, positioning, identity, room_config, pcap_extractor, render_output, pipeline, app) -- 298 stmts, 0 miss, 100%.
+
+Verificare manuala: `.venv/bin/streamlit run app.py` pornit headless pe port 8765, raspuns HTTP 200, fara erori in log, oprit curat.
+
+Dependinta noua: streamlit==1.59.2 (instalat in .venv, nu inregistrat inca intr-un requirements.txt -- proiectul nu are unul explicit gestionat in aceasta sesiune).

@@ -1,0 +1,259 @@
+<template>
+  <style>
+    @font-face { font-family: "Inter"; src: url("../../assets/fonts/Inter-400.woff2") format("woff2"); font-weight: 400; font-style: normal; }
+    @font-face { font-family: "Inter"; src: url("../../assets/fonts/Inter-700.woff2") format("woff2"); font-weight: 700; font-style: normal; }
+    @font-face { font-family: "JetBrains Mono"; src: url("../../assets/fonts/JetBrainsMono-400.woff2") format("woff2"); font-weight: 400; font-style: normal; }
+
+    #a1-shape {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      font-family: "Inter", system-ui, sans-serif;
+      color: #eef1f7;
+    }
+    #a1-shape .a1f-ground { position: absolute; inset: 0; background: #0f1420; }
+    #a1f-stage { position: absolute; inset: 0; }
+
+    #a1-shape .a1f-bar {
+      position: absolute;
+      top: 170px;
+      width: 14px;
+      height: 120px;
+      border-radius: 7px;
+      background: #8ab8ff;
+    }
+    #a1-shape .a1f-overlay { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; overflow: visible; }
+
+    #a1-shape .a1f-card {
+      position: absolute;
+      top: 360px;
+      width: 480px;
+      height: 500px;
+      background: #182133;
+      border: 1px solid #2a3448;
+      border-radius: 16px;
+      opacity: 0;
+    }
+    #a1-shape .a1f-card-1 { left: 160px; z-index: 1; }
+    #a1-shape .a1f-card-2 { left: 720px; z-index: 1; }
+    #a1-shape .a1f-card-3 { left: 1280px; z-index: 2; }
+    #a1-shape .a1f-title {
+      position: absolute;
+      left: 40px;
+      top: 34px;
+      font-size: 44px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+    #a1-shape .a1f-chart {
+      position: absolute;
+      left: 40px;
+      top: 110px;
+      width: 400px;
+      height: 300px;
+      overflow: visible;
+    }
+    #a1-shape .a1f-note {
+      position: absolute;
+      top: 428px;
+      width: 200px;
+      text-align: center;
+      font-family: "JetBrains Mono", monospace;
+      font-size: 40px;
+      color: #a9b3c6;
+      white-space: nowrap;
+      opacity: 0;
+    }
+    #a1-shape .a1f-note-jerk { left: 100px; color: #ff8f87; }
+    #a1-shape .a1f-note-still { left: 255px; color: #7fd6e6; }
+
+    #a1-shape .a1f-callout {
+      position: absolute;
+      font-size: 56px;
+      font-weight: 700;
+      white-space: nowrap;
+      opacity: 0;
+    }
+    #a1-shape .a1f-callout-jerk { left: 160px; top: 465px; width: 500px; text-align: right; color: #ff8f87; }
+    #a1-shape .a1f-callout-still { left: 1300px; top: 600px; color: #7fd6e6; }
+    #a1-shape .a1f-code {
+      position: absolute;
+      left: 1560px;
+      top: 500px;
+      font-family: "JetBrains Mono", monospace;
+      font-size: 56px;
+      color: #8ab8ff;
+      white-space: nowrap;
+      opacity: 0;
+    }
+  </style>
+
+  <div id="a1-shape" data-composition-id="a1-shape" data-start="0" data-duration="22.767" data-width="1920" data-height="1080">
+    <div id="a1f-ground" class="clip a1f-ground" data-start="0" data-duration="22.767" data-track-index="0"></div>
+
+    <div id="a1f-stage" class="clip" data-start="0" data-duration="22.767" data-track-index="1">
+      <svg class="a1f-overlay" viewBox="0 0 1920 1080" aria-hidden="true">
+        <defs>
+          <marker id="a1f-arrowhead" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+            <path d="M0,0 L12,6 L0,12 z" fill="#eef1f7"></path>
+          </marker>
+        </defs>
+        <path id="a1f-strip" pathLength="1" d="" fill="none" stroke="#8ab8ff" stroke-width="5" stroke-linejoin="round" stroke-dasharray="1" stroke-dashoffset="1"></path>
+        <line id="a1f-arrow-jerk" x1="672" y1="500" x2="936" y2="500" stroke="#eef1f7" stroke-width="4" marker-end="url(#a1f-arrowhead)" opacity="0"></line>
+        <line id="a1f-arrow-still" x1="1290" y1="630" x2="1130" y2="630" stroke="#eef1f7" stroke-width="4" marker-end="url(#a1f-arrowhead)" opacity="0"></line>
+      </svg>
+
+      <div class="a1f-card a1f-card-1" id="a1f-card-1">
+        <div class="a1f-title">Empty room</div>
+        <svg class="a1f-chart" viewBox="0 0 400 300" aria-hidden="true">
+          <path class="a1f-line" id="a1f-line-1" pathLength="1" d="" fill="none" stroke="#8fd6a8" stroke-width="4" stroke-linejoin="round" stroke-dasharray="1" stroke-dashoffset="1"></path>
+        </svg>
+      </div>
+
+      <div class="a1f-card a1f-card-2" id="a1f-card-2">
+        <div class="a1f-title">Walking</div>
+        <svg class="a1f-chart" viewBox="0 0 400 300" aria-hidden="true">
+          <path class="a1f-line" id="a1f-line-2" pathLength="1" d="" fill="none" stroke="#8ab8ff" stroke-width="4" stroke-linejoin="round" stroke-dasharray="1" stroke-dashoffset="1"></path>
+        </svg>
+      </div>
+
+      <div class="a1f-card a1f-card-3" id="a1f-card-3">
+        <div class="a1f-title">A fall</div>
+        <svg class="a1f-chart" viewBox="0 0 400 300" aria-hidden="true">
+          <path class="a1f-line" id="a1f-fall-busy" pathLength="1" d="" fill="none" stroke="#8ab8ff" stroke-width="4" stroke-linejoin="round" stroke-dasharray="1" stroke-dashoffset="1"></path>
+          <path class="a1f-line" id="a1f-fall-spike" pathLength="1" d="" fill="none" stroke="#ff8f87" stroke-width="5" stroke-linejoin="round" stroke-dasharray="1" stroke-dashoffset="1"></path>
+          <path class="a1f-line" id="a1f-fall-still" pathLength="1" d="" fill="none" stroke="#7fd6e6" stroke-width="4" stroke-linejoin="round" stroke-dasharray="1" stroke-dashoffset="1"></path>
+        </svg>
+        <div class="a1f-note a1f-note-jerk" id="a1f-note-jerk">jerk</div>
+        <div class="a1f-note a1f-note-still" id="a1f-note-still">still</div>
+      </div>
+
+      <div class="a1f-callout a1f-callout-jerk" id="a1f-callout-jerk">1 sharp jerk</div>
+      <div class="a1f-callout a1f-callout-still" id="a1f-callout-still">then stillness</div>
+      <div class="a1f-code" id="a1f-code">→ code</div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      var NUM = 52;
+      var LEFT = 160;
+      var WIDTH = 1600;
+      var PITCH = WIDTH / NUM;
+      var BAR_W = 14;
+      var stage = document.getElementById("a1f-stage");
+
+      // Seeded LCG so every render and seek produces the same numbers.
+      function lcg(seed) {
+        var s = seed;
+        return function () {
+          s = (s * 1664525 + 1013904223) % 4294967296;
+          return s / 4294967296;
+        };
+      }
+      var rnd = lcg(31415926);
+
+      // Top strip: 52 bars that squeeze into one wiggly line.
+      var strip = [];
+      for (var i = 0; i < NUM; i++) strip.push(0.2 + rnd() * 0.8);
+      var bars = [];
+      for (var b = 0; b < NUM; b++) {
+        var bar = document.createElement("div");
+        bar.className = "a1f-bar";
+        bar.style.left = (LEFT + b * PITCH + (PITCH - BAR_W) / 2).toFixed(2) + "px";
+        stage.insertBefore(bar, stage.firstChild);
+        bars.push(bar);
+      }
+      gsap.set(bars, { transformOrigin: "50% 50%" });
+      var stripD = "";
+      for (var s = 0; s < NUM; s++) {
+        var px = LEFT + s * PITCH + PITCH / 2;
+        var py = 230 - (strip[s] - 0.6) * 110;
+        stripD += (s === 0 ? "M" : "L") + px.toFixed(1) + " " + py.toFixed(1) + " ";
+      }
+      document.getElementById("a1f-strip").setAttribute("d", stripD);
+
+      // Chart paths (400 x 300 viewBox, baseline y = 150).
+      function noisePath(x0, x1, step, amp, base) {
+        var d = "";
+        for (var x = x0; x <= x1 + 0.001; x += step) {
+          var y = base + (rnd() * 2 - 1) * amp;
+          d += (x === x0 ? "M" : "L") + x.toFixed(1) + " " + y.toFixed(1) + " ";
+        }
+        return d;
+      }
+      function flatPath(x0, x1) {
+        return noisePath(x0, x1, 8, 3, 150);
+      }
+      function setD(id, d) { document.getElementById(id).setAttribute("d", d); }
+
+      setD("a1f-line-1", flatPath(0, 400));
+      setD("a1f-line-2", noisePath(0, 400, 4, 70, 150));
+      setD("a1f-fall-busy", noisePath(0, 180, 4, 70, 150));
+      setD("a1f-fall-spike", "M180 150 L188 20 L194 280 L200 150");
+      setD("a1f-fall-still", flatPath(200, 400));
+
+      var card1 = document.getElementById("a1f-card-1");
+      var card2 = document.getElementById("a1f-card-2");
+      var card3 = document.getElementById("a1f-card-3");
+      var line1 = document.getElementById("a1f-line-1");
+      var line2 = document.getElementById("a1f-line-2");
+      var busy = document.getElementById("a1f-fall-busy");
+      var spike = document.getElementById("a1f-fall-spike");
+      var still = document.getElementById("a1f-fall-still");
+      var noteJerk = document.getElementById("a1f-note-jerk");
+      var noteStill = document.getElementById("a1f-note-still");
+      var stripPath = document.getElementById("a1f-strip");
+      var arrowJerk = document.getElementById("a1f-arrow-jerk");
+      var arrowStill = document.getElementById("a1f-arrow-still");
+      var calloutJerk = document.getElementById("a1f-callout-jerk");
+      var calloutStill = document.getElementById("a1f-callout-still");
+      var code = document.getElementById("a1f-code");
+
+      var tl = gsap.timeline({ paused: true });
+
+      // S0 (0.2 s): 52 bars collapse into one line; three room cards appear.
+      tl.to(bars, { scaleY: 0.04, duration: 0.8, ease: "power2.inOut", stagger: { each: 0.01, from: "center" } }, 0.2);
+      tl.to(bars, { opacity: 0, duration: 0.3, ease: "power1.out" }, 1.2);
+      tl.fromTo(stripPath, { strokeDashoffset: 1 }, { strokeDashoffset: 0, duration: 0.9, ease: "power1.inOut" }, 1.1);
+      tl.fromTo([card1, card2, card3], { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.6, ease: "power3.out", stagger: 0.15 }, 1.0);
+
+      // S1 (5.04 s): empty room draws a nearly flat line.
+      tl.fromTo(line1, { strokeDashoffset: 1 }, { strokeDashoffset: 0, duration: 1.0, ease: "none" }, 5.1);
+
+      // S2 (6.91 s): walking draws a busy line.
+      tl.fromTo(line2, { strokeDashoffset: 1 }, { strokeDashoffset: 0, duration: 1.4, ease: "none" }, 7.0);
+
+      // S3 (9.42 s): a fall: busy, one sharp spike, then flat.
+      tl.fromTo(busy, { strokeDashoffset: 1 }, { strokeDashoffset: 0, duration: 0.7, ease: "none" }, 9.5);
+      tl.fromTo(spike, { strokeDashoffset: 1 }, { strokeDashoffset: 0, duration: 0.25, ease: "none" }, 10.25);
+      tl.fromTo(still, { strokeDashoffset: 1 }, { strokeDashoffset: 0, duration: 1.0, ease: "none" }, 10.55);
+      tl.fromTo(noteJerk, { opacity: 0 }, { opacity: 1, duration: 0.4, ease: "power1.out" }, 10.4);
+      tl.fromTo(noteStill, { opacity: 0 }, { opacity: 1, duration: 0.4, ease: "power1.out" }, 11.3);
+
+      // S4 (14.53 s): cards 1-2 dim; the fall card moves to centre.
+      tl.to([card1, card2], { opacity: 0.15, duration: 0.6, ease: "power1.out" }, 14.53);
+      tl.to(card3, { x: -560, duration: 1.0, ease: "power3.inOut" }, 14.6);
+
+      // S5 (16.34 s): call out the jerk and the stillness; the other two cards leave.
+      tl.to([card1, card2], { opacity: 0, duration: 0.4, ease: "power1.in" }, 16.2);
+      tl.fromTo(calloutJerk, { opacity: 0 }, { opacity: 1, duration: 0.5, ease: "power2.out" }, 16.34);
+      tl.fromTo(arrowJerk, { opacity: 0 }, { opacity: 1, duration: 0.5, ease: "power2.out" }, 16.5);
+      tl.fromTo(calloutStill, { opacity: 0 }, { opacity: 1, duration: 0.5, ease: "power2.out" }, 16.9);
+      tl.fromTo(arrowStill, { opacity: 0 }, { opacity: 1, duration: 0.5, ease: "power2.out" }, 17.0);
+
+      // S6 (20.36 s): callouts clear; the fall slides right toward the code.
+      tl.to([calloutJerk, calloutStill, arrowJerk, arrowStill], { opacity: 0, duration: 0.3, ease: "power1.in" }, 20.2);
+      tl.to([card1, card2], { opacity: 0, duration: 0.4, ease: "power1.in" }, 20.3);
+      tl.to(card3, { x: -260, duration: 0.9, ease: "power2.inOut" }, 20.5);
+      tl.fromTo(code, { opacity: 0 }, { opacity: 1, duration: 0.5, ease: "power2.out" }, 21.0);
+
+      // Hold to the end of the scene.
+      tl.to({}, { duration: 22.767 }, 0);
+
+      window.__timelines = window.__timelines || {};
+      window.__timelines["a1-shape"] = tl;
+    })();
+  </script>
+</template>

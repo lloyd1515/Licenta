@@ -1,0 +1,13 @@
+{
+  "active": true,
+  "started_at": "2026-07-31T16:22:14.164Z",
+  "current_phase": "executing",
+  "original_prompt": "/ultragoal",
+  "session_id": "e7174772-7112-4e06-b088-ce4b44585f92",
+  "project_path": "/home/vlads4r4/dev/Licenta",
+  "reinforcement_count": 2,
+  "max_reinforcements": 50,
+  "awaiting_confirmation": true,
+  "awaiting_confirmation_set_at": "2026-07-31T16:22:14.164Z",
+  "last_checked_at": "2026-07-31T16:26:11.629Z"
+}
