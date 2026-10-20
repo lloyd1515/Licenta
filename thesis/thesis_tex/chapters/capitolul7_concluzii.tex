@@ -1,0 +1,30 @@
+\chapter{Concluzii și Direcții Viitoare}
+\label{chap:concluzii}
+
+\section{Sinteza Realizărilor}
+În cadrul acestei teze de licență a fost proiectat, implementat și validat experimental un sistem complet și autonom de monitorizare ambientală radio și detecție în timp real a căderilor umane, bazat pe extragerea informației despre starea canalului (CSI) pe o rețea distribuită de microcontrolere ESP32 și un analizor radio Ubertooth One.
+
+Principalele obiective atinse sunt:
+\begin{enumerate}
+    \item \textbf{Dezvoltarea platformei hardware low-cost:} Demonstrarea faptului că hardware-ul comercial de larg consum (trei plăci ESP32 de sub 5 euro și un modul Ubertooth One) poate substitui cu succes echipamentele de laborator din literatura de profil (stații USRP sau plăci Intel 5300) ce costă mii de euro.
+    \item \textbf{Optimizarea firmware-ului embedded:} Implementarea modului promiscuu în ESP-IDF v5 și a structurilor de captură CSI pe 52 de subpurtătoare active, cu transmisie serială neblocantă la 921600 baud și eșantionare la 250 Hz.
+    \item \textbf{Conceperea lanțului analitic DSP:} Integrarea filtrelor Hampel, Butterworth trece-bandă (0.2--12 Hz) și PCA pe prima componentă reprezentativă ($PC_1$), obținând un semnal cu raport semnal-zgomot ridicat și imunitate la perturbațiile termice sau de rețea.
+    \item \textbf{Proiectarea clasificatorului determinist FSM:} Formularea criteriului matematic de colaps simultan pe legăturile Fresnel, validat prin analiza spectrală micro-Doppler ($>35\text{ Hz}$) și monitorizarea ferestrei de imobilitate post-impact ($2.54\text{ s}$).
+    \item \textbf{Construirea aplicației desktop PyQt6:} Crearea unei interfețe grafice de înaltă performanță (50--60 FPS) care integrează o hartă 2D interactivă a încăperii cu elipsoide Fresnel dinamice, avatar uman animat, cascadă spectrală waterfall, spectru Doppler și sistem automat de avertizare vizuală.
+    \item \textbf{Validarea experimentală riguroasă:} Colectarea și evaluarea datelor pe bancul de test fizic în trei scenarii (Test A, Test B, Test C), demonstrând o sensibilitate de 100\%, o specificitate de 98.5\% și o latență de decizie de doar 2.54 secunde, fără nicio alarmă falsă la mersul normal.
+\end{enumerate}
+
+\section{Limitări ale Sistemului}
+Deși performanțele obținute sunt excelente, au fost identificate câteva limitări operaționale:
+\begin{itemize}
+    \item \textbf{Scenariul multi-persoană:} Când două sau mai multe persoane se află simultan în încăpere, interferența cumulată a zonelor Fresnel face dificilă atribuirea precisă a mișcărilor către un individ anume, putând masca imobilitatea unei persoane căzute dacă o a doua persoană continuă să meargă.
+    \item \textbf{Sensibilitate la reconfigurarea mobilierului:} Deplasarea unor obiecte masive de mobilier metalic modifică geometria căilor de reflexie statică, cerând o recalibrare scurtă de 10 secunde a pragului de liniște (Test A).
+\end{itemize}
+
+\section{Direcții Viitoare de Cercetare}
+Pornind de la arhitectura modulară dezvoltată, direcțiile viitoare promițătoare de extindere includ:
+\begin{enumerate}
+    \item \textbf{Edge AI pe microcontrolere ESP32-S3:} Portarea etapelor de filtrare Butterworth și a automatului FSM direct pe cipul nodului receptor folosind instrucțiunile vectoriale de procesare a semnalului (DSP Vector Extensions ale ESP32-S3), eliminând complet necesitatea unui calculator gazdă pentru detecție.
+    \item \textbf{Tranziția la Wi-Fi 6 (IEEE 802.11ax):} Utilizarea benzilor de 160 MHz și a modulației OFDMA cu până la 1024 de subpurtătoare, ceea ce va crește rezoluția spațială a zonelor Fresnel la sub 2 centimetri.
+    \item \textbf{Fuziune multisenzorială hibridă:} Integrarea unui modul radar mmWave în banda de 60 GHz pentru discriminarea micro-vibrațiilor toracice (respirație și puls), permițând confirmarea semnelor vitale chiar și atunci când victima este căzută inconștientă la sol.
+\end{enumerate}
