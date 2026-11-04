@@ -156,3 +156,161 @@ Idei importante:
 - "În plus" măsoară depărtarea de linia directă. Nu măsoară apropierea de un nod.
 - Persoana este în afara elipsei albastre când `în plus > L`.
 - Amplitudine mică (`0.05`) înseamnă că simulatorul vede greu mișcarea persoanei.
+
+
+# Sesiunea din 4 noiembrie 2026: main.c pe placă
+
+Întrebările vin din două conversații. Conversația originală acoperă punctul 3, placa reală și comenzile. Conversația ramificată acoperă punctul 4.
+
+## Atributul packed (punctul 3)
+Întrebare: ce face `__attribute__((packed))`? Ce octeți interzice?
+
+- Compilatorul adaugă uneori octeți de umplutură, pentru alinierea câmpurilor.
+- În `csi_packet_t`, câmpurile sunt deja aliniate. Umplutura apare doar la sfârșit: 2 octeți.
+- Cu `packed`, mărimea este 138. Fără `packed`, mărimea este 140. PC-ul așteaptă exact 138.
+- `_Static_assert` verifică mărimea la compilare.
+- Quiz: unde apar cei 2 octeți fără `packed`? Răspuns: la sfârșit, după `csi_iq`.
+
+## Ce este `__attribute__`
+- `__attribute__` este o extensie GCC. Ea adaugă o instrucțiune specială la o definiție.
+- Parantezele duble sunt sintaxa GCC. `packed` este numele atributului.
+
+## Little-endian
+- `magic = 0xA55A` apare în memorie ca `5A A5`. Octetul mic vine primul.
+- `timestamp_us = 0x01020304` apare ca `04 03 02 01`.
+- Demo: în `docs/learning/exercitii`, rulați `sh run_packed_demo.sh`.
+
+## Pot rula main.c direct pe PC?
+- Nu. `main.c` are nevoie de ESP-IDF și de procesorul ESP32 (Xtensa).
+- Harness-ul din `docs/learning/ilustrat/debug-harness` compilează `main.c` nemodificat, cu biblioteci false.
+- Radioul, rețeaua și FreeRTOS sunt simulate. GDB poate opri codul pe fiecare linie.
+
+## Depanare live pe placă
+Întrebare: dacă conectez placa, pot vedea live ce se întâmplă?
+
+- Placa este un ESP32 clasic, cu punte USB CP210x. Ea nu are JTAG prin USB.
+- Fără JTAG, nu puteți pune puncte de oprire pe placă.
+- Variante: `ESP_LOGI` în cod, harness pe PC, adaptor ESP-Prog (JTAG extern), GDBStub (netestat).
+- CAUTION: Nu opriți placa mult timp într-un punct de oprire. Oprirea blochează radioul și conexiunea cu AP.
+
+## ESP-IDF
+- ESP-IDF este kitul oficial Espressif pentru ESP32.
+- El conține FreeRTOS, driverul Wi-Fi, lwIP, biblioteca de log, NVS, compilatorul și `idf.py`.
+- `gcc` de pe PC nu compilează pentru ESP32. ESP-IDF aduce compilatorul potrivit.
+- Locuri: `~/esp/esp-idf` (kitul v5.1.7), `~/.espressif` (unelte), `~/esp/csi-node` (fișiere compilate).
+
+## idf.py
+- Unde este? În `~/esp/esp-idf/tools/idf.py`, nu în `src`. `export.sh` îl pune în `PATH`.
+- Ce face? Configurează, compilează, scrie firmware-ul pe placă și arată monitorul serial.
+- `idf.py` nu face singur munca. El pornește `cmake`, `ninja` și `esptool`.
+- De ce Python? `esptool` și uneltele ESP-IDF sunt scrise în Python. Python rulează pe Linux, Windows și macOS.
+
+## Rețeaua Wi-Fi a plăcii
+- ESP32 funcționează doar pe 2,4 GHz. O rețea doar pe 5 GHz nu este vizibilă pentru placă.
+- PC-ul și placa trebuie să fie în aceeași rețea. Broadcast-ul `255.255.255.255` nu trece între rețele.
+- Parola stă în `~/esp/csi-node/wifi.defaults`, în afara repository-ului.
+
+## Cele trei comenzi
+Pregătire: `PY=~/.espressif/python_env/idf5.1_py3.14_env/bin/python`
+
+| Comandă | Ce face |
+|---|---|
+| `python3 asculta.py 5` (în `docs/learning/exercitii`) | Ascultă UDP pe portul 5005. Decodează antetul și primii 8 octeți CSI. |
+| `$PY src/firmware/esp32_csi_node/tools/start_log.py 15` | Jurnalul plăcii, curat și colorat, 15 secunde. |
+| `$PY src/firmware/esp32_csi_node/tools/start_log_raw.py 15` | Tot jurnalul, exact cum vine. |
+| `WIFI_SSID=<rețea> WIFI_PASS=<parolă> bash src/firmware/esp32_csi_node/tools/flash.sh` | Compilează și scrie pe placă. Rezultat scurt, cu bare de progres. |
+| `WIFI_SSID=<rețea> WIFI_PASS=<parolă> bash src/firmware/esp32_csi_node/tools/flash_raw.sh` | La fel, dar cu tot jurnalul `idf.py`. |
+
+Bucla de depanare: editați `main.c`, rulați `flash.sh`, apoi citiți jurnalul sau pachetele.
+
+CAUTION: Nu scrieți un `ESP_LOGI` la fiecare pachet. Folosiți `if (packet.seq % 20 == 0)`. Altfel jurnalul încetinește `on_csi`.
+
+## seq
+- `seq` este numărul de ordine al pachetului. `on_csi` îl crește cu 1 la fiecare pachet.
+- Golurile arată pachete pierdute, în coadă sau în rețea.
+- `seq` are 16 biți. După 65 535, valoarea revine la 0.
+
+## Șablonul `<HBbIH`
+| Literă | Tip C | Octeți | Câmp |
+|---|---|---|---|
+| `<` | — | 0 | Little-endian, fără umplutură |
+| `H` | `uint16_t` | 2 | `magic` |
+| `B` | `uint8_t` | 1 | `node_id` |
+| `b` | `int8_t` | 1 | `rssi_dbm` |
+| `I` | `uint32_t` | 4 | `timestamp_us` |
+| `H` | `uint16_t` | 2 | `seq` |
+
+Literă mare: fără semn. Literă mică: cu semn. Total: 10 octeți de antet.
+
+## Vectorul csi_iq
+- 64 de perechi (Q, I), câte una pentru fiecare subpurtătoare. Fiecare număr este un `int8_t`.
+- Exemplu: `0xFC` = 252. Octeții de la 128 la 255 sunt negativi: 252 − 256 = −4.
+- Amplitudinea este `sqrt(I² + Q²)`. Faza este `atan2(Q, I)`.
+- `asculta.py` afișează doar primii 8 octeți, adică 4 subpurtătoare. Restul sunt în `data[18:138]`.
+- `packets.py` păstrează 52 de subpurtătoare utile: `slice(6, 32)` și `slice(33, 59)`.
+
+## Unde este decodarea?
+- `main.c` nu decodează. `main.c` codează: `on_csi` scrie câmpurile, `sendto` trimite 138 de octeți.
+- PC-ul decodează: `asculta.py:20` și `src/csi/packets.py`, cu `<HBbIH`.
+- CAUTION: Dacă schimbați `csi_packet_t`, schimbați și șablonul Python.
+
+## copy_len
+- `copy_len` este cel mult 128. `csi_iq` are loc doar pentru 128 de octeți.
+- Fără limită, `memcpy` scrie peste alte date.
+
+## Quiz: 5 din 5
+1. `sizeof(csi_packet_t)` cu `packed`: 138.
+2. Primul octet în memorie pentru `0xA55A`: `5A`.
+3. `0xF0` ca `int8_t`: −16 (240 − 256).
+4. Decodarea cu `<HBbIH`: în `asculta.py`, pe PC.
+5. Un gol în `seq`: unul sau mai multe pachete pierdute.
+
+## Jurnalul plăcii
+- Linia `I (4952) CSI_NODE: ...` are nivelul (`I`, `W`, `E`), milisecundele de la pornire, `TAG` și mesajul.
+- Primele linii ROM apar stricate, cu litere lipsă. Acest lucru este normal la pornire.
+- Prima conectare eșuează adesea. A doua reușește, apoi placa primește IP.
+- `log.py` afișează jurnalul serial, nu pachetele CSI. Pachetele merg prin UDP.
+
+## 115200
+- 115200 este viteza consolei seriale, în biți pe secundă (baud).
+- Un octet folosește 10 biți: start, 8 biți de date, stop. Rezultă 11 520 octeți pe secundă.
+- 11 520 B/s = 11,5 KB/s = 0,0115 MB/s = 0,1152 Mb/s.
+- `MB` (B mare) înseamnă megaoctet. `Mb` (b mic) înseamnă megabit. 1 octet = 8 biți.
+- Corecție: vechiul firmware trimitea CSI pe UART la 921 600 baud, nu la 115 200. Aceasta înseamnă aproximativ 667 de pachete pe secundă. Afirmația „83 de pachete pe secundă, deci UDP” este greșită.
+
+## flash_raw.sh, pe scurt
+- `set -e` oprește scriptul la prima eroare.
+- `: "${WIFI_SSID:?...}"` oprește scriptul dacă variabila lipsește.
+- `PORT="${PORT:-/dev/ttyUSB0}"` dă o valoare implicită.
+- `. export.sh` pune `idf.py` și compilatorul în `PATH`.
+- `-B` și `-DSDKCONFIG` țin fișierele generate în afara repository-ului.
+- `-DSDKCONFIG_DEFAULTS` citește setările proiectului, apoi rețeaua și parola.
+- `build flash` compilează, apoi scrie pe placă.
+
+## Octeții ficși ai cadrului probe (punctul 4)
+Întrebare: ce rol au `PROBE_FRAME_CONTROL`, `BROADCAST_MAC` și `SOURCE_MAC`?
+
+Analogia: placa strigă des „E cineva aici?”. Celelalte plăci aud strigătul. Pereții și oamenii schimbă puțin sunetul pe drum. Această schimbare este CSI.
+
+Radioul nu trimite strigătul fără plic. Codul scrie plicul octet cu octet:
+
+| Octeții | Valoarea | Rolul |
+|---|---|---|
+| 0 | `0x40` | Eticheta „probe request”: o întrebare despre rețelele din jur. |
+| 1 | `0x00` | Opt steaguri nebifate: fără criptare, fără repetare, fără fragmente. |
+| 2-3 | `0x00 0x00` | Durata 0: canalul nu rămâne rezervat. Nimeni nu confirmă primirea. |
+| 4-9 | `FF:FF:FF:FF:FF:FF` | Destinația „pentru toată lumea”, ca un anunț la difuzor. |
+| 10-15 | `24:0A:C4:00:00:03` | Semnătura „sunt nodul 3”. Ultimul octet este `NODE_ID`. |
+| 16-21 | `FF:FF:FF:FF:FF:FF` | BSSID „orice rețea”. |
+| 22-63 | zero | Plic fără conținut. |
+
+Lucrul important: CSI nu depinde de textul de pe plic. CSI vine din preambul, semnalul cunoscut de la începutul cadrului.
+
+Analogia pentru preambul: tehnicianul de sunet spune mereu „unu, doi, trei”. El știe cuvintele, deci aude exact ce schimbă sala.
+
+Quiz:
+1. De ce Address 1 este `FF:FF:FF:FF:FF:FF`? Răspuns: toate plăcile aud cadrul și nicio placă nu trimite ACK.
+2. Se schimbă CSI dacă schimbați zerourile din corp? Răspuns: nu. CSI vine din preambul, nu din plic.
+
+## Unde am rămas
+Următorul pas este punctul 5: variabilele comune `csi_queue`, `wifi_events` și `next_seq`.
