@@ -1,9 +1,12 @@
 [submodule ".agents/skills/codebase-video"]
 	path = .agents/skills/codebase-video
 	url = https://github.com/OnurGumus/codebase-video
+	ignore = dirty
 [submodule ".agents/skills/diagram-tour"]
 	path = .agents/skills/diagram-tour
 	url = https://github.com/centraltowerlabs/diagram-tour
+	ignore = dirty
 [submodule ".agents/skills/hyperframes"]
 	path = .agents/skills/hyperframes
 	url = https://github.com/heygen-com/hyperframes
+	ignore = dirty
