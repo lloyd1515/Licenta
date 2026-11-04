@@ -3,28 +3,26 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "freertos/ringbuf.h"
+#include "freertos/event_groups.h"
 #include "esp_system.h"
 #include "esp_wifi.h"
 #include "esp_event.h"
 #include "esp_log.h"
 #include "nvs_flash.h"
 #include "esp_timer.h"
-#include "driver/uart.h"
+#include "lwip/sockets.h"
 
 #define TAG "CSI_NODE"
 
 #define NODE_ID 3
-#define WIFI_CHANNEL 6
-#define UART_PORT UART_NUM_0
-#define UART_BAUD_RATE 921600
 #define FRAME_MAGIC 0xA55A
 #define CSI_BYTES 128
-#define UART_RX_BUFFER_BYTES 4096
 #define CSI_QUEUE_BYTES (16 * 1024)
+#define WIFI_CONNECTED_BIT BIT0
 
-#define UART_TASK_CORE 1
-#define UART_TASK_STACK_BYTES 4096
-#define UART_TASK_PRIORITY 10
+#define UDP_TASK_CORE 1
+#define UDP_TASK_STACK_BYTES 4096
+#define UDP_TASK_PRIORITY 10
 #define WIFI_TASK_CORE 0
 #define WIFI_TASK_STACK_BYTES 2048
 #define WIFI_TASK_PRIORITY 5
@@ -51,6 +49,7 @@ static const uint8_t BROADCAST_MAC[MAC_BYTES] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0
 static const uint8_t SOURCE_MAC[MAC_BYTES] = {0x24, 0x0A, 0xC4, 0x00, 0x00, NODE_ID};
 
 static RingbufHandle_t csi_queue = NULL;
+static EventGroupHandle_t wifi_events = NULL;
 static uint16_t next_seq = 0;
 
 static void IRAM_ATTR on_csi(void *ctx, wifi_csi_info_t *info) {
@@ -74,14 +73,36 @@ static void IRAM_ATTR on_csi(void *ctx, wifi_csi_info_t *info) {
     }
 }
 
-static void uart_sender_task(void *arg) {
+static int open_udp_socket(struct sockaddr_in *dest) {
+    int sock = socket(AF_INET, SOCK_DGRAM, IPPROTO_IP);
+    if (sock < 0) {
+        ESP_LOGE(TAG, "UDP socket failed: errno %d", errno);
+        return -1;
+    }
+    int broadcast = 1;
+    setsockopt(sock, SOL_SOCKET, SO_BROADCAST, &broadcast, sizeof(broadcast));
+    memset(dest, 0, sizeof(*dest));
+    dest->sin_family = AF_INET;
+    dest->sin_port = htons(CONFIG_CSI_UDP_PORT);
+    dest->sin_addr.s_addr = inet_addr(CONFIG_CSI_UDP_HOST);
+    return sock;
+}
+
+static void udp_sender_task(void *arg) {
+    struct sockaddr_in dest;
+    int sock = -1;
     size_t item_size;
     while (1) {
         csi_packet_t *packet = (csi_packet_t *)xRingbufferReceive(csi_queue, &item_size, portMAX_DELAY);
-        if (packet != NULL) {
-            uart_write_bytes(UART_PORT, (const char *)packet, sizeof(csi_packet_t));
-            vRingbufferReturnItem(csi_queue, (void *)packet);
+        if (packet == NULL) continue;
+        bool connected = xEventGroupGetBits(wifi_events) & WIFI_CONNECTED_BIT;
+        if (connected && sock < 0) {
+            sock = open_udp_socket(&dest);
         }
+        if (connected && sock >= 0) {
+            sendto(sock, packet, sizeof(csi_packet_t), 0, (struct sockaddr *)&dest, sizeof(dest));
+        }
+        vRingbufferReturnItem(csi_queue, (void *)packet);
     }
 }
 
@@ -103,26 +124,39 @@ static void probe_sender_task(void *arg) {
     }
 }
 
-static void init_uart(void) {
-    uart_config_t uart_config = {
-        .baud_rate = UART_BAUD_RATE,
-        .data_bits = UART_DATA_8_BITS,
-        .parity    = UART_PARITY_DISABLE,
-        .stop_bits = UART_STOP_BITS_1,
-        .flow_ctrl = UART_HW_FLOWCTRL_DISABLE,
-        .source_clk = UART_SCLK_DEFAULT,
-    };
-    ESP_ERROR_CHECK(uart_param_config(UART_PORT, &uart_config));
-    ESP_ERROR_CHECK(uart_driver_install(UART_PORT, UART_RX_BUFFER_BYTES, 0, 0, NULL, 0));
+static void on_wifi_event(void *arg, esp_event_base_t base, int32_t id, void *data) {
+    if (base == WIFI_EVENT && id == WIFI_EVENT_STA_START) {
+        esp_wifi_connect();
+    } else if (base == WIFI_EVENT && id == WIFI_EVENT_STA_DISCONNECTED) {
+        xEventGroupClearBits(wifi_events, WIFI_CONNECTED_BIT);
+        ESP_LOGW(TAG, "Wi-Fi deconectat, reconectare...");
+        esp_wifi_connect();
+    } else if (base == IP_EVENT && id == IP_EVENT_STA_GOT_IP) {
+        ip_event_got_ip_t *event = (ip_event_got_ip_t *)data;
+        ESP_LOGI(TAG, "IP " IPSTR ", trimitere UDP catre %s:%d", IP2STR(&event->ip_info.ip), CONFIG_CSI_UDP_HOST, CONFIG_CSI_UDP_PORT);
+        xEventGroupSetBits(wifi_events, WIFI_CONNECTED_BIT);
+    }
 }
 
 static void init_wifi(void) {
+    wifi_events = xEventGroupCreate();
+    esp_netif_create_default_wifi_sta();
     wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
     ESP_ERROR_CHECK(esp_wifi_init(&cfg));
+    ESP_ERROR_CHECK(esp_event_handler_register(WIFI_EVENT, ESP_EVENT_ANY_ID, &on_wifi_event, NULL));
+    ESP_ERROR_CHECK(esp_event_handler_register(IP_EVENT, IP_EVENT_STA_GOT_IP, &on_wifi_event, NULL));
     ESP_ERROR_CHECK(esp_wifi_set_storage(WIFI_STORAGE_RAM));
     ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA));
+
+    wifi_config_t wifi_config = {
+        .sta = {
+            .ssid = CONFIG_CSI_WIFI_SSID,
+            .password = CONFIG_CSI_WIFI_PASSWORD,
+        },
+    };
+    ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_STA, &wifi_config));
     ESP_ERROR_CHECK(esp_wifi_start());
-    ESP_ERROR_CHECK(esp_wifi_set_channel(WIFI_CHANNEL, WIFI_SECOND_CHAN_NONE));
+    ESP_ERROR_CHECK(esp_wifi_set_ps(WIFI_PS_NONE));
 
     wifi_promiscuous_filter_t filter = {
         .filter_mask = WIFI_PROMIS_FILTER_MASK_ALL
@@ -147,7 +181,7 @@ static void init_csi(void) {
 }
 
 static void start_tasks(void) {
-    xTaskCreatePinnedToCore(uart_sender_task, "uart_sender", UART_TASK_STACK_BYTES, NULL, UART_TASK_PRIORITY, NULL, UART_TASK_CORE);
+    xTaskCreatePinnedToCore(udp_sender_task, "udp_sender", UDP_TASK_STACK_BYTES, NULL, UDP_TASK_PRIORITY, NULL, UDP_TASK_CORE);
     xTaskCreatePinnedToCore(probe_sender_task, "probe_sender", WIFI_TASK_STACK_BYTES, NULL, WIFI_TASK_PRIORITY, NULL, WIFI_TASK_CORE);
 }
 
@@ -156,12 +190,11 @@ void app_main(void) {
     ESP_ERROR_CHECK(esp_netif_init());
     ESP_ERROR_CHECK(esp_event_loop_create_default());
 
-    init_uart();
     csi_queue = xRingbufferCreate(CSI_QUEUE_BYTES, RINGBUF_TYPE_NOSPLIT);
     init_wifi();
     init_csi();
 
-    ESP_LOGI(TAG, "Nodul ESP32 #%d initializat cu succes pe Canalul %d!", NODE_ID, WIFI_CHANNEL);
+    ESP_LOGI(TAG, "Nodul ESP32 #%d initializat cu succes (SSID %s)!", NODE_ID, CONFIG_CSI_WIFI_SSID);
 
     start_tasks();
 }

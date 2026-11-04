@@ -3,7 +3,7 @@
 Acest firmware transformă un modul ESP32 într-un nod senzor radio pasiv:
 1. Emite cadre broadcast 802.11 la o rată de $250\text{ Hz}$ folosind `esp_wifi_80211_tx`.
 2. Extrage datele CSI (64 subpurtătoare, din care 52 active HT20) din fiecare pachet recepționat de la celelalte noduri.
-3. Transmite pachetele binare prin UART la $921600\text{ baud}$ către PC.
+3. Transmite pachetele binare prin Wi-Fi, ca datagrame UDP (un pachet / datagramă), către PC pe portul `5005`.
 
 ---
 
@@ -16,7 +16,19 @@ Acest firmware transformă un modul ESP32 într-un nod senzor radio pasiv:
 
 ---
 
-## 2. Compilare și Flash (ESP-IDF)
+## 2. Configurare Rețea (UDP)
+
+Nodul se conectează ca stație la un AP și trimite datele prin UDP. Toate nodurile folosesc același AP, deci același canal Wi-Fi.
+Se setează în `idf.py menuconfig` → `CSI Node UDP`:
+- `CSI_WIFI_SSID` / `CSI_WIFI_PASSWORD`: rețeaua Wi-Fi.
+- `CSI_UDP_HOST`: IP-ul PC-ului receptor (implicit broadcast `255.255.255.255`; IP-ul unicast al PC-ului dă latență mai mică).
+- `CSI_UDP_PORT`: portul UDP (implicit `5005`).
+
+Pe PC: `python -m csi.gui --live --port 5005` sau `python -m csi.record --port 5005`. Firewall-ul trebuie să permită UDP pe acest port.
+
+---
+
+## 3. Compilare și Flash (ESP-IDF)
 
 ```bash
 # Setează mediul ESP-IDF
@@ -25,13 +37,16 @@ Acest firmware transformă un modul ESP32 într-un nod senzor radio pasiv:
 # Setare țintă ESP32
 idf.py set-target esp32
 
-# Compilare și scriere pe portul serial (ex: /dev/ttyUSB0)
+# Setare SSID, parolă, IP și port UDP
+idf.py menuconfig
+
+# Compilare și scriere pe portul serial de programare (ex: /dev/ttyUSB0)
 idf.py -p /dev/ttyUSB0 flash monitor
 ```
 
 ---
 
-## 3. Format Pachet Binar UART (138 bytes / pachet)
+## 4. Format Pachet Binar UDP (138 bytes / datagramă)
 
 | Câmp | Dimensiune | Descriere |
 | :--- | :--- | :--- |

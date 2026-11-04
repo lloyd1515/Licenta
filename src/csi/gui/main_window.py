@@ -2,12 +2,12 @@ import time
 
 from PyQt6.QtCore import Qt, QTimer
 from PyQt6.QtWidgets import (
-    QComboBox,
     QFrame,
     QHBoxLayout,
     QLabel,
     QMainWindow,
     QPushButton,
+    QSpinBox,
     QSplitter,
     QStatusBar,
     QVBoxLayout,
@@ -20,14 +20,15 @@ from csi.gui.frames import Frame
 from csi.gui.room_map import RoomMap
 from csi.gui.status_panel import StatusPanel
 from csi.gui.theme import BADGE_LIVE, BADGE_OFF, BADGE_REPLAY, STYLESHEET
-from csi.packets import BAUD_RATE, DEFAULT_PORTS, REAL_FALL
+from csi.packets import REAL_FALL, UDP_PORT
 
 WINDOW_TITLE = "Sistem Inteligent de Monitorizare Ambientală Wi-Fi CSI — Licență UTCN"
-EXTRA_PORT = "COM3"
+MIN_UDP_PORT = 1024
+MAX_UDP_PORT = 65535
 FPS_REFRESH_MS = 1000
 NO_LATENCY = "--"
 CONNECTION_BADGES = {
-    "live": ("● LIVE USB ({port})", BADGE_LIVE),
+    "live": ("● LIVE UDP (:{port})", BADGE_LIVE),
     "replay": ("● REPLAY (TEST C)", BADGE_REPLAY),
     None: ("● DECONECTAT", BADGE_OFF),
 }
@@ -39,10 +40,9 @@ def alarm_text(latency_s):
 
 
 class MainWindow(QMainWindow):
-    def __init__(self, ports=DEFAULT_PORTS, baud_rate=BAUD_RATE, fps=50.0, recording_path=REAL_FALL):
+    def __init__(self, udp_port=UDP_PORT, fps=50.0, recording_path=REAL_FALL):
         super().__init__()
-        self.ports = tuple(ports)
-        self.baud_rate = baud_rate
+        self.udp_port = udp_port
         self.fps = fps
         self.recording_path = recording_path
         self.source = None
@@ -60,7 +60,7 @@ class MainWindow(QMainWindow):
         self._build_alarm_banner()
         self.status_bar = QStatusBar(self)
         self.setStatusBar(self.status_bar)
-        self.status_bar.showMessage("Sistem gata. Selectați modul Live USB sau Replay Salvare.")
+        self.status_bar.showMessage("Sistem gata. Selectați modul Live UDP sau Replay Salvare.")
         self._build_layout(*columns)
 
         self.fps_timer = QTimer(self)
@@ -95,11 +95,13 @@ class MainWindow(QMainWindow):
         self.fps_label.setObjectName("MetricBadge")
         layout.addWidget(self.fps_label)
 
-        self.port_box = QComboBox(self.top_bar)
-        self.port_box.addItems([*self.ports, EXTRA_PORT])
+        self.port_box = QSpinBox(self.top_bar)
+        self.port_box.setRange(MIN_UDP_PORT, MAX_UDP_PORT)
+        self.port_box.setPrefix("UDP :")
+        self.port_box.setValue(self.udp_port)
         layout.addWidget(self.port_box)
 
-        self.live_button = QPushButton("Live USB", self.top_bar)
+        self.live_button = QPushButton("Live UDP", self.top_bar)
         self.live_button.setObjectName("ToggleLive")
         self.live_button.setCheckable(True)
         self.live_button.clicked.connect(self._on_live_clicked)
@@ -194,12 +196,11 @@ class MainWindow(QMainWindow):
         layout.addWidget(main_splitter, 1)
         layout.addWidget(self.alarm_banner)
 
-    def _start_source(self, live, ports):
+    def _start_source(self, live):
         self.stop_source()
         self.source = FrameSource(
             live=live,
-            ports=ports,
-            baud_rate=self.baud_rate,
+            udp_port=self.udp_port,
             fps=self.fps,
             recording_path=self.recording_path,
         )
@@ -208,18 +209,17 @@ class MainWindow(QMainWindow):
         self.source.start()
 
     def start_live(self):
-        port = self.port_box.currentText()
-        ports = (port, *(other for other in self.ports if other != port))
+        self.udp_port = self.port_box.value()
         self.replay_button.setChecked(False)
         self.live_button.setChecked(True)
-        self._start_source(True, ports)
+        self._start_source(True)
         self.set_connection_status("live")
-        self.status_bar.showMessage(f"Conectat la nod hardware pe port {port} ({self.baud_rate} baud)...")
+        self.status_bar.showMessage(f"Ascultare noduri hardware pe portul UDP {self.udp_port}...")
 
     def start_replay(self):
         self.live_button.setChecked(False)
         self.replay_button.setChecked(True)
-        self._start_source(False, ())
+        self._start_source(False)
         self.set_connection_status("replay")
         self.status_bar.showMessage("Se rulează replay din salvarea Test C (Scenariu Cădere + Mers)...")
 
@@ -274,7 +274,7 @@ class MainWindow(QMainWindow):
 
     def set_connection_status(self, mode):
         text, style = CONNECTION_BADGES[mode]
-        self.status_badge.setText(text.format(port=self.port_box.currentText()))
+        self.status_badge.setText(text.format(port=self.port_box.value()))
         self.status_badge.setStyleSheet(style)
 
     def _update_fps_label(self):

@@ -1,0 +1,24 @@
+menu "CSI Node UDP"
+
+    config CSI_WIFI_SSID
+        string "Wi-Fi SSID"
+        default "csi-lab"
+        help
+            Retea Wi-Fi la care se conecteaza nodul. Toate nodurile folosesc acelasi AP, deci acelasi canal.
+
+    config CSI_WIFI_PASSWORD
+        string "Wi-Fi password"
+        default ""
+
+    config CSI_UDP_HOST
+        string "UDP destination IPv4"
+        default "255.255.255.255"
+        help
+            Adresa PC-ului receptor. Implicit broadcast; pentru latenta mica se recomanda IP-ul unicast al PC-ului.
+
+    config CSI_UDP_PORT
+        int "UDP destination port"
+        range 1 65535
+        default 5005
+
+endmenu

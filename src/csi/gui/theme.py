@@ -129,7 +129,7 @@ QLabel#MetricBadge {
     border-radius: 6px;
 }
 
-QComboBox {
+QSpinBox {
     background-color: $border;
     border: 1px solid $border_strong;
     border-radius: 6px;

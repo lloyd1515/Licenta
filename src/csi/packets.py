@@ -1,17 +1,18 @@
+import socket
 import struct
 from dataclasses import dataclass
 from pathlib import Path
 
 import numpy as np
 
-BAUD_RATE = 921600
+UDP_PORT = 5005
+UDP_RECEIVE_BYTES = 2048
 MAGIC = 0xA55A
 HEADER_FORMAT = "<HBbIH"
 HEADER_BYTES = 10
 CSI_IQ_BYTES = 128
 PACKET_BYTES = HEADER_BYTES + CSI_IQ_BYTES
 ACTIVE_SUBCARRIERS = (slice(6, 32), slice(33, 59))
-DEFAULT_PORTS = ("/dev/ttyUSB1", "/dev/ttyUSB0", "/dev/ttyUSB2")
 FALLBACK_RATE_HZ = 30.0
 DATA_DIR = Path(__file__).parent / "data"
 EMPTY_ROOM = DATA_DIR / "test_A_camera_goala.npz"
@@ -47,26 +48,32 @@ def _parse(raw):
     return Packet(node_id, rssi_dbm, timestamp_us, seq, active)
 
 
-class PacketStream:
-    def __init__(self):
-        self._buffer = bytearray()
+def encode_packet(packet):
+    iq = np.zeros(CSI_IQ_BYTES // 2, dtype=np.complex128)
+    sizes = [part.stop - part.start for part in ACTIVE_SUBCARRIERS]
+    for part, values in zip(ACTIVE_SUBCARRIERS, np.split(np.asarray(packet.csi), np.cumsum(sizes)[:-1])):
+        iq[part] = values
+    interleaved = np.empty(CSI_IQ_BYTES, dtype=np.int8)
+    interleaved[0::2] = np.clip(np.round(iq.real), -128, 127)
+    interleaved[1::2] = np.clip(np.round(iq.imag), -128, 127)
+    header = struct.pack(HEADER_FORMAT, MAGIC, packet.node_id, packet.rssi_dbm, packet.timestamp_us, packet.seq)
+    return header + interleaved.tobytes()
 
-    def feed(self, data):
-        self._buffer.extend(data)
-        packets = []
-        while True:
-            start = self._buffer.find(_WIRE_MAGIC)
-            if start == -1:
-                if self._buffer[-1:] == _WIRE_MAGIC[:1]:
-                    del self._buffer[:-1]
-                else:
-                    self._buffer.clear()
-                return packets
-            del self._buffer[:start]
-            if len(self._buffer) < PACKET_BYTES:
-                return packets
-            packets.append(_parse(bytes(self._buffer[:PACKET_BYTES])))
-            del self._buffer[:PACKET_BYTES]
+
+def parse_datagram(data):
+    return [
+        _parse(data[start:start + PACKET_BYTES])
+        for start in range(0, len(data) - PACKET_BYTES + 1, PACKET_BYTES)
+        if data[start:start + 2] == _WIRE_MAGIC
+    ]
+
+
+def open_udp_socket(port, timeout_s=None):
+    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    sock.bind(("", port))
+    sock.settimeout(timeout_s)
+    return sock
 
 
 def _recording(times_s, csi_rows, rssi_dbm):
