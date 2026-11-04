@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="ro">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Root.tsx ilustrat</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="../../assets/learn.css">
+</head>
+<body data-file="simulation-remotion/src/Root.tsx" data-root="../../">
+<main>
+<header class="page">
+  <span class="eyebrow">src/simulation-remotion/src/Root.tsx · 15 linii</span>
+  <h1>Formatul videoclipului: 1920 × 1080, 30 FPS, 100 s</h1>
+  <p class="lede">Root.tsx declară o singură compoziție, numită MainScene. Compoziția spune ce componentă se desenează, câte cadre are videoclipul și ce mărime are imaginea.</p>
+</header>
+
+<section class="card">
+  <span class="lines">Liniile 6–15 · Composition</span>
+  <h2>Cele cinci valori ale compoziției</h2>
+  <div class="fig" id="frame"></div>
+  <div class="readout">
+    <div><small>id</small><strong>MainScene</strong></div>
+    <div><small>Mărimea</small><strong>1920 × 1080</strong></div>
+    <div><small>FPS</small><strong>30</strong></div>
+    <div><small>Cadre</small><strong>3000</strong></div>
+    <div><small>Durata</small><strong>100 s</strong></div>
+  </div>
+  <div class="text">
+    <p>FPS și TOTAL_FRAMES vin din timeline.ts. Astfel, durata videoclipului și durata actelor folosesc aceleași numere.</p>
+    <div class="why"><b>De ce id = MainScene?</b><p>Comanda build din package.json randează compoziția cu acest nume. Numele trebuie să fie identic în ambele locuri.</p></div>
+  </div>
+  <div class="uses">Folosește: <a class="chip" href="MainScene.tsx.html">MainScene.tsx</a><a class="chip" href="timeline.ts.html">timeline.ts · FPS, TOTAL_FRAMES</a></div>
+</section>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../../assets/learn.js"></script>
+<script>
+(function () {
+  var s = L.svg("frame", "0 0 800 300", "Cadrul video și axa timpului");
+  L.el("rect", { x: 160, y: 10, width: 480, height: 270, rx: 4, fill: "#070b14", stroke: "var(--signal)", "stroke-width": 2 }, s);
+  L.el("text", { x: 400, y: 150, "text-anchor": "middle", "font-size": 14, style: "fill:#e2e8f0" }, s, "1920 × 1080 px (16 : 9)");
+  var head = L.el("line", { x1: 160, y1: 286, x2: 160, y2: 296, stroke: "var(--reflect)", "stroke-width": 3 }, s);
+  L.el("line", { x1: 160, y1: 291, x2: 640, y2: 291, stroke: "var(--line)", "stroke-width": 2 }, s);
+  var fr = L.el("text", { x: 650, y: 296, "font-size": 11, "text-anchor": "start" }, s, "cadrul 0");
+  var st = { f: 0 };
+  if (L.G) L.G.to(st, { f: 2999, duration: 10, ease: "none", repeat: -1, onUpdate: function () { var x = 160 + st.f / 2999 * 480; head.setAttribute("x1", x); head.setAttribute("x2", x); fr.textContent = "cadrul " + Math.round(st.f); } });
+})();
+</script>
+</body>
+</html>

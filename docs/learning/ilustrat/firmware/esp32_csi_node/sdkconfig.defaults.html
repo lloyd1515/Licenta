@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="ro">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>sdkconfig.defaults ilustrat</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="../../assets/learn.css">
+</head>
+<body data-file="firmware/esp32_csi_node/sdkconfig.defaults" data-root="../../">
+<main>
+<header class="page">
+  <span class="eyebrow">src/firmware/esp32_csi_node/sdkconfig.defaults · 2 linii</span>
+  <h1>Comutatorul care pornește CSI</h1>
+  <p class="lede">Placa ESP32 calculează CSI doar dacă firmware-ul activează această funcție la compilare. Cele două linii o activează.</p>
+</header>
+
+<section class="card">
+  <span class="lines">Liniile 1–2 · CSI activat</span>
+  <h2>Fără comutator, nu există date</h2>
+  <div class="controls" role="group" aria-label="Starea opțiunii CSI">
+    <button class="opt" data-v="y" aria-pressed="true">CSI = activat</button>
+    <button class="opt" data-v="n" aria-pressed="false">CSI = dezactivat</button>
+  </div>
+  <div class="fig" id="sw"></div>
+  <p class="tip" id="sw-tip"></p>
+  <div class="text">
+    <p>Linia 1 folosește numele nou al opțiunii, din ESP-IDF 5. Linia 2 folosește numele vechi, cu prefixul ESP32. Ambele cer același lucru: Wi-Fi cu CSI.</p>
+    <p>ESP-IDF citește acest fișier când creează sdkconfig prima dată. Valorile de aici devin valorile de pornire.</p>
+    <div class="why"><b>De ce două nume pentru aceeași opțiune?</b><p>ESP-IDF a redenumit opțiunea. Versiunile noi acceptă și numele vechi. Cu ambele nume, fișierul merge pe versiuni vechi și noi.</p></div>
+    <div class="why"><b>De ce un fișier separat de sdkconfig?</b><p>sdkconfig are aproape 2000 de linii generate. Acest fișier păstrează doar alegerea importantă a proiectului. Dacă ștergi sdkconfig, ESP-IDF îl recreează cu CSI activat.</p></div>
+  </div>
+  <div class="uses">Ajunge în: <a class="chip" href="sdkconfig.html">sdkconfig (liniile 949 și 1828)</a> · Necesar pentru: <a class="chip" href="main/main.c.html">main.c · init_csi</a></div>
+</section>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../../assets/learn.js"></script>
+<script>
+(function () {
+  var s = L.svg("sw", "0 0 800 200", "Drumul datelor CSI, cu opțiunea activată sau dezactivată");
+  L.box(s, 10, 60, 150, 70, "radio Wi-Fi", { k: "muted", sub: "primește cadre" });
+  var gate = L.box(s, 230, 60, 150, 70, "opțiunea CSI", { k: "good", sub: "sdkconfig.defaults" });
+  var cb = L.box(s, 450, 60, 150, 70, "on_csi", { k: "signal", sub: "funcția din main.c" });
+  var pc = L.box(s, 660, 60, 130, 70, "PC", { k: "signal", sub: "UDP 5005" });
+  L.arrow(s, 162, 95, 226, 95); var a2 = L.arrow(s, 382, 95, 446, 95); var a3 = L.arrow(s, 602, 95, 656, 95);
+  var dot = L.travel(s, [[160, 95], [230, 95], [380, 95], [450, 95], [600, 95], [660, 95]], { dur: 3 });
+  var cross = L.el("g", {}, s);
+  L.el("line", { x1: 395, y1: 75, x2: 435, y2: 115, stroke: "var(--alert)", "stroke-width": 4 }, cross);
+  L.el("line", { x1: 435, y1: 75, x2: 395, y2: 115, stroke: "var(--alert)", "stroke-width": 4 }, cross);
+  var tip = document.getElementById("sw-tip");
+  L.toggle("button.opt", function (d) {
+    var on = d.v === "y";
+    cross.style.display = on ? "none" : "";
+    dot.style.display = on ? "" : "none";
+    gate.querySelector("rect").setAttribute("stroke", on ? "var(--good)" : "var(--alert)");
+    gate.querySelector("rect").setAttribute("fill", on ? "var(--soft-good)" : "var(--soft-alert)");
+    [a2, a3, cb, pc].forEach(function (g) { g.style.opacity = on ? 1 : 0.3; });
+    tip.textContent = on ? "Biblioteca Wi-Fi calculează CSI și apelează on_csi pentru fiecare cadru primit." : "Fără opțiune, biblioteca Wi-Fi nu are funcția CSI. Funcțiile CSI din init_csi dau eroare la pornire.";
+  });
+})();
+</script>
+</body>
+</html>

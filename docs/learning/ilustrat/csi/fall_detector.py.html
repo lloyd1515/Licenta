@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="ro">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>fall_detector.py ilustrat</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="../assets/learn.css">
+</head>
+<body data-file="csi/fall_detector.py" data-root="../">
+<main>
+<script src="../assets/data/recC.js"></script>
+<script src="../assets/data/sim.js"></script>
+<header class="page">
+  <span class="eyebrow">src/csi/fall_detector.py · 120 de linii</span>
+  <h1>Cinci stări: de la calm la alarmă</h1>
+  <p class="lede">Detectorul nu caută doar o mișcare bruscă. El cere două lucruri: un impact puternic, apoi 2.5 s de imobilitate. Doar atunci el declară alarma. Astfel, o așezare bruscă urmată de mișcare nu dă alarmă.</p>
+  <nav class="toc" aria-label="Fișe"><a href="#st">L7–21 Stări</a><a href="#k">L23–34 Praguri</a><a href="#d">L36–50 Detection</a><a href="#n">L53–68 Pante</a><a href="#f">L71–120 Automatul</a><a href="#play">Replay test C</a></nav>
+</header>
+
+<section class="card" id="st">
+  <span class="lines">Liniile 7–21 · FallState și STATE_LABELS</span>
+  <h2>Automatul de stări</h2>
+  <div class="fig" id="fsm"></div>
+  <div class="text">
+    <p>Fiecare stare are un număr de la 0 la 4 și o etichetă în română pentru interfață. IntEnum permite stocarea stărilor într-un vector NumPy de numere întregi.</p>
+    <div class="why"><b>De ce o stare separată „VERIFICARE”?</b><p>Un impact singur nu ajunge. O persoană care se așază brusc produce și ea o pantă mare. Starea de verificare așteaptă să vadă dacă urmează imobilitatea.</p></div>
+  </div>
+</section>
+
+<section class="card" id="k">
+  <span class="lines">Liniile 23–34 · pragurile</span>
+  <h2>Numerele care decid</h2>
+  <div class="tablewrap"><table class="t">
+    <thead><tr><th>Nume</th><th>Valoare</th><th>Sens</th></tr></thead>
+    <tbody>
+      <tr><td class="m">SLOPE_ACTIVE</td><td class="m">0.05 /s</td><td>Peste această pantă, un link „vede” mișcare.</td></tr>
+      <tr><td class="m">IMPACT_SLOPE</td><td class="m">17.5 /s</td><td>Peste această pantă, schimbarea este un impact.</td></tr>
+      <tr><td class="m">MIN_LINKS_AT_IMPACT</td><td class="m">2</td><td>Impactul trebuie văzut pe cel puțin 2 link-uri. Cu un singur semnal, ajunge 1.</td></tr>
+      <tr><td class="m">CALM_RETURN_S</td><td class="m">0.6 s</td><td>Timpul fără mișcare după care starea revine la CALM.</td></tr>
+      <tr><td class="m">IMPACT_SETTLE_S</td><td class="m">0.5 s</td><td>Imediat după impact, corpul încă se mișcă. Această parte nu intră în verificare.</td></tr>
+      <tr><td class="m">STILL_WINDOW_S</td><td class="m">2.5 s</td><td>Cât așteaptă detectorul după impact înainte de decizie.</td></tr>
+      <tr><td class="m">STILL_MAX_VARIANCE</td><td class="m">0.20</td><td>Varianța maximă pentru „nemișcat”.</td></tr>
+      <tr><td class="m">EMPTY_ROOM_STD_*</td><td class="m">0.20 simulat / 11.0 hardware</td><td>Sub acest nivel, camera este goală și detectorul nu caută nimic.</td></tr>
+      <tr><td class="m">SIMULATED_MIN_RATE_HZ</td><td class="m">100 Hz</td><td>Peste 100 Hz, datele sunt simulate (250 Hz). Plăcile reale dau sub 100 Hz.</td></tr>
+    </tbody>
+  </table></div>
+  <div class="note"><b>Cum alege pragul pentru cameră goală</b><p>Codul nu știe direct dacă datele sunt reale sau simulate. El ghicește după rată. O placă reală mai rapidă de 100 Hz ar primi pragul simulat.</p></div>
+</section>
+
+<section class="card" id="d">
+  <span class="lines">Liniile 36–50 · Detection</span>
+  <h2>Rezultatul: stările, impactul, alarma</h2>
+  <div class="fig" id="det"></div>
+  <div class="text">
+    <p>Detection păstrează starea pentru fiecare eșantion și două momente: impactul și alarma. Proprietatea alarm este adevărată dacă există moment de alarmă. latency_s este diferența dintre cele două momente.</p>
+  </div>
+</section>
+
+<section class="card" id="n">
+  <span class="lines">Liniile 53–68 · normalizare, pante, imobilitate</span>
+  <h2>Cât de repede se schimbă semnalul</h2>
+  <div class="text">
+    <p>_normalized împarte semnalul la valoarea lui maximă: rezultatul este între −1 și 1. _slopes calculează derivata în timp și ia valoarea absolută. Unitatea este „pe secundă”.</p>
+    <p>_is_still calculează varianța semnalului de la 0.5 s după impact până la momentul curent. Dacă media varianțelor este sub 0.20, persoana este nemișcată.</p>
+    <div class="why"><b>De ce normalizare?</b><p>Amplitudinea depinde de placă, de distanță și de cameră. După normalizare, aceleași praguri merg pentru date simulate și reale.</p></div>
+  </div>
+</section>
+
+<section class="card" id="f">
+  <span class="lines">Liniile 71–120 · detect_fall</span>
+  <h2>Bucla care trece prin fiecare eșantion</h2>
+  <div class="fig" id="loop"></div>
+  <p class="tip" id="loop-tip">Atinge un pas.</p>
+  <div class="text">
+    <p>Liniile 75–78 verifică întâi dacă există mișcare. Liniile 80–84 calculează pantele și, pentru fiecare moment, câte link-uri sunt active și dacă există o pantă de impact.</p>
+    <p>Bucla (95–116) aplică regulile automatului. Din CALM sau MERS, un impact duce la IMPACT. Din IMPACT, starea trece imediat la VERIFICARE. După 2.5 s, starea devine ALARMĂ sau revine la MERS. Din ALARMĂ, bucla nu mai iese: starea rămâne până la finalul înregistrării.</p>
+  </div>
+</section>
+
+<section class="card" id="play">
+  <span class="lines">Rularea reală · captura test C</span>
+  <h2>Automatul pe date reale</h2>
+  <label class="hint" for="pt">Timpul: <strong id="ptv" style="font-family:var(--f-mono)">0.0 s</strong></label>
+  <input type="range" id="pt" min="0" max="399" value="0">
+  <div class="controls"><button class="opt" id="playb" aria-pressed="false">▶ Redă</button></div>
+  <div class="fig" id="fsm2"></div>
+  <div class="fig" id="slope"></div>
+  <div class="text">
+    <p>Graficul arată panta normalizată a capturii test C. Linia roșie este pragul de impact, 17.5. Doar 3 momente trec peste prag: 4.35 s, 7.95 s și 18.35 s. Primul pornește verificarea. Celelalte două apar când detectorul este deja în verificare sau în alarmă. La 7.36 s apare alarma.</p>
+    <div class="note"><b>Marjă mică</b><p>Cea mai mare pantă din captură este 18.9, doar puțin peste pragul de 17.5. Un prag puțin mai mare ar fi ratat căderea.</p></div>
+  </div>
+  <div class="uses">Primește date de la: <a class="chip" href="dsp.py.html">dsp.py</a> · Folosit de: <a class="chip" href="gui/frames.py.html">gui/frames.py</a><a class="chip" href="gui/status_panel.py.html">gui/status_panel.py</a><a class="chip" href="gui/theme.py.html">gui/theme.py</a><a class="chip" href="figures.py.html">figures.py</a></div>
+</section>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../assets/learn.js"></script>
+<script>
+(function () {
+  var nodes = [
+    { id: 0, label: "CALM", x: 110, y: 60, k: "muted", w: 130 }, { id: 1, label: "MERS", x: 400, y: 60, k: "signal", w: 130 },
+    { id: 2, label: "IMPACT", x: 690, y: 60, k: "reflect", w: 130 }, { id: 3, label: "VERIFICARE", x: 690, y: 240, k: "violet", w: 150 },
+    { id: 4, label: "ALARMĂ", x: 400, y: 240, k: "alert", w: 130 },
+  ];
+  var edges = [
+    { a: 0, b: 1, label: "≥1 link activ", bend: -24 }, { a: 1, b: 0, label: "0.6 s fără mișcare", bend: -24, ly: 14 },
+    { a: 1, b: 2, label: "pantă > 17.5 pe ≥2 link-uri" }, { a: 0, b: 2, label: "", bend: -70 },
+    { a: 2, b: 3, label: "imediat", lx: 36 }, { a: 3, b: 4, label: "2.5 s, nemișcat" }, { a: 3, b: 1, label: "2.5 s, încă mișcare", lx: 50, ly: 30 },
+  ];
+  var fsm = L.states("fsm", nodes, edges, { vb: "0 0 800 290", label: "Stările detectorului și tranzițiile" });
+  var fsm2 = L.states("fsm2", nodes, edges, { vb: "0 0 800 290", label: "Starea curentă în replay" });
+
+  var ds = L.svg("det", "0 0 800 110", "Momentele din rezultat");
+  L.el("line", { x1: 20, y1: 60, x2: 780, y2: 60, stroke: "var(--line)" }, ds);
+  var X = function (t) { return 20 + t / 20 * 760; };
+  L.el("rect", { x: X(4.35), y: 45, width: X(7.36) - X(4.35), height: 30, fill: "var(--soft-reflect)", stroke: "var(--reflect)" }, ds);
+  L.text(ds, X(4.35), 32, "impact_time_s = 4.35", { s: 11.5, c: "var(--alert)" }); L.text(ds, X(7.36) + 60, 32, "alarm_time_s = 7.36", { s: 11.5, c: "var(--good)" });
+  L.text(ds, (X(4.35) + X(7.36)) / 2, 98, "latency_s = 3.02 s", { s: 12.5, b: true });
+
+  L.flow("loop", [
+    { t: "cameră goală?", s: "L75–78 · ieși fără alarmă", k: "muted", tip: "Dacă abaterea medie este sub prag, toate stările rămân CALM." },
+    { t: "pante", s: "L80–84 · pentru fiecare link", k: "signal", tip: "Normalizare, derivată, praguri de activitate și de impact." },
+    { t: "pragurile în eșantioane", s: "L86–88", k: "violet", tip: "0.6 s, 2.5 s și 0.5 s devin numere de eșantioane, după rată." },
+    { t: "bucla stărilor", s: "L95–116", k: "reflect", tip: "O tranziție pe eșantion, după regulile automatului." },
+    { t: "momentele", s: "L118–120 · Detection", k: "good", tip: "Indicii de impact și alarmă devin secunde." },
+  ], { cols: 5, gap: 26, fs: 12, tipId: "loop-tip" });
+
+  var C = window.DATA.recC, smax = Math.max.apply(null, C.slope) * 1.05;
+  var sp = L.plot("slope", { h: 220, xmin: 0, xmax: C.dur, ymin: 0, ymax: smax, xticks: [0, 5, 10, 15, 20], yticks: [0, 17.5], xlabel: "timp (s)", ylabel: "|pantă| normalizată", hlines: [{ y: 17.5, label: "IMPACT_SLOPE 17.5" }], vlines: [{ x: C.impact, label: "impact", c: "var(--alert)" }, { x: C.alarm, label: "alarmă", c: "var(--good)", ly: 46 }], series: [{ x: C.t, y: C.slope, c: "var(--signal)", w: 1.3 }], label: "Panta normalizată în test C" });
+  var cur = L.el("line", { y1: sp.m.t, y2: sp.H - sp.m.b, stroke: "var(--reflect)", "stroke-width": 3 }, sp.over);
+  var sl = document.getElementById("pt"); sl.max = C.t.length - 1;
+  function at(i) { cur.setAttribute("x1", sp.sx(C.t[i])); cur.setAttribute("x2", sp.sx(C.t[i])); fsm2.set(C.states[i]); document.getElementById("ptv").textContent = C.t[i].toFixed(2) + " s"; }
+  sl.addEventListener("input", function () { at(+sl.value); });
+  var timer = null, btn = document.getElementById("playb");
+  btn.addEventListener("click", function () {
+    if (timer) { clearInterval(timer); timer = null; btn.textContent = "▶ Redă"; return; }
+    btn.textContent = "❚❚ Pauză";
+    timer = setInterval(function () { var v = (+sl.value + 1) % C.t.length; sl.value = v; at(v); }, 50);
+  });
+  at(0); fsm.set(-1);
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,599 @@
+<!doctype html>
+<html lang="ro">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+</head>
+<body>
+<title>room.py ilustrat</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: o singură coloană de "fișe de laborator"; fiecare fișă = un grup de linii din room.py, cu ilustrația deasupra și explicația dedesubt. */
+:root {
+  --bg: #eef1f5;
+  --panel: #ffffff;
+  --ink: #142033;
+  --muted: #56637a;
+  --line: #d3d9e3;
+  --signal: #1f63d6;      /* unda directă, Wi-Fi */
+  --reflect: #d0771a;     /* drumul reflectat, persoana */
+  --node: #142033;
+  --good: #1d8a5a;
+  --alert: #c8323c;
+  --soft-signal: rgba(31, 99, 214, 0.12);
+  --soft-reflect: rgba(208, 119, 26, 0.14);
+  --f-display: "Bricolage Grotesque", "Avenir Next", "Segoe UI", sans-serif;
+  --f-body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0e1520; --panel: #151f2e; --ink: #e4eaf3; --muted: #95a3b9; --line: #2a3850;
+    --signal: #6ea2ff; --reflect: #f0a050; --node: #e4eaf3; --good: #4cc48d; --alert: #ff6b73;
+    --soft-signal: rgba(110, 162, 255, 0.16); --soft-reflect: rgba(240, 160, 80, 0.16);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0e1520; --panel: #151f2e; --ink: #e4eaf3; --muted: #95a3b9; --line: #2a3850;
+  --signal: #6ea2ff; --reflect: #f0a050; --node: #e4eaf3; --good: #4cc48d; --alert: #ff6b73;
+  --soft-signal: rgba(110, 162, 255, 0.16); --soft-reflect: rgba(240, 160, 80, 0.16);
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--ink); font-family: var(--f-body); font-size: 16px; line-height: 1.6;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 32px 64px;
+}
+main { max-width: 880px; margin: 0 auto; display: flex; flex-direction: column; gap: 28px; }
+h1, h2 { font-family: var(--f-display); text-wrap: balance; line-height: 1.15; margin: 0; }
+h1 { font-size: clamp(2rem, 5vw, 3rem); font-weight: 700; letter-spacing: -0.01em; }
+h2 { font-size: 1.5rem; font-weight: 700; }
+p { margin: 0; max-width: 65ch; }
+.lede { color: var(--muted); font-size: 1.08rem; }
+.eyebrow { font-family: var(--f-mono); font-size: 0.78rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+header { display: flex; flex-direction: column; gap: 12px; }
+nav.toc { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+nav.toc a {
+  font-family: var(--f-mono); font-size: 0.8rem; color: var(--ink); text-decoration: none;
+  border: 1px solid var(--line); padding: 4px 10px; border-radius: 4px; background: var(--panel);
+}
+nav.toc a:hover, nav.toc a:focus-visible { border-color: var(--signal); color: var(--signal); outline: none; }
+section.card {
+  background: var(--panel); border: 1px solid var(--line); border-radius: 6px;
+  padding: 22px; display: flex; flex-direction: column; gap: 16px; min-width: 0;
+}
+.lines { font-family: var(--f-mono); font-size: 0.8rem; color: var(--signal); }
+.fig { width: 100%; overflow-x: auto; }
+.fig svg { display: block; width: 100%; height: auto; min-width: 0; }
+.text { display: flex; flex-direction: column; gap: 10px; }
+.why { border-left: 3px solid var(--reflect); padding-left: 12px; display: flex; flex-direction: column; gap: 6px; }
+.why b { font-weight: 600; }
+.uses { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; font-size: 0.85rem; color: var(--muted); }
+.uses span.chip { font-family: var(--f-mono); font-size: 0.75rem; color: var(--ink); background: var(--bg); border: 1px solid var(--line); padding: 2px 8px; border-radius: 3px; }
+.controls { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+button.opt {
+  font-family: var(--f-mono); font-size: 0.82rem; background: var(--bg); color: var(--ink);
+  border: 1px solid var(--line); border-radius: 4px; padding: 6px 12px; cursor: pointer;
+}
+button.opt[aria-pressed="true"] { background: var(--signal); border-color: var(--signal); color: var(--panel); }
+button.opt:focus-visible, input:focus-visible { outline: 2px solid var(--reflect); outline-offset: 2px; }
+.readout { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
+.readout div { background: var(--bg); border-radius: 4px; padding: 8px 12px; min-width: 0; }
+.readout small { display: block; font-size: 0.72rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+.readout strong { font-family: var(--f-mono); font-weight: 500; font-size: 1.1rem; font-variant-numeric: tabular-nums; }
+input[type="range"] { width: min(360px, 100%); accent-color: var(--reflect); }
+svg text { font-family: var(--f-mono); fill: var(--ink); }
+svg .muted { fill: var(--muted); }
+svg .halo { paint-order: stroke; stroke: var(--bg); stroke-width: 4px; stroke-linejoin: round; }
+.hint { font-size: 0.85rem; color: var(--muted); }
+footer { color: var(--muted); font-size: 0.85rem; }
+@media (max-width: 520px) { section.card { padding: 16px; } h2 { font-size: 1.3rem; } }
+</style>
+
+<main>
+<header>
+  <div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;font-family:var(--f-mono);font-size:0.8rem"><a href="ilustrat/index.html" style="color:var(--signal)">← Toate fișierele</a><a href="ilustrat/firmware/esp32_csi_node/CMakeLists.txt.html" style="color:var(--signal)">CMakeLists.txt →</a></div>
+  <span class="eyebrow">Licență · src/csi/room.py · 25 de linii</span>
+  <h1>Camera, unda și drumul în plus</h1>
+  <p class="lede">Fișierul room.py nu calculează mult. El descrie lumea simulată: unda Wi-Fi, cele 52 de subpurtătoare, camera de 5 × 5 m și cele trei plăci ESP32. Șapte fișiere din proiect citesc aceste valori. Fiecare fișă de mai jos ilustrează un grup de linii.</p>
+  <nav class="toc" aria-label="Fișe">
+    <a href="#numpy">L1 NumPy</a><a href="#unda">L3–5 Unda</a><a href="#subpurtatoare">L6–8 Subpurtătoare</a>
+    <a href="#camera">L9–12 Camera</a><a href="#doppler">L13 Doppler</a><a href="#nume">L16–17 Nume</a><a href="#drum">L20–25 Drum în plus</a>
+  </nav>
+</header>
+
+<!-- L1 -->
+<section class="card" id="numpy">
+  <span class="lines">Linia 1 · importul NumPy</span>
+  <h2>Un calcul pentru multe puncte deodată</h2>
+  <div class="fig">
+    <svg viewBox="0 0 800 180" role="img" aria-label="Mai multe puncte intră într-o singură funcție și ies mai multe rezultate">
+      <g id="np-dots"></g>
+      <rect x="330" y="50" width="140" height="80" rx="6" fill="var(--soft-signal)" stroke="var(--signal)" stroke-width="2"/>
+      <text x="400" y="86" text-anchor="middle" font-size="14">calcul</text>
+      <text x="400" y="106" text-anchor="middle" font-size="12" class="muted">o singură dată</text>
+      <g id="np-out"></g>
+      <text x="120" y="170" text-anchor="middle" font-size="12" class="muted">pozițiile persoanei în timp</text>
+      <text x="680" y="170" text-anchor="middle" font-size="12" class="muted">un rezultat pentru fiecare poziție</text>
+      <text x="120" y="30" text-anchor="middle" font-size="13">intrare: vector [p₁ … p₁₂]</text>
+      <text x="660" y="30" text-anchor="middle" font-size="13">ieșire: vector [r₁ … r₁₂]</text>
+    </svg>
+  </div>
+  <div class="text">
+    <p>NumPy lucrează cu un vector întreg de numere. Simulatorul trimite toate pozițiile persoanei deodată, nu una câte una.</p>
+    <div class="why"><b>De ce NumPy și nu modulul math?</b><p>Modulul math calculează doar un număr pe rând. Pentru mii de poziții, NumPy este mult mai rapid și scrie mai puțin cod.</p></div>
+  </div>
+  <div class="uses">Folosit de: <span class="chip">simulator.py</span><span class="chip">localization.py</span></div>
+</section>
+
+<!-- L3-5 -->
+<section class="card" id="unda">
+  <span class="lines">Liniile 3–5 · viteza luminii, frecvența centrală, lungimea de undă</span>
+  <h2>O undă Wi-Fi are aproximativ 12 cm</h2>
+  <div class="controls" role="group" aria-label="Alege canalul">
+    <button class="opt" data-f="2.412" aria-pressed="false">Canal 1 · 2.412 GHz</button>
+    <button class="opt" data-f="2.437" aria-pressed="true">Canal 6 · 2.437 GHz (proiect)</button>
+    <button class="opt" data-f="2.462" aria-pressed="false">Canal 11 · 2.462 GHz</button>
+    <button class="opt" data-f="5.18" aria-pressed="false">5 GHz · canal 36</button>
+  </div>
+  <div class="fig">
+    <svg viewBox="0 0 800 200" role="img" aria-label="Undă sinusoidală cu o riglă care arată o lungime de undă">
+      <line x1="0" y1="90" x2="800" y2="90" stroke="var(--line)" stroke-width="1"/>
+      <path id="wave" d="" fill="none" stroke="var(--signal)" stroke-width="3"/>
+      <g id="ruler">
+        <line id="rl" x1="40" y1="160" x2="114" y2="160" stroke="var(--reflect)" stroke-width="2"/>
+        <line id="rl-a" x1="40" y1="150" x2="40" y2="170" stroke="var(--reflect)" stroke-width="2"/>
+        <line id="rl-b" x1="114" y1="150" x2="114" y2="170" stroke="var(--reflect)" stroke-width="2"/>
+        <text id="rl-t" x="77" y="190" text-anchor="middle" font-size="13">λ = 12.3 cm</text>
+      </g>
+      <text x="790" y="24" text-anchor="end" font-size="12" class="muted">scara: 6 px = 1 cm</text>
+      <text x="20" y="24" font-size="12" class="muted">unda se deplasează →</text>
+      <text x="130" y="164" font-size="12" class="muted">← distanța dintre două vârfuri</text>
+    </svg>
+  </div>
+  <div class="readout">
+    <div><small>Viteza luminii (L3)</small><strong>300 000 km/s</strong></div>
+    <div><small>Frecvența (L4)</small><strong id="ro-f">2.437 GHz</strong></div>
+    <div><small>Lungimea de undă (L5)</small><strong id="ro-l">12.31 cm</strong></div>
+  </div>
+  <div class="text">
+    <p>Unda radio oscilează de 2.437 miliarde de ori pe secundă. Ea se deplasează cu viteza luminii. Distanța dintre două vârfuri este lungimea de undă: viteza împărțită la frecvență.</p>
+    <p>Pentru proiect, valoarea este 12.3 cm. Este puțin mai mică decât lungimea unui telefon.</p>
+    <div class="why"><b>De ce o calculăm și nu o scriem direct?</b><p>Apasă pe alt canal. Lungimea de undă se schimbă automat. Dacă scrii 0.123 de mână, uiți să o schimbi când schimbi canalul.</p></div>
+    <div class="why"><b>De ce 3 × 10⁸ și nu valoarea exactă?</b><p>Valoarea exactă este 299 792 458 m/s. Diferența schimbă lungimea de undă cu mai puțin de 0.1 %. Rezultatul simulării nu se schimbă vizibil.</p></div>
+    <div class="why"><b>Ce influențează?</b><p>Lungimea de undă transformă distanța în fază și viteza în Doppler. Harta camerei o folosește pentru zonele Fresnel.</p></div>
+  </div>
+  <div class="uses">Folosit de: <span class="chip">simulator.py</span><span class="chip">gui/room_map.py</span><span class="chip">gui/charts.py</span></div>
+</section>
+
+<!-- L6-8 -->
+<section class="card" id="subpurtatoare">
+  <span class="lines">Liniile 6–8 · spațierea, numărul și indicii subpurtătoarelor</span>
+  <h2>Un canal de 20 MHz, tăiat în 64 de felii</h2>
+  <div class="fig">
+    <svg id="sc-svg" viewBox="0 0 800 230" role="img" aria-label="64 de subpurtătoare: 52 folosite, una centrală goală, 11 de margine">
+      <g id="sc-bars"></g>
+      <line x1="16" y1="150" x2="784" y2="150" stroke="var(--line)"/>
+      <text x="400" y="200" text-anchor="middle" font-size="12" class="muted">indicele 0 (centrul canalului, 2.437 GHz)</text>
+      <line x1="400" y1="160" x2="400" y2="185" stroke="var(--muted)" stroke-dasharray="3 3"/>
+      <text x="16" y="172" font-size="12" class="muted">−32</text>
+      <text x="784" y="172" text-anchor="end" font-size="12" class="muted">+31</text>
+      <path d="M88 52 V46 H724 V52" fill="none" stroke="var(--signal)"/>
+      <text x="406" y="40" text-anchor="middle" font-size="12" style="fill:var(--signal)">52 folosite (−26 … +26, fără 0)</text>
+      <path d="M16 118 V112 H88 V118" fill="none" stroke="var(--muted)"/>
+      <text x="52" y="106" text-anchor="middle" font-size="12" class="muted">6 margine</text>
+      <path d="M724 118 V112 H784 V118" fill="none" stroke="var(--muted)"/>
+      <text x="754" y="106" text-anchor="middle" font-size="12" class="muted">5 margine</text>
+      <text x="406" y="112" text-anchor="middle" font-size="12" class="muted">DC</text>
+      <path d="M526 162 H538 M526 158 V166 M538 158 V166" fill="none" stroke="var(--reflect)" stroke-width="2"/>
+      <text x="548" y="184" font-size="12" style="fill:var(--reflect)">312.5 kHz între două bare</text>
+      <text id="sc-tip" x="400" y="24" text-anchor="middle" font-size="14">Treci cu mouse-ul (sau atinge) o bară</text>
+    </svg>
+  </div>
+  <div class="controls" aria-hidden="true">
+    <span class="uses"><span class="chip" style="border-color:var(--signal);color:var(--signal)">■ 52 folosite</span><span class="chip">□ 1 centrală (DC), nefolosită</span><span class="chip">□ 11 de margine, nefolosite</span></span>
+  </div>
+  <div class="text">
+    <p>Wi-Fi nu trimite datele pe o singură frecvență. El împarte canalul de 20 MHz în 64 de frecvențe mici. Acestea sunt subpurtătoarele.</p>
+    <p>Două subpurtătoare vecine sunt la 312.5 kHz una de alta: 20 MHz împărțit la 64. Proiectul folosește 52 dintre ele, cu indicii de la −26 la +26.</p>
+    <div class="why"><b>De ce lipsește indicele 0?</b><p>Subpurtătoarea din centru stă exact pe frecvența purtătoarei. Standardul Wi-Fi nu pune date pe ea. Ea nu dă informație utilă despre cameră.</p></div>
+    <div class="why"><b>De ce nu folosim și marginile?</b><p>Standardul lasă 11 felii goale la margini. Ele protejează canalele vecine de interferență. Placa ESP32 nu raportează date utile pentru ele.</p></div>
+    <div class="why"><b>De ce o listă fixă de indici?</b><p>Indicii nu se schimbă niciodată în timpul programului. Python îi păstrează într-un tuplu, care nu se poate modifica din greșeală.</p></div>
+    <div class="why"><b>Ce influențează?</b><p>Simulatorul dă fiecărei subpurtătoare frecvența ei proprie. De aceea, o persoană produce un model diferit pe fiecare dintre cele 52 de bare.</p></div>
+  </div>
+  <div class="uses">Folosit de: <span class="chip">simulator.py</span><span class="chip">gui/charts.py (cascada de 52 de coloane)</span></div>
+</section>
+
+<!-- L9-12 -->
+<section class="card" id="camera">
+  <span class="lines">Liniile 9–12 · camera, nodurile, link-urile</span>
+  <h2>Trei plăci ESP32 într-o cameră de 5 × 5 m</h2>
+  <div class="fig">
+    <svg viewBox="-40 -30 580 595" role="img" aria-label="Planul camerei cu trei noduri și trei link-uri">
+      <rect x="0" y="0" width="500" height="500" fill="var(--soft-signal)" stroke="var(--ink)" stroke-width="2"/>
+      <g stroke="var(--line)" stroke-width="1" id="grid"></g>
+      <line x1="250" y1="0" x2="250" y2="500" stroke="var(--muted)" stroke-dasharray="2 6"/>
+      <line x1="0" y1="250" x2="500" y2="250" stroke="var(--muted)" stroke-dasharray="2 6"/>
+      <circle cx="250" cy="250" r="4" fill="var(--muted)"/>
+      <text x="258" y="268" font-size="13" class="muted">(0, 0)</text>
+      <defs><marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="4" markerHeight="4" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="var(--signal)"/></marker></defs>
+      <g class="links">
+        <line class="lk" x1="50" y1="130" x2="431" y2="130" stroke="var(--signal)" stroke-width="3" stroke-dasharray="10 10" marker-end="url(#arr)"/>
+        <line class="lk" x1="450" y1="130" x2="260" y2="434" stroke="var(--signal)" stroke-width="3" stroke-dasharray="10 10" marker-end="url(#arr)"/>
+        <line class="lk" x1="250" y1="450" x2="60" y2="146" stroke="var(--signal)" stroke-width="3" stroke-dasharray="10 10" marker-end="url(#arr)"/>
+      </g>
+      <text x="490" y="244" text-anchor="end" font-size="12" class="muted">+x →</text>
+      <text x="256" y="16" font-size="12" class="muted">↑ +y</text>
+      <text x="0" y="548" font-size="12" class="muted">→ sensul semnalului: emițător (TX) → receptor (RX)</text>
+      <text x="250" y="118" text-anchor="middle" font-size="14">Link 1-2</text>
+      <text x="372" y="300" font-size="14">Link 2-3</text>
+      <text x="128" y="300" text-anchor="end" font-size="14">Link 3-1</text>
+      <g font-size="14">
+        <circle cx="50" cy="130" r="16" fill="var(--node)"/><text x="50" y="135" text-anchor="middle" fill="var(--panel)" style="fill:var(--panel)">1</text>
+        <text x="50" y="168" text-anchor="middle" font-size="12" class="muted">(−2.0, 1.2)</text>
+        <circle cx="450" cy="130" r="16" fill="var(--node)"/><text x="450" y="135" text-anchor="middle" style="fill:var(--panel)">2</text>
+        <text x="450" y="168" text-anchor="middle" font-size="12" class="muted">(2.0, 1.2)</text>
+        <circle cx="250" cy="450" r="16" fill="var(--node)"/><text x="250" y="455" text-anchor="middle" style="fill:var(--panel)">3</text>
+        <text x="250" y="488" text-anchor="middle" font-size="12" class="muted">(0.0, −2.0)</text>
+      </g>
+      <text x="0" y="-10" font-size="12" class="muted">−2.5 m</text>
+      <text x="500" y="-10" text-anchor="end" font-size="12" class="muted">+2.5 m</text>
+      <text x="250" y="525" text-anchor="middle" font-size="13">5 m</text>
+      <text x="-14" y="250" text-anchor="middle" font-size="13" transform="rotate(-90 -14 250)">5 m</text>
+    </svg>
+  </div>
+  <div class="text">
+    <p>Camera are 5 m pe fiecare latură. Centrul camerei este punctul (0, 0). Astfel, camera începe la −2.5 m și se termină la +2.5 m pe fiecare axă.</p>
+    <p>Fiecare placă are o poziție fixă. Un link este o pereche emițător → receptor. Liniile punctate arată sensul semnalului.</p>
+    <div class="why"><b>De ce jumătate din latură (2.5 m)?</b><p>Cu centrul în (0, 0), limita camerei este simplu ±2.5 m. Harta din aplicație și localizarea folosesc această limită.</p></div>
+    <div class="why"><b>De ce un triunghi și nu o linie?</b><p>Cu trei plăci pe aceeași linie, un punct și imaginea lui în oglindă dau aceleași măsurători. Triunghiul separă aceste două puncte.</p></div>
+    <div class="why"><b>De ce un dicționar pentru poziții?</b><p>Codul cere poziția după numărul plăcii, de exemplu „placa 2”. Dicționarul dă răspunsul direct, fără o căutare.</p></div>
+  </div>
+  <div class="uses">Folosit de: <span class="chip">simulator.py</span><span class="chip">localization.py</span><span class="chip">udp_sim.py</span><span class="chip">gui/room_map.py</span><span class="chip">gui/status_panel.py</span><span class="chip">figures.py</span></div>
+</section>
+
+<!-- L13 -->
+<section class="card" id="doppler">
+  <span class="lines">Linia 13 · referința Doppler</span>
+  <h2>35 Hz: linia roșie dintre mers și cădere</h2>
+  <label for="speed" class="hint">Viteza persoanei: <strong id="sp-v" style="font-family:var(--f-mono)">1.0 m/s</strong></label>
+  <input type="range" id="speed" min="0" max="4" step="0.05" value="1">
+  <div class="fig">
+    <svg viewBox="0 0 800 150" role="img" aria-label="Scară Doppler de la 0 la 70 Hz, cu pragul la 35 Hz">
+      <rect x="20" y="50" width="760" height="28" rx="4" fill="var(--bg)" stroke="var(--line)"/>
+      <rect id="dp-fill" x="20" y="50" width="176" height="28" rx="4" fill="var(--good)"/>
+      <line x1="400" y1="34" x2="400" y2="94" stroke="var(--alert)" stroke-width="3"/>
+      <text x="400" y="26" text-anchor="middle" font-size="13" style="fill:var(--alert)">35 Hz ≈ 2.15 m/s</text>
+      <g font-size="12" class="muted" id="dp-ticks"></g>
+      <text x="388" y="44" text-anchor="end" font-size="12" class="muted">sub prag · mers</text>
+      <text x="412" y="44" font-size="12" class="muted">peste prag · mișcare bruscă</text>
+      <text x="20" y="124" font-size="12" class="muted">Doppler = 2 · v ÷ λ</text>
+      <text x="780" y="124" text-anchor="end" font-size="11" class="muted">doar referință pe grafic · detectorul nu o folosește</text>
+      <text id="dp-label" x="20" y="140" font-size="14">16.2 Hz · sub prag (de exemplu, mers)</text>
+    </svg>
+  </div>
+  <div class="text">
+    <p>Când persoana se mișcă, drumul reflectat se schimbă. Faza semnalului se rotește mai repede. Această viteză de rotire este frecvența Doppler.</p>
+    <p>Regula este simplă: Doppler = 2 × viteza ÷ lungimea de undă. Factorul 2 apare pentru că semnalul merge până la persoană și înapoi.</p>
+    <div class="why"><b>Ce influențează?</b><p>Valoarea apare doar pe grafice, ca linie roșie de referință. Detectorul de cădere nu folosește această valoare. El are pragurile lui proprii.</p></div>
+  </div>
+  <div class="uses">Folosit de: <span class="chip">gui/charts.py</span><span class="chip">figures.py</span></div>
+</section>
+
+<!-- L16-17 -->
+<section class="card" id="nume">
+  <span class="lines">Liniile 16–17 · funcția link_name</span>
+  <h2>O pereche de numere devine o etichetă</h2>
+  <div class="fig">
+    <svg viewBox="0 -24 800 234" role="img" aria-label="Perechile 1-2, 2-3, 3-1 devin etichete text">
+      <text x="115" y="-6" text-anchor="middle" font-size="12" class="muted">intrare: pereche (tx, rx)</text>
+      <text x="455" y="-6" text-anchor="middle" font-size="12" class="muted">ieșire: text</text>
+      <g id="nm-rows"></g>
+    </svg>
+  </div>
+  <div class="text">
+    <p>Funcția primește o pereche de plăci, de exemplu 1 și 2. Ea returnează textul „Link 1-2”.</p>
+    <div class="why"><b>De ce o funcție pentru un text atât de mic?</b><p>Simulatorul salvează datele sub acest nume. Aplicația le caută după același nume. O singură funcție garantează același format peste tot.</p></div>
+  </div>
+  <div class="uses">Folosit de: <span class="chip">simulator.py</span><span class="chip">udp_sim.py</span><span class="chip">figures.py</span></div>
+</section>
+
+<!-- L20-25 -->
+<section class="card" id="drum">
+  <span class="lines">Liniile 20–25 · funcția extra_path_m</span>
+  <h2>Cât drum în plus face semnalul?</h2>
+  <div class="controls" role="group" aria-label="Alege link-ul">
+    <button class="opt lkbtn" data-l="0" aria-pressed="true">Link 1-2</button>
+    <button class="opt lkbtn" data-l="1" aria-pressed="false">Link 2-3</button>
+    <button class="opt lkbtn" data-l="2" aria-pressed="false">Link 3-1</button>
+  </div>
+  <p class="hint">Trage persoana (cercul portocaliu) prin cameră.</p>
+  <div class="fig">
+    <svg id="ep-svg" viewBox="-30 -30 560 560" role="img" aria-label="Plan interactiv: drumul direct și drumul reflectat pe persoană" style="touch-action:none">
+      <rect x="0" y="0" width="500" height="500" fill="var(--bg)" stroke="var(--ink)" stroke-width="2"/>
+      <ellipse id="ep-fresnel" fill="var(--soft-signal)" stroke="var(--signal)" stroke-width="1" stroke-dasharray="4 4"/>
+      <ellipse id="ep-ell" fill="none" stroke="var(--reflect)" stroke-width="1.5" stroke-dasharray="6 5"/>
+      <line id="ep-direct" stroke="var(--signal)" stroke-width="3"/>
+      <polyline id="ep-refl" fill="none" stroke="var(--reflect)" stroke-width="3"/>
+      <g id="ep-nodes"></g>
+      <g id="ep-person" style="cursor:grab">
+        <circle r="26" fill="transparent"/>
+        <circle r="13" fill="var(--reflect)" stroke="var(--panel)" stroke-width="3"/>
+      </g>
+      <text id="ep-la" class="halo" font-size="12" text-anchor="middle" style="fill:var(--reflect)"></text>
+      <text id="ep-lb" class="halo" font-size="12" text-anchor="middle" style="fill:var(--reflect)"></text>
+      <text id="ep-ld" class="halo" font-size="12" text-anchor="middle" style="fill:var(--signal)"></text>
+      <text id="ep-lp" class="halo" font-size="12" text-anchor="middle">persoană</text>
+      <text id="ep-lf" class="halo" font-size="11" text-anchor="middle" style="fill:var(--signal)">zona Fresnel</text>
+      <text id="ep-le" class="halo" font-size="11" text-anchor="middle" style="fill:var(--reflect)">același drum în plus</text>
+      <g id="ep-legend" font-size="12" style="pointer-events:none">
+        <line x1="12" y1="20" x2="40" y2="20" stroke="var(--signal)" stroke-width="3"/><text class="halo" x="48" y="24">d · drum direct</text>
+        <polyline points="12,40 26,34 40,40" fill="none" stroke="var(--reflect)" stroke-width="3"/><text class="halo" x="48" y="44">a + b · drum reflectat</text>
+        <line x1="12" y1="60" x2="40" y2="60" stroke="var(--reflect)" stroke-width="1.5" stroke-dasharray="6 5"/><text class="halo" x="48" y="64">elipsă: același drum în plus</text>
+        <rect x="12" y="72" width="28" height="12" fill="var(--soft-signal)" stroke="var(--signal)" stroke-dasharray="4 4"/><text class="halo" x="48" y="82">extra = L · amplitudine ×0.37</text>
+        <text class="halo" x="12" y="452" style="fill:var(--reflect)">în plus = a + b − d</text>
+        <text class="halo" x="12" y="470" style="fill:var(--signal)">amplitudine = 0.35 · e^(−în plus / L)</text>
+        <text class="halo" x="12" y="488" style="fill:var(--signal)">L = 1.5 · 0.5 · √(λ · d)</text>
+      </g>
+      <text id="ep-tx" font-size="13" style="fill:var(--signal)">TX</text>
+      <text id="ep-rx" font-size="13" style="fill:var(--signal)">RX</text>
+    </svg>
+  </div>
+  <div class="readout">
+    <div><small>d · drum direct TX → RX</small><strong id="ep-d">4.00 m</strong></div>
+    <div><small>a + b · drum reflectat TX → persoană → RX</small><strong id="ep-r">–</strong></div>
+    <div><small>Drum în plus (rezultatul)</small><strong id="ep-e" style="color:var(--reflect)">–</strong></div>
+    <div><small>În lungimi de undă</small><strong id="ep-w">–</strong></div>
+    <div><small>Amplitudine reflexie (simulator.py:115)</small><strong id="ep-a" style="color:var(--signal)">–</strong></div>
+  </div>
+  <div class="text">
+    <p>Semnalul ajunge la receptor pe două drumuri. Drumul direct (albastru) merge în linie dreaptă. Drumul reflectat (portocaliu) lovește persoana și apoi ajunge la receptor.</p>
+    <p>Funcția ia pozițiile plăcilor din link. Apoi măsoară cele două segmente portocalii (a și b) și le adună. La final, ea scade drumul albastru (d). Rezultatul este drumul în plus, în metri.</p>
+    <div class="why"><b>De ce diferența și nu drumul total?</b><p>Receptorul compară cele două semnale. Contează doar cu cât întârzie cel reflectat. Fiecare 12.3 cm în plus înseamnă o rotire completă a fazei.</p></div>
+    <div class="why"><b>Ce arată elipsa portocalie?</b><p>Toate punctele de pe elipsă dau același drum în plus. Un singur link nu știe unde este persoana pe elipsă. De aceea, localizarea intersectează elipsele celor trei link-uri.</p></div>
+    <div class="why"><b>Ce arată elipsa albastră?</b><p>Simulatorul reduce amplitudinea reflexiei exponențial: 0.35 · e^(−în plus / L), cu L = 1.5 · 0.5 · √(λ · d). Pe elipsa albastră, în plus este egal cu L. Acolo amplitudinea este 0.35 · e⁻¹ ≈ 0.13. Pe linia directă este 0.35.</p></div>
+    <div class="why"><b>Și dacă persoana a căzut?</b><p>Simulatorul folosește atunci amplitudinea fixă 0.85. Poziția nu mai contează.</p></div>
+    <div class="why"><b>De ce merge pentru un punct sau pentru mii de puncte?</b><p>Funcția măsoară distanța pe ultima axă a datelor. Astfel, simulatorul trimite toată traiectoria deodată și primește un rezultat pentru fiecare moment.</p></div>
+  </div>
+  <div class="uses">Folosit de: <span class="chip">simulator.py (faza semnalului)</span><span class="chip">localization.py (găsirea persoanei)</span></div>
+</section>
+
+<footer>Valorile din pagină vin din src/csi/room.py. Pagina nu schimbă codul proiectului.</footer>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script>
+(function () {
+  var NS = "http://www.w3.org/2000/svg";
+  var C = 3.0e8;
+  var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var hasGsap = typeof window.gsap !== "undefined";
+  function el(tag, attrs, parent) {
+    var e = document.createElementNS(NS, tag);
+    for (var k in attrs) e.setAttribute(k, attrs[k]);
+    if (parent) parent.appendChild(e);
+    return e;
+  }
+  function fmt(n, d) { return n.toFixed(d).replace("-", "−"); }
+
+  /* ---------- L1: NumPy dots ---------- */
+  var dots = document.getElementById("np-dots"), outs = document.getElementById("np-out");
+  for (var i = 0; i < 12; i++) {
+    var cx = 40 + (i % 6) * 32, cy = 60 + Math.floor(i / 6) * 44;
+    el("circle", { cx: cx, cy: cy, r: 7, fill: "var(--reflect)", class: "npd" }, dots);
+    el("rect", { x: 580 + (i % 6) * 32, y: cy - 7, width: 16, height: 14, rx: 2, fill: "var(--signal)", class: "npo" }, outs);
+  }
+  el("path", { d: "M235 90 L320 90", stroke: "var(--muted)", "stroke-width": 2, "marker-end": "" }, dots);
+  el("path", { d: "M480 90 L565 90", stroke: "var(--muted)", "stroke-width": 2 }, outs);
+  if (hasGsap && !reduce) {
+    var tl = gsap.timeline({ repeat: -1, repeatDelay: 1.2 });
+    tl.from(".npd", { x: -30, opacity: 0, duration: 0.5, stagger: 0.04 })
+      .to(".npd", { x: 120, opacity: 0.25, duration: 0.6, ease: "power2.in" })
+      .from(".npo", { x: -60, opacity: 0, duration: 0.5, stagger: 0.04 }, "-=0.1")
+      .to(".npd", { x: 0, opacity: 1, duration: 0.01 });
+  }
+
+  /* ---------- L3-5: wave ---------- */
+  var wave = document.getElementById("wave");
+  var PX_PER_CM = 6, phase = 0, lambdaCm = C / 2.437e9 * 100;
+  function drawWave() {
+    var lp = lambdaCm * PX_PER_CM, d = "";
+    for (var x = 0; x <= 800; x += 2) {
+      var y = 90 - 45 * Math.sin((x / lp) * 2 * Math.PI - phase);
+      d += (x === 0 ? "M" : "L") + x + " " + y.toFixed(1) + " ";
+    }
+    wave.setAttribute("d", d);
+  }
+  function setRuler() {
+    var lp = lambdaCm * PX_PER_CM, x1 = 40, x2 = 40 + lp;
+    var parts = { rl: [x1, x2], "rl-b": [x2, x2] };
+    document.getElementById("rl").setAttribute("x2", x2);
+    document.getElementById("rl-b").setAttribute("x1", x2);
+    document.getElementById("rl-b").setAttribute("x2", x2);
+    var t = document.getElementById("rl-t");
+    t.setAttribute("x", (x1 + x2) / 2);
+    t.textContent = "λ = " + lambdaCm.toFixed(1) + " cm";
+  }
+  document.querySelectorAll("#unda button.opt").forEach(function (b) {
+    b.addEventListener("click", function () {
+      document.querySelectorAll("#unda button.opt").forEach(function (o) { o.setAttribute("aria-pressed", o === b ? "true" : "false"); });
+      var fGHz = parseFloat(b.dataset.f), target = C / (fGHz * 1e9) * 100;
+      document.getElementById("ro-f").textContent = fGHz.toFixed(3) + " GHz";
+      document.getElementById("ro-l").textContent = target.toFixed(2) + " cm";
+      if (hasGsap && !reduce) {
+        gsap.to({ v: lambdaCm }, { v: target, duration: 0.6, ease: "power2.out", onUpdate: function () { lambdaCm = this.targets()[0].v; setRuler(); drawWave(); } });
+      } else { lambdaCm = target; setRuler(); drawWave(); }
+    });
+  });
+  setRuler(); drawWave();
+  if (hasGsap && !reduce) gsap.ticker.add(function () { phase += 0.06; drawWave(); });
+
+  /* ---------- L6-8: subcarriers ---------- */
+  var bars = document.getElementById("sc-bars"), tip = document.getElementById("sc-tip");
+  for (var k = -32; k <= 31; k++) {
+    var used = k !== 0 && k >= -26 && k <= 26;
+    var x = 16 + (k + 32) * 12;
+    var r = el("rect", {
+      x: x + 1.5, y: used ? 60 : 120, width: 9, height: used ? 90 : 30, rx: 1.5,
+      fill: used ? "var(--signal)" : "none", stroke: used ? "none" : "var(--muted)", "stroke-width": 1,
+      class: used ? "scu" : "scn", tabindex: used ? 0 : -1
+    }, bars);
+    (function (kk, rect, isUsed) {
+      function show() {
+        if (!isUsed) {
+          tip.textContent = kk === 0 ? "Indicele 0: centrul canalului. Fără date." : "Indicele " + fmt(kk, 0) + ": margine de protecție. Nefolosit.";
+          return;
+        }
+        var f = 2.437e9 + kk * 312.5e3;
+        tip.textContent = "Indicele " + fmt(kk, 0) + " → 2.437 GHz " + (kk < 0 ? "−" : "+") + " " + Math.abs(kk) + " × 312.5 kHz = " + (f / 1e9).toFixed(6) + " GHz";
+        document.querySelectorAll(".scu").forEach(function (o) { o.setAttribute("fill", o === rect ? "var(--reflect)" : "var(--signal)"); });
+      }
+      rect.addEventListener("mouseenter", show);
+      rect.addEventListener("focus", show);
+      rect.addEventListener("click", show);
+    })(k, r, used);
+  }
+  if (hasGsap && !reduce) gsap.from(".scu", { scaleY: 0, transformOrigin: "50% 100%", duration: 0.4, stagger: 0.012, ease: "back.out(2)", delay: 0.2 });
+
+  /* ---------- L9-12: grid + flowing links ---------- */
+  var grid = document.getElementById("grid");
+  for (var g = 1; g < 5; g++) {
+    el("line", { x1: g * 100, y1: 0, x2: g * 100, y2: 500 }, grid);
+    el("line", { x1: 0, y1: g * 100, x2: 500, y2: g * 100 }, grid);
+  }
+  if (hasGsap && !reduce) gsap.to(".lk", { attr: { "stroke-dashoffset": -40 }, duration: 1, repeat: -1, ease: "none" });
+
+  /* ---------- L13: Doppler ---------- */
+  var LAMBDA = C / 2.437e9, DMAX = 70;
+  var ticks = document.getElementById("dp-ticks");
+  for (var t = 0; t <= DMAX; t += 10) {
+    var tx = 20 + (t / DMAX) * 760;
+    el("line", { x1: tx, y1: 78, x2: tx, y2: 86, stroke: "var(--muted)" }, ticks);
+    el("text", { x: tx, y: 104, "text-anchor": "middle", class: "muted" }, ticks).textContent = t + " Hz";
+  }
+  var fill = document.getElementById("dp-fill"), lab = document.getElementById("dp-label");
+  function setSpeed(v) {
+    var hz = 2 * v / LAMBDA, w = Math.min(hz / DMAX, 1) * 760, over = hz >= 35;
+    document.getElementById("sp-v").textContent = v.toFixed(2) + " m/s";
+    if (hasGsap && !reduce) gsap.to(fill, { attr: { width: Math.max(w, 1) }, duration: 0.25 }); else fill.setAttribute("width", Math.max(w, 1));
+    fill.setAttribute("fill", over ? "var(--alert)" : "var(--good)");
+    var what = v < 0.1 ? "persoana stă pe loc" : over ? "peste prag (mișcare bruscă, ca o cădere)" : "sub prag (de exemplu, mers)";
+    lab.textContent = hz.toFixed(1) + " Hz · " + what;
+  }
+  document.getElementById("speed").addEventListener("input", function (e) { setSpeed(parseFloat(e.target.value)); });
+  setSpeed(1);
+
+  /* ---------- L16-17: link names ---------- */
+  var rows = document.getElementById("nm-rows");
+  [[1, 2], [2, 3], [3, 1]].forEach(function (p, i) {
+    var y = 40 + i * 62, gr = el("g", { class: "nmrow" }, rows);
+    el("rect", { x: 40, y: y - 20, width: 150, height: 40, rx: 4, fill: "var(--bg)", stroke: "var(--line)" }, gr);
+    el("text", { x: 115, y: y + 5, "text-anchor": "middle", "font-size": 16 }, gr).textContent = "(" + p[0] + ", " + p[1] + ")";
+    el("path", { d: "M210 " + y + " L360 " + y, stroke: "var(--muted)", "stroke-width": 2, class: "nmarrow" }, gr);
+    el("path", { d: "M352 " + (y - 6) + " L362 " + y + " L352 " + (y + 6), fill: "none", stroke: "var(--muted)", "stroke-width": 2 }, gr);
+    el("text", { x: 285, y: y - 8, "text-anchor": "middle", "font-size": 12, class: "muted" }, gr).textContent = "link_name";
+    el("rect", { x: 380, y: y - 20, width: 150, height: 40, rx: 20, fill: "var(--soft-signal)", stroke: "var(--signal)", class: "nmtag" }, gr);
+    el("text", { x: 455, y: y + 5, "text-anchor": "middle", "font-size": 16, style: "fill:var(--signal)", class: "nmtag" }, gr).textContent = "Link " + p[0] + "-" + p[1];
+    el("path", { d: "M550 " + y + " L620 " + y, stroke: "var(--line)", "stroke-width": 2, "stroke-dasharray": "4 4" }, gr);
+  });
+  el("rect", { x: 630, y: 18, width: 150, height: 168, rx: 6, fill: "none", stroke: "var(--reflect)", "stroke-width": 2 }, rows);
+  el("text", { x: 705, y: 92, "text-anchor": "middle", "font-size": 13 }, rows).textContent = "datele";
+  el("text", { x: 705, y: 112, "text-anchor": "middle", "font-size": 13 }, rows).textContent = "simulatorului";
+  if (hasGsap && !reduce) gsap.from(".nmtag", { opacity: 0, x: -40, duration: 0.5, stagger: 0.15, repeat: -1, repeatDelay: 2.5, yoyo: false });
+
+  /* ---------- L20-25: extra path ---------- */
+  var NODES = { 1: [-2.0, 1.2], 2: [2.0, 1.2], 3: [0.0, -2.0] };
+  var LINKS = [[1, 2], [2, 3], [3, 1]];
+  var cur = 0, person = [0.4, -0.3];
+  function px(p) { return [(p[0] + 2.5) * 100, (2.5 - p[1]) * 100]; }
+  function dist(a, b) { return Math.hypot(a[0] - b[0], a[1] - b[1]); }
+  var nodesG = document.getElementById("ep-nodes");
+  Object.keys(NODES).forEach(function (id) {
+    var p = px(NODES[id]);
+    el("circle", { cx: p[0], cy: p[1], r: 15, fill: "var(--node)" }, nodesG);
+    el("text", { x: p[0], y: p[1] + 5, "text-anchor": "middle", "font-size": 14, style: "fill:var(--panel)" }, nodesG).textContent = id;
+  });
+  function setEllipse(node, tx, rx, extra) {
+    var d = dist(tx, rx), a = (d + extra) / 2, c = d / 2, b = Math.sqrt(Math.max(a * a - c * c, 0));
+    var m = px([(tx[0] + rx[0]) / 2, (tx[1] + rx[1]) / 2]);
+    var pt = px(tx), pr = px(rx), ang = Math.atan2(pr[1] - pt[1], pr[0] - pt[0]) * 180 / Math.PI;
+    node.setAttribute("cx", m[0]); node.setAttribute("cy", m[1]);
+    node.setAttribute("rx", a * 100); node.setAttribute("ry", b * 100);
+    node.setAttribute("transform", "rotate(" + ang + " " + m[0] + " " + m[1] + ")");
+  }
+  function normal(a, b) {
+    var dx = b[0] - a[0], dy = b[1] - a[1], l = Math.hypot(dx, dy) || 1, nx = -dy / l, ny = dx / l;
+    if (ny < -1e-6 || (Math.abs(ny) <= 1e-6 && nx < 0)) { nx = -nx; ny = -ny; }
+    return [nx, ny];
+  }
+  function putLabel(id, x, y, txt) {
+    var t = document.getElementById(id);
+    t.setAttribute("x", Math.max(40, Math.min(460, x)).toFixed(1));
+    t.setAttribute("y", (Math.max(-12, Math.min(520, y)) + 4).toFixed(1));
+    if (txt !== undefined) t.textContent = txt;
+  }
+  function update() {
+    var L = LINKS[cur], tx = NODES[L[0]], rx = NODES[L[1]];
+    var d = dist(tx, rx), refl = dist(person, tx) + dist(person, rx), extra = refl - d;
+    var pt = px(tx), pr = px(rx), pp = px(person);
+    var dl = document.getElementById("ep-direct");
+    dl.setAttribute("x1", pt[0]); dl.setAttribute("y1", pt[1]); dl.setAttribute("x2", pr[0]); dl.setAttribute("y2", pr[1]);
+    document.getElementById("ep-refl").setAttribute("points", pt.join(",") + " " + pp.join(",") + " " + pr.join(","));
+    document.getElementById("ep-person").setAttribute("transform", "translate(" + pp[0] + "," + pp[1] + ")");
+    setEllipse(document.getElementById("ep-ell"), tx, rx, extra);
+    var Lsc = 1.5 * 0.5 * Math.sqrt(LAMBDA * d);
+    setEllipse(document.getElementById("ep-fresnel"), tx, rx, Lsc);
+    var tt = document.getElementById("ep-tx"), rt = document.getElementById("ep-rx");
+    tt.setAttribute("x", pt[0] + (pt[0] < 250 ? -14 : 22)); tt.setAttribute("y", pt[1] - 20); tt.setAttribute("text-anchor", pt[0] < 250 ? "end" : "start");
+    if (pt[0] === 250) { tt.setAttribute("x", pt[0] + 22); tt.setAttribute("y", pt[1] + 5); tt.setAttribute("text-anchor", "start"); }
+    rt.setAttribute("x", pr[0] + (pr[0] < 250 ? -14 : 22)); rt.setAttribute("y", pr[1] - 20); rt.setAttribute("text-anchor", pr[0] < 250 ? "end" : "start");
+    if (pr[0] === 250) { rt.setAttribute("x", pr[0] + 22); rt.setAttribute("y", pr[1] + 5); rt.setAttribute("text-anchor", "start"); }
+    var a = dist(person, tx), b = dist(person, rx), mid = [(pt[0] + pr[0]) / 2, (pt[1] + pr[1]) / 2], nd = normal(pt, pr);
+    var side = ((pp[0] - mid[0]) * nd[0] + (pp[1] - mid[1]) * nd[1]) < 0 ? -1 : 1;
+    var bF = Math.sqrt(Math.max(Math.pow((d + Lsc) / 2, 2) - d * d / 4, 0)) * 100;
+    var amp = 0.35 * Math.exp(-extra / Lsc);
+    var bE = Math.sqrt(Math.max(Math.pow(refl / 2, 2) - d * d / 4, 0)) * 100;
+    var n1 = normal(pt, pp), n2 = normal(pp, pr);
+    var o1 = 10 + 40 * Math.abs(n1[0]), o2 = 10 + 40 * Math.abs(n2[0]);
+    putLabel("ep-la", (pt[0] + pp[0]) / 2 + n1[0] * o1, (pt[1] + pp[1]) / 2 + n1[1] * o1, "a = " + a.toFixed(2) + " m");
+    putLabel("ep-lb", (pp[0] + pr[0]) / 2 + n2[0] * o2, (pp[1] + pr[1]) / 2 + n2[1] * o2, "b = " + b.toFixed(2) + " m");
+    putLabel("ep-ld", mid[0] - nd[0] * 14, mid[1] - nd[1] * 14, "d = " + d.toFixed(2) + " m");
+    putLabel("ep-lp", pp[0], pp[1] - 24);
+    putLabel("ep-lf", mid[0] + side * nd[0] * (bF + 12), mid[1] + side * nd[1] * (bF + 12), "extra = L = " + Lsc.toFixed(2) + " m → ×0.37");
+    document.getElementById("ep-a").textContent = amp.toFixed(3);
+    putLabel("ep-le", mid[0] - side * nd[0] * (bE + 12), mid[1] - side * nd[1] * (bE + 12));
+    document.getElementById("ep-d").textContent = d.toFixed(2) + " m";
+    document.getElementById("ep-r").textContent = refl.toFixed(2) + " m";
+    document.getElementById("ep-e").textContent = extra.toFixed(3) + " m";
+    document.getElementById("ep-w").textContent = (extra / LAMBDA).toFixed(1) + " λ";
+  }
+  document.querySelectorAll(".lkbtn").forEach(function (b) {
+    b.addEventListener("click", function () {
+      cur = parseInt(b.dataset.l, 10);
+      document.querySelectorAll(".lkbtn").forEach(function (o) { o.setAttribute("aria-pressed", o === b ? "true" : "false"); });
+      update();
+    });
+  });
+  var svg = document.getElementById("ep-svg"), pg = document.getElementById("ep-person"), dragging = false;
+  function toRoom(evt) {
+    var p = svg.createSVGPoint(); p.x = evt.clientX; p.y = evt.clientY;
+    var s = p.matrixTransform(svg.getScreenCTM().inverse());
+    var x = Math.max(-2.5, Math.min(2.5, s.x / 100 - 2.5)), y = Math.max(-2.5, Math.min(2.5, 2.5 - s.y / 100));
+    return [x, y];
+  }
+  pg.addEventListener("pointerdown", function (e) { dragging = true; pg.style.cursor = "grabbing"; svg.setPointerCapture(e.pointerId); e.preventDefault(); });
+  svg.addEventListener("pointerdown", function (e) { if (e.target.closest("#ep-person")) return; dragging = true; svg.setPointerCapture(e.pointerId); person = toRoom(e); update(); });
+  svg.addEventListener("pointermove", function (e) { if (!dragging) return; person = toRoom(e); update(); });
+  svg.addEventListener("pointerup", function () { dragging = false; pg.style.cursor = "grab"; });
+  svg.addEventListener("pointercancel", function () { dragging = false; });
+  update();
+})();
+</script>
+
+</body>
+</html>

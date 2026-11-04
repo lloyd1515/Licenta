@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="ro">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>theme.py ilustrat</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="../../assets/learn.css">
+</head>
+<body data-file="csi/gui/theme.py" data-root="../../">
+<main>
+<header class="page">
+  <span class="eyebrow">src/csi/gui/theme.py · 249 de linii</span>
+  <h1>Paleta și stilurile aplicației</h1>
+  <p class="lede">theme.py nu calculează nimic despre semnal. El adună toate culorile într-un dicționar și construiește din ele stilurile Qt. Celelalte fișiere GUI cer culori doar prin nume.</p>
+  <nav class="toc" aria-label="Fișe"><a href="#c">L6–43 Culori</a><a href="#s">L46–58 Stări</a><a href="#q">L60–207 Foaia de stil</a><a href="#f">L210–249 Funcții</a></nav>
+</header>
+
+<section class="card" id="c">
+  <span class="lines">Liniile 6–43 · COLORS</span>
+  <h2>36 de culori cu nume</h2>
+  <div class="fig" id="pal"></div>
+  <p class="tip" id="pal-tip">Atinge o culoare.</p>
+  <div class="text">
+    <p>Toate culorile sunt pe fond închis: aplicația are o singură temă, întunecată. Albastrul-cian marchează semnalul, verdele mersul, roșul căderea.</p>
+    <div class="why"><b>De ce un dicționar central?</b><p>O culoare se schimbă într-un singur loc. Harta, graficele și cardurile primesc automat noua valoare.</p></div>
+  </div>
+</section>
+
+<section class="card" id="s">
+  <span class="lines">Liniile 46–58 · StateColors și STATE_COLORS</span>
+  <h2>O insignă pentru fiecare stare</h2>
+  <div class="fig" id="badges"></div>
+  <div class="text">
+    <p>Fiecare stare a detectorului are trei culori: fond, text și margine. Panoul de stare folosește aceste culori pentru insigna mare.</p>
+    <div class="why"><b>De ce culori diferite și nu doar text?</b><p>Persoana care privește ecranul de la distanță vede culoarea înainte să citească textul. Portocaliu și roșu ies în evidență pe fondul închis.</p></div>
+  </div>
+</section>
+
+<section class="card" id="q">
+  <span class="lines">Liniile 60–207 · STYLESHEET</span>
+  <h2>Un șablon cu găuri pentru culori</h2>
+  <div class="fig" id="tpl"></div>
+  <div class="text">
+    <p>Foaia de stil Qt seamănă cu CSS. În loc de culori, ea are nume precedate de $, de exemplu $background. Linia 207 înlocuiește fiecare nume cu valoarea din COLORS.</p>
+    <p>Regulile se adresează widget-urilor după nume de obiect: PanelFrame, TopBar, AlertBanner, ToggleLive. main_window.py dă aceste nume widget-urilor.</p>
+    <div class="why"><b>De ce string.Template și nu f-string?</b><p>CSS folosește acolade { }. Într-un f-string, fiecare acoladă ar trebui dublată. Template folosește $ și lasă acoladele neatinse.</p></div>
+  </div>
+</section>
+
+<section class="card" id="f">
+  <span class="lines">Liniile 210–249 · funcții și stiluri gata făcute</span>
+  <h2>Stiluri mici, construite o singură dată</h2>
+  <div class="fig" id="mini"></div>
+  <div class="text">
+    <p>Patru funcții construiesc stiluri pentru o insignă, eticheta Doppler, insigna de stare și valoarea unui card. Liniile 237–249 le apelează o dată, la import, pentru variantele folosite des.</p>
+  </div>
+  <div class="uses">Folosit de: <a class="chip" href="main_window.py.html">main_window.py</a><a class="chip" href="charts.py.html">charts.py</a><a class="chip" href="room_map.py.html">room_map.py</a><a class="chip" href="status_panel.py.html">status_panel.py</a></div>
+</section>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../../assets/learn.js"></script>
+<script>
+(function () {
+  var C = { background: "#0b0f19", map_background: "#080d1a", surface: "#111827", surface_raised: "#1f2937", top_bar: "#0f172a", border: "#1e293b", border_strong: "#334155", divider: "#374151", grid: "#151e32", text: "#e2e8f0", text_bright: "#f8fafc", muted: "#94a3b8", dim: "#64748b", plot_foreground: "#9ca3af", accent: "#38bdf8", cyan: "#06b6d4", cyan_dark: "#0891b2", green: "#10b981", green_dark: "#059669", walker: "#22c55e", walker_light: "#4ade80", walker_text: "#86efac", red: "#ef4444", red_strong: "#dc2626", red_dark: "#991b1b", red_darker: "#7f1d1d", red_background: "#450a0a", red_light: "#fca5a5", node: "#0284c7", node_edge: "#e0f2fe", warning_text: "#fef08a", amber: "#f59e0b", violet: "#a78bfa", mint: "#34d399", yellow: "#fbbf24", white: "#ffffff" };
+  var names = Object.keys(C), s = L.svg("pal", "0 0 800 " + (Math.ceil(names.length / 6) * 74 + 8), "Paleta COLORS");
+  names.forEach(function (n, i) {
+    var c = i % 6, r = Math.floor(i / 6), x = 6 + c * 132, y = 6 + r * 74, g = L.el("g", { "data-tip": n + " = " + C[n] }, s);
+    L.el("rect", { x: x, y: y, width: 124, height: 40, rx: 4, fill: C[n], stroke: "var(--line)" }, g);
+    L.text(g, x + 62, y + 56, n.length > 15 ? n.slice(0, 14) + "…" : n, { s: 10.5 });
+  });
+  L.tips(s, "pal-tip");
+
+  var st = [["CALM", "#334155", "#f1f5f9", "#64748b"], ["MERS", "#1d4ed8", "#ffffff", "#3b82f6"], ["IMPACT", "#ea580c", "#ffffff", "#f97316"], ["VERIFICARE", "#ca8a04", "#ffffff", "#eab308"], ["ALARMĂ", "#dc2626", "#ffffff", "#ef4444"]];
+  var b = L.svg("badges", "0 0 800 90", "Insignele stărilor");
+  L.el("rect", { x: 0, y: 0, width: 800, height: 90, rx: 6, fill: C.background }, b);
+  var alarmRect;
+  st.forEach(function (x, i) {
+    var r = L.el("rect", { x: 14 + i * 156, y: 22, width: 144, height: 44, rx: 8, fill: x[1], stroke: x[3], "stroke-width": 2 }, b);
+    if (i === 4) alarmRect = r;
+    L.el("text", { x: 86 + i * 156, y: 49, "text-anchor": "middle", "font-size": 13, "font-weight": 700, style: "fill:" + x[2] }, b, x[0]);
+  });
+  if (L.G) L.G.to(alarmRect, { attr: { fill: C.red_darker }, duration: 0.25, repeat: -1, yoyo: true, ease: "steps(1)" });
+
+  var t = L.svg("tpl", "0 0 800 170", "Înlocuirea numelor cu culori");
+  L.box(t, 10, 20, 300, 130, "QFrame#TopBar", { k: "plain", sub: "background-color: $top_bar;\nborder-bottom: 1px solid $border;", s: 13 });
+  L.box(t, 490, 20, 300, 130, "QFrame#TopBar", { k: "plain", sub: "background-color: #0f172a;\nborder-bottom: 1px solid #1e293b;", s: 13 });
+  L.arrow(t, 314, 85, 486, 85, { label: ".substitute(COLORS)" });
+  L.el("rect", { x: 730, y: 100, width: 40, height: 16, fill: C.top_bar, stroke: "var(--line)" }, t);
+
+  var m = L.svg("mini", "0 0 800 110", "Stiluri gata făcute");
+  L.el("rect", { x: 0, y: 0, width: 800, height: 110, rx: 6, fill: C.background }, m);
+  [["● DECONECTAT", C.border, C.muted, C.border_strong], ["● REPLAY (TEST C)", "rgba(6,182,212,0.2)", C.cyan, C.cyan_dark], ["● LIVE UDP (:5005)", "rgba(16,185,129,0.2)", C.green, C.green_dark]].forEach(function (x, i) {
+    L.el("rect", { x: 16 + i * 200, y: 18, width: 184, height: 32, rx: 6, fill: x[1], stroke: x[3] }, m);
+    L.el("text", { x: 108 + i * 200, y: 39, "text-anchor": "middle", "font-size": 12, "font-weight": 700, style: "fill:" + x[2] }, m, x[0]);
+  });
+  L.el("rect", { x: 16, y: 64, width: 380, height: 32, rx: 5, fill: C.background, stroke: C.border }, m);
+  L.el("text", { x: 26, y: 85, "font-size": 12, "font-weight": 700, style: "fill:" + C.accent }, m, "DOPPLER_LABEL_NORMAL");
+  L.el("rect", { x: 410, y: 64, width: 380, height: 32, rx: 5, fill: C.red_background, stroke: C.red_strong }, m);
+  L.el("text", { x: 420, y: 85, "font-size": 12, "font-weight": 700, style: "fill:" + C.red_light }, m, "DOPPLER_LABEL_CRITICAL");
+})();
+</script>
+</body>
+</html>

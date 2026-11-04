@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="ro">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>frame_source.py ilustrat</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="../../assets/learn.css">
+</head>
+<body data-file="csi/gui/frame_source.py" data-root="../../">
+<main>
+<header class="page">
+  <span class="eyebrow">src/csi/gui/frame_source.py · 104 linii</span>
+  <h1>Firul care produce cadre în fundal</h1>
+  <p class="lede">Fereastra nu poate aștepta pachete: ar îngheța. FrameSource rulează într-un fir separat (QThread). El produce cadre și le trimite ferestrei prin semnale Qt.</p>
+  <nav class="toc" aria-label="Fișe"><a href="#a">L14–40</a><a href="#o">L42–50</a><a href="#l">L52–81 Live</a><a href="#r">L83–104 Replay</a></nav>
+</header>
+
+<section class="card" id="a">
+  <span class="lines">Liniile 10–40 · clasa, semnalele, pornirea</span>
+  <h2>Două fire, două semnale</h2>
+  <div class="fig" id="thr"></div>
+  <div class="text">
+    <p>frame_ready transportă un cadru. status_changed transportă un mesaj pentru bara de stare. Qt livrează semnalele în firul ferestrei, deci desenul rămâne sigur.</p>
+    <p>run (26–33) alege modul. Dacă modul live nu poate deschide portul, el trimite un mesaj și trece la replay. stop cere oprirea și așteaptă firul. reset_alarm setează un steag (threading.Event) pe care bucla live îl citește.</p>
+    <div class="why"><b>De ce MIN_FPS = 10?</b><p>Sub 10 cadre pe secundă, animația pare întreruptă. Valoarea cerută se ridică automat la 10.</p></div>
+    <div class="why"><b>De ce un Event și nu un apel direct?</b><p>Butonul rulează în firul ferestrei. Tracker-ul rulează în firul de fundal. Steagul trece cererea în siguranță de la un fir la altul.</p></div>
+  </div>
+</section>
+
+<section class="card" id="o">
+  <span class="lines">Liniile 42–50 · _open_socket</span>
+  <h2>Un socket care nu blochează</h2>
+  <div class="text">
+    <p>Funcția deschide portul cu open_udp_socket din packets.py. La eroare, ea trimite mesajul și returnează None. Altfel, ea face socket-ul neblocant: recv răspunde imediat, chiar fără date.</p>
+  </div>
+</section>
+
+<section class="card" id="l">
+  <span class="lines">Liniile 52–81 · _run_live</span>
+  <h2>Golește coada, apoi desenează la ritmul cerut</h2>
+  <div class="fig" id="live"></div>
+  <p class="tip" id="live-tip">Atinge un pas.</p>
+  <div class="text">
+    <p>Bucla internă (62–69) citește toate datagramele disponibile, până la BlockingIOError: „nu mai sunt date”. Fiecare pachet intră în LiveTracker. Un cadru nou pleacă doar dacă există date noi și a trecut intervalul 1/FPS.</p>
+    <div class="why"><b>De ce o pauză de 2 ms?</b><p>Fără pauză, bucla ar folosi un nucleu întreg doar ca să întrebe „am date?”. 2 ms este destul de scurt pentru 250 de pachete pe secundă.</p></div>
+  </div>
+</section>
+
+<section class="card" id="r">
+  <span class="lines">Liniile 83–104 · _run_replay</span>
+  <h2>Replay: analiza o dată, apoi cadrele în buclă</h2>
+  <div class="controls" id="fpsctl" role="group" aria-label="FPS">
+    <button class="opt" data-f="50" aria-pressed="true">50 FPS (implicit)</button>
+    <button class="opt" data-f="20" aria-pressed="false">20 FPS</button>
+    <button class="opt" data-f="10" aria-pressed="false">10 FPS</button>
+  </div>
+  <div class="readout">
+    <div><small>Rata capturii test C</small><strong>33.5 Hz</strong></div>
+    <div><small>Pas (eșantioane pe cadru)</small><strong id="step">1</strong></div>
+    <div><small>Viteza față de timpul real</small><strong id="spd">1.49×</strong></div>
+  </div>
+  <div class="text">
+    <p>Replay-ul analizează fișierul o singură dată (linia 85). Pasul este rata împărțită la FPS, rotunjit, cel puțin 1. Bucla trimite un cadru, avansează cu pasul și revine la început la final.</p>
+    <p>Liniile 99–104 țin ritmul: următorul moment este cel anterior plus intervalul. Dacă firul a întârziat, ceasul se resetează, ca să nu „recupereze” cadre în rafală.</p>
+    <div class="note"><b>Replay-ul nu merge în timp real</b><p>Test C are 33.5 eșantioane pe secundă. La 50 FPS, pasul este 1, deci aplicația arată 50 de eșantioane pe secundă. Replay-ul rulează de aproximativ 1.5 ori mai repede decât captura.</p></div>
+  </div>
+  <div class="uses">Folosește: <a class="chip" href="frames.py.html">frames.py</a><a class="chip" href="../dsp.py.html">dsp.py</a><a class="chip" href="../packets.py.html">packets.py</a> · Folosit de: <a class="chip" href="main_window.py.html">main_window.py</a><a class="chip" href="../../tests/test_udp_transport.py.html">test GUI live</a></div>
+</section>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../../assets/learn.js"></script>
+<script>
+(function () {
+  var s = L.svg("thr", "0 0 800 220", "Firul de fundal și firul ferestrei");
+  L.el("rect", { x: 10, y: 10, width: 360, height: 200, rx: 8, fill: "none", stroke: "var(--line)", "stroke-dasharray": "5 4" }, s);
+  L.el("rect", { x: 430, y: 10, width: 360, height: 200, rx: 8, fill: "none", stroke: "var(--line)", "stroke-dasharray": "5 4" }, s);
+  L.text(s, 24, 32, "fir de fundal · FrameSource", { a: "start", s: 12, cls: "muted" }); L.text(s, 444, 32, "fir principal · MainWindow", { a: "start", s: 12, cls: "muted" });
+  L.box(s, 40, 60, 300, 50, "live sau replay", { k: "reflect", s: 13 });
+  L.box(s, 40, 140, 300, 50, "cadru nou", { k: "signal", s: 13 });
+  L.box(s, 460, 60, 300, 50, "show_frame", { k: "good", s: 13, sub: "4 panouri" });
+  L.box(s, 460, 140, 300, 50, "status bar", { k: "muted", s: 13 });
+  L.arrow(s, 190, 112, 190, 136);
+  L.arrow(s, 342, 160, 456, 90, { label: "frame_ready", ly: -4 }); L.arrow(s, 342, 170, 456, 165, { label: "status_changed", ly: 16 });
+  L.travel(s, [[190, 110], [190, 160], [342, 160], [456, 90]], { dur: 2 });
+
+  L.flow("live", [
+    { t: "reset cerut?", s: "L59–61", k: "alert", tip: "Dacă utilizatorul a apăsat Resetează, tracker-ul uită pachetele." },
+    { t: "citește tot", s: "L62–69 · până la gol", k: "signal", tip: "Toate datagramele din buffer intră în tracker." },
+    { t: "e timpul?", s: "L70–71 · 1/FPS", k: "violet", tip: "Doar dacă există date noi și a trecut intervalul." },
+    { t: "trimite cadru", s: "L72–76", k: "good", tip: "tracker.frame() rulează analiza și dă ultimul cadru." },
+    { t: "pauză 2 ms", s: "L77", k: "muted", tip: "Bucla doarme puțin, apoi reîncepe." },
+  ], { cols: 5, gap: 26, fs: 12, tipId: "live-tip" });
+
+  L.toggle("#fpsctl button.opt", function (d) {
+    var f = +d.f, step = Math.max(1, Math.round(33.51 / f));
+    document.getElementById("step").textContent = step;
+    document.getElementById("spd").textContent = (step * f / 33.51).toFixed(2) + "×";
+  });
+})();
+</script>
+</body>
+</html>

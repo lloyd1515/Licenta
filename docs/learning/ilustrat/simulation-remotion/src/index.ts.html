@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="ro">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>index.ts ilustrat</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="../../assets/learn.css">
+</head>
+<body data-file="simulation-remotion/src/index.ts" data-root="../../">
+<main>
+<header class="page">
+  <span class="eyebrow">src/simulation-remotion/src/index.ts · 4 linii</span>
+  <h1>Ușa de intrare a videoclipului</h1>
+  <p class="lede">Remotion caută un fișier care înregistrează rădăcina proiectului. index.ts face doar asta: dă lui Remotion componenta RemotionRoot din Root.tsx.</p>
+</header>
+
+<section class="card">
+  <span class="lines">Liniile 1–4 · registerRoot</span>
+  <h2>Lanțul de la comandă la scenă</h2>
+  <div class="fig" id="chain"></div>
+  <p class="tip" id="chain-tip">Atinge un pas.</p>
+  <div class="text">
+    <p>Linia 1 importă funcția registerRoot din Remotion. Linia 2 importă rădăcina. Linia 4 o înregistrează.</p>
+    <div class="why"><b>De ce un fișier separat pentru o singură linie?</b><p>Remotion cere un punct de intrare fix. Root.tsx rămâne o componentă obișnuită, ușor de citit și de testat.</p></div>
+  </div>
+  <div class="uses">Următorul: <a class="chip" href="Root.tsx.html">Root.tsx</a></div>
+</section>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../../assets/learn.js"></script>
+<script>
+L.flow("chain", [
+  { t: "npm start / build", s: "package.json", k: "muted", tip: "Comanda pornește Remotion." },
+  { t: "index.ts", s: "registerRoot", k: "reflect", tip: "Acest fișier: înregistrează rădăcina." },
+  { t: "Root.tsx", s: "Composition", k: "violet", tip: "Rădăcina declară compoziția MainScene." },
+  { t: "MainScene.tsx", s: "scena + HUD", k: "signal", tip: "Componenta desenată la fiecare cadru." },
+], { fs: 13, tipId: "chain-tip" });
+</script>
+</body>
+</html>

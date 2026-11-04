@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="ro">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>tsconfig.json ilustrat</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="../assets/learn.css">
+</head>
+<body data-file="simulation-remotion/tsconfig.json" data-root="../">
+<main>
+<header class="page">
+  <span class="eyebrow">src/simulation-remotion/tsconfig.json · 16 linii</span>
+  <h1>Regulile verificatorului TypeScript</h1>
+  <p class="lede">TypeScript verifică tipurile înainte de rulare. Acest fișier îi spune ce versiune de JavaScript să accepte, cum să citească JSX și cât de strict să fie. Remotion compilează singur codul, deci TypeScript doar verifică.</p>
+</header>
+
+<section class="card">
+  <span class="lines">Liniile 2–14 · compilerOptions</span>
+  <h2>Fiecare opțiune, pe scurt</h2>
+  <div class="fig" id="opts"></div>
+  <p class="tip" id="opts-tip">Atinge o opțiune.</p>
+  <div class="text">
+    <p>Linia 15 limitează verificarea la folderul src. node_modules și out nu intră în verificare.</p>
+    <div class="why"><b>De ce noEmit?</b><p>Remotion are propriul bundler, care transformă TypeScript în JavaScript. TypeScript nu trebuie să scrie fișiere. El doar raportează erorile.</p></div>
+    <div class="why"><b>De ce strict?</b><p>Modul strict cere tipuri clare, de exemplu pentru TimelineState. O greșeală de nume în timeline.ts apare în editor, nu în videoclipul randat.</p></div>
+  </div>
+  <div class="uses">Verifică: <a class="chip" href="src/index.ts.html">src/*.ts, src/*.tsx</a></div>
+</section>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../assets/learn.js"></script>
+<script>
+(function () {
+  var O = [["target", "ES2022", "Sintaxa JavaScript modernă este acceptată."], ["module", "ESNext", "Importuri cu import / export."], ["moduleResolution", "bundler", "Caută modulele ca un bundler modern."],
+    ["jsx", "react-jsx", "JSX fără import React explicit în fiecare fișier."], ["strict", "true", "Toate verificările stricte sunt pornite."], ["noEmit", "true", "Nu scrie fișiere JavaScript."],
+    ["isolatedModules", "true", "Fiecare fișier se poate compila singur, cum cere bundler-ul."], ["esModuleInterop", "true", "Importă ușor pachete scrise în stil vechi."],
+    ["skipLibCheck", "true", "Nu verifică tipurile din node_modules. Verificarea este mai rapidă."], ["forceConsistentCasingInFileNames", "true", "„Hud” și „hud” nu sunt același fișier."],
+    ["lib", "DOM, DOM.Iterable, ESNext", "Tipurile pentru browser și JavaScript modern."]];
+  var s = L.svg("opts", "0 0 800 " + (Math.ceil(O.length / 3) * 72 + 6), "Opțiunile compilatorului");
+  O.forEach(function (o, i) { var c = i % 3, r = Math.floor(i / 3); L.box(s, 6 + c * 264, 6 + r * 72, 256, 62, o[0], { k: o[0] === "strict" || o[0] === "noEmit" ? "reflect" : "signal", sub: o[1], s: 12.5, tip: o[0] + " = " + o[1] + ": " + o[2] }); });
+  L.tips(s, "opts-tip");
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="ro">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>csi/__init__.py ilustrat</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="../assets/learn.css">
+</head>
+<body data-file="csi/__init__.py" data-root="../">
+<main>
+<header class="page">
+  <span class="eyebrow">src/csi/__init__.py · 0 linii</span>
+  <h1>Un fișier gol care dă un nume folderului</h1>
+  <p class="lede">Fișierul nu conține nimic. Prezența lui spune lui Python că folderul csi este un pachet. Astfel, celelalte fișiere scriu „csi.room” sau „csi.dsp” când importă ceva.</p>
+</header>
+
+<section class="card">
+  <span class="lines">Fișierul întreg · 0 linii</span>
+  <h2>Folderul devine pachet</h2>
+  <div class="controls" role="group" aria-label="Alege varianta">
+    <button class="opt" data-v="cu" aria-pressed="true">Cu __init__.py</button>
+    <button class="opt" data-v="fara" aria-pressed="false">Fără __init__.py</button>
+  </div>
+  <div class="fig" id="tree"></div>
+  <p class="tip" id="tree-tip"></p>
+  <div class="text">
+    <p>Python caută modulele în foldere. Un folder cu acest fișier este un „pachet obișnuit”. Numele pachetului este numele folderului: csi.</p>
+    <p>Fiecare import din proiect începe cu acest nume. De exemplu, dsp.py cere funcția de detecție din csi.fall_detector.</p>
+    <div class="why"><b>De ce un fișier gol și nu niciun fișier?</b><p>Python 3 găsește folderul și fără acest fișier, ca „pachet namespace”. Fișierul gol face intenția clară. Unelte ca pytest recunosc pachetul imediat.</p></div>
+    <div class="why"><b>De ce nu are cod?</b><p>Codul din acest fișier rulează la primul import al pachetului. Proiectul nu are nevoie de nimic la acel moment. Un fișier gol nu încetinește pornirea.</p></div>
+  </div>
+  <div class="uses">Permite importurile din: <span class="chip">toate fișierele din csi/</span><span class="chip">tests/test_udp_transport.py</span></div>
+</section>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../assets/learn.js"></script>
+<script>
+(function () {
+  var s = L.svg("tree", "0 0 800 300", "Arborele folderului csi și un import");
+  var files = ["room.py", "packets.py", "dsp.py", "fall_detector.py", "simulator.py", "gui/"];
+  var initG = L.el("g", {}, s);
+  L.box(s, 30, 20, 150, 46, "csi/", { k: "violet" });
+  L.box(initG, 70, 80, 170, 34, "__init__.py", { k: "good", s: 12.5 });
+  files.forEach(function (f, i) {
+    L.el("line", { x1: 50, y1: 66, x2: 50, y2: 137 + i * 28, stroke: "var(--line)" }, s);
+    L.el("line", { x1: 50, y1: 137 + i * 28, x2: 68, y2: 137 + i * 28, stroke: "var(--line)" }, s);
+    L.text(s, 74, 141 + i * 28, f, { a: "start", s: 12.5 });
+  });
+  L.el("line", { x1: 50, y1: 97, x2: 68, y2: 97, stroke: "var(--line)" }, initG);
+  L.box(s, 470, 40, 300, 60, "import „csi.room”", { k: "signal", sub: "cerut de simulator.py", s: 13 });
+  var res = L.box(s, 470, 190, 300, 60, "pachet obișnuit găsit", { k: "good", s: 13 });
+  var resT = res.querySelector("text");
+  L.arrow(s, 620, 102, 620, 186);
+  var pkt = L.el("circle", { r: 7, cx: 620, cy: 108, fill: "var(--reflect)" }, s);
+  if (L.G) L.G.to(pkt, { attr: { cy: 180 }, duration: 1.2, repeat: -1, repeatDelay: 0.8, ease: "power1.inOut" });
+  var tip = document.getElementById("tree-tip");
+  L.toggle("button.opt", function (d) {
+    var on = d.v === "cu";
+    initG.style.opacity = on ? 1 : 0.15;
+    res.querySelector("rect").setAttribute("stroke", on ? "var(--good)" : "var(--reflect)");
+    res.querySelector("rect").setAttribute("fill", on ? "var(--soft-good)" : "var(--soft-reflect)");
+    resT.firstChild.textContent = on ? "pachet obișnuit găsit" : "pachet namespace găsit";
+    tip.textContent = on ? "Python vede __init__.py și tratează csi ca pachet obișnuit." : "Python 3 găsește folderul și așa, dar pachetul nu mai este declarat explicit.";
+  });
+})();
+</script>
+</body>
+</html>

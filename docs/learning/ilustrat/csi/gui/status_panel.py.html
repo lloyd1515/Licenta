@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="ro">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>status_panel.py ilustrat</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="../../assets/learn.css">
+</head>
+<body data-file="csi/gui/status_panel.py" data-root="../../">
+<main>
+<header class="page">
+  <span class="eyebrow">src/csi/gui/status_panel.py · 178 de linii</span>
+  <h1>Panoul de stare: înălțime, insignă, patru carduri</h1>
+  <p class="lede">Panoul din dreapta jos arată starea detectorului ca insignă colorată. Lângă ea stau un indicator vertical de înălțime și patru carduri cu valori.</p>
+  <nav class="toc" aria-label="Fișe"><a href="#k">L18–32</a><a href="#g">L35–81 Înălțimea</a><a href="#c">L84–101 Card</a><a href="#p">L104–178 Panoul</a></nav>
+</header>
+
+<section class="card" id="k">
+  <span class="lines">Liniile 18–32 · constantele</span>
+  <h2>Pragurile de culoare și ritmul de clipire</h2>
+  <div class="tablewrap"><table class="t">
+    <thead><tr><th>Nume</th><th>Valoare</th><th>Rol</th></tr></thead>
+    <tbody>
+      <tr><td class="m">MAX_HEIGHT_M, INITIAL_HEIGHT_M</td><td class="m">1.8 m, 1.75 m</td><td>Vârful scalei și valoarea de pornire.</td></tr>
+      <tr><td class="m">HEIGHT_EASING</td><td class="m">0.2</td><td>La fiecare cadru, bara parcurge 20 % din distanța rămasă.</td></tr>
+      <tr><td class="m">SEATED / FLOOR_HEIGHT_M</td><td class="m">1.0 m / 0.5 m</td><td>Sub 1.0 m: chihlimbar. Sub 0.5 m: roșu.</td></tr>
+      <tr><td class="m">ACTIVE_LINK_ACTIVITY</td><td class="m">0.1</td><td>Peste această activitate, cardul spune 3 / 3 link-uri active.</td></tr>
+      <tr><td class="m">FLASH_INTERVAL_MS</td><td class="m">250 ms</td><td>Insigna ALARMĂ clipește de 2 ori pe secundă.</td></tr>
+      <tr><td class="m">HEIGHT_TICKS</td><td>1.8 · 1.2 · 0.8 · 0.4 · 0 m</td><td>Gradațiile cu text de lângă bară.</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section class="card" id="g">
+  <span class="lines">Liniile 35–81 · HeightGauge</span>
+  <h2>Bara care coboară lin</h2>
+  <div class="controls" id="hctl" role="group" aria-label="Înălțimea țintă">
+    <button class="opt" data-h="1.75" aria-pressed="true">CALM 1.75 m</button>
+    <button class="opt" data-h="0.55" aria-pressed="false">IMPACT 0.55 m</button>
+    <button class="opt" data-h="0.15" aria-pressed="false">ALARMĂ 0.15 m</button>
+  </div>
+  <div class="fig" id="gauge"></div>
+  <div class="text">
+    <p>set_height_m limitează ținta între 0 și 1.8 m. Apoi mută bara cu 20 % din diferență. fill_color alege culoarea după înălțimea curentă. paintEvent desenează bara, umplerea, gradațiile și valoarea.</p>
+    <div class="why"><b>De ce 20 % pe cadru și nu salt direct?</b><p>Un salt direct ar părea un defect de afișare. Mișcarea lină arată o coborâre. La 50 FPS, bara ajunge aproape de țintă în aproximativ 0.3 s.</p></div>
+    <div class="note"><b>Înălțimea vine din stare</b><p>Valoarea vine din illustrative_pose din frames.py. Ea nu este o înălțime măsurată din CSI.</p></div>
+  </div>
+</section>
+
+<section class="card" id="c">
+  <span class="lines">Liniile 84–101 · Card</span>
+  <h2>Un titlu mic și o valoare colorată</h2>
+  <div class="text"><p>Card este un cadru Qt cu două etichete. set_value schimbă doar textul valorii. Culoarea fiecărei valori vine din theme.py.</p></div>
+</section>
+
+<section class="card" id="p">
+  <span class="lines">Liniile 104–178 · StatusPanel</span>
+  <h2>Ce scrie fiecare card</h2>
+  <div class="fig" id="panel"></div>
+  <p class="tip" id="panel-tip">Atinge un card.</p>
+  <div class="text">
+    <p>Constructorul (105–148) pornește un temporizator de clipire și așază indicatorul, titlul, insigna și grila de 2 × 2 carduri. show_frame (165–178) actualizează totul la fiecare cadru.</p>
+    <p>Insigna se redesenează doar când starea se schimbă (linia 168). clear_alarm, apelat de butonul de resetare, revine la CALM.</p>
+    <div class="note"><b>Cardul „Link-uri Active” nu măsoară link-urile</b><p>Linia 175 scrie 3 / 3 dacă activitatea este peste 0.1 și 0 / 3 altfel. Valoarea nu verifică fiecare link. În capturile reale, doar nodul 1 trimite date folosite.</p></div>
+  </div>
+  <div class="uses">Folosește: <a class="chip" href="theme.py.html">theme.py</a><a class="chip" href="../fall_detector.py.html">fall_detector.py</a><a class="chip" href="frames.py.html">frames.py</a> · Folosit de: <a class="chip" href="main_window.py.html">main_window.py</a></div>
+</section>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../../assets/learn.js"></script>
+<script>
+(function () {
+  var g = L.svg("gauge", "0 0 800 300", "Indicatorul de înălțime");
+  L.el("rect", { x: 0, y: 0, width: 800, height: 300, rx: 6, fill: "#0b0f19" }, g);
+  var bx = 60, top = 20, bot = 270, bh = bot - top;
+  L.el("rect", { x: bx, y: top, width: 40, height: bh, rx: 6, fill: "#0f172a", stroke: "#334155", "stroke-width": 1.5 }, g);
+  var fill = L.el("rect", { x: bx + 3, width: 34, rx: 4 }, g);
+  [[1.8, "1.8m (Picioare)"], [1.2, "1.2m"], [0.8, "0.8m (Așezat)"], [0.4, "0.4m (Sol)"], [0, "0.0m"]].forEach(function (t) {
+    var y = bot - t[0] / 1.8 * bh; L.el("line", { x1: bx + 40, y1: y, x2: bx + 46, y2: y, stroke: "#94a3b8" }, g);
+    L.el("text", { x: bx + 52, y: y + 4, "font-size": 11, style: "fill:#94a3b8" }, g, t[1]);
+  });
+  var val = L.el("text", { x: bx, y: 292, "font-size": 12, "font-weight": 700 }, g, "");
+  var hist = L.el("path", { fill: "none", stroke: "#38bdf8", "stroke-width": 2 }, g);
+  L.el("rect", { x: 300, y: 20, width: 480, height: 250, fill: "none", stroke: "#1e293b" }, g);
+  L.el("text", { x: 306, y: 36, "font-size": 11, style: "fill:#94a3b8" }, g, "înălțimea afișată, cadru cu cadru (20 % pe cadru)");
+  var h = 1.75, target = 1.75, H = [];
+  L.toggle("#hctl button.opt", function (d) { target = +d.h; });
+  function step() {
+    h += (Math.max(0, Math.min(1.8, target)) - h) * 0.2;
+    var c = h < 0.5 ? "#dc2626" : h < 1.0 ? "#f59e0b" : "#10b981", fh = h / 1.8 * bh;
+    fill.setAttribute("y", bot - fh); fill.setAttribute("height", fh); fill.setAttribute("fill", c);
+    val.textContent = h.toFixed(2) + " m"; val.setAttribute("style", "fill:" + c);
+    H.push(h); if (H.length > 120) H.shift();
+    hist.setAttribute("d", H.map(function (v, i) { return (i ? "L" : "M") + (300 + i * 4) + " " + (270 - v / 1.8 * 230).toFixed(1); }).join(" "));
+  }
+  step(); setInterval(step, 50);
+
+  var p = L.svg("panel", "0 0 800 220", "Insigna și cele patru carduri");
+  L.el("rect", { x: 0, y: 0, width: 800, height: 220, rx: 6, fill: "#0b0f19" }, p);
+  L.el("text", { x: 20, y: 26, "font-size": 11, "font-weight": 700, style: "fill:#94a3b8" }, p, "STARE FSM & TELEMETRIE CSI");
+  L.el("rect", { x: 20, y: 38, width: 760, height: 44, rx: 8, fill: "#dc2626", stroke: "#ef4444", "stroke-width": 2 }, p);
+  L.el("text", { x: 400, y: 66, "text-anchor": "middle", "font-size": 14, "font-weight": 700, style: "fill:#fff" }, p, "ALARMĂ");
+  var cards = [["Latență Procesare", "3.02 s", "#38bdf8", "detection.latency_s, doar în starea ALARMĂ."], ["Putere RSSI", "−85.0 dBm", "#34d399", "frame.rssi_dbm, din pachet."], ["Link-uri Active", "3 / 3 Mesh", "#a78bfa", "3 dacă activitatea > 0.1, altfel 0. Nu verifică fiecare link."], ["Energie PC1", "12.40", "#fbbf24", "frame.motion, valoarea semnalului de mișcare. Valoarea de aici este un exemplu."]];
+  cards.forEach(function (c, i) {
+    var x = 20 + (i % 2) * 385, y = 94 + Math.floor(i / 2) * 62, gg = L.el("g", { "data-tip": c[0] + ": " + c[3] }, p);
+    L.el("rect", { x: x, y: y, width: 375, height: 54, rx: 6, fill: "#0b0f19", stroke: "#1e293b" }, gg);
+    L.el("text", { x: x + 10, y: y + 18, "font-size": 10, "font-weight": 700, style: "fill:#64748b" }, gg, c[0]);
+    L.el("text", { x: x + 10, y: y + 40, "font-size": 14, "font-weight": 700, style: "fill:" + c[2] }, gg, c[1]);
+  });
+  L.tips(p, "panel-tip");
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="ro">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Scene3D.tsx ilustrat</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="../../assets/learn.css">
+</head>
+<body data-file="simulation-remotion/src/Scene3D.tsx" data-root="../../">
+<main>
+<header class="page">
+  <span class="eyebrow">src/simulation-remotion/src/Scene3D.tsx · 197 de linii</span>
+  <h1>Scena 3D: lumini, podea, plăci, tuburi Fresnel</h1>
+  <p class="lede">Scene3D construiește lumea 3D a videoclipului. Ea mută camera după timeline, aprinde luminile și desenează fiecare obiect doar când opacitatea lui este peste 0.01.</p>
+  <nav class="toc" aria-label="Fișe"><a href="#img">Captura</a><a href="#o">L16–99 Obiecte</a><a href="#sc">L101–171 Scena</a><a href="#c">L173–197 Canvas</a></nav>
+</header>
+
+<section class="card" id="img">
+  <span class="lines">Rezultatul · out/act3_fresnel.png</span>
+  <h2>Scena în actul 3</h2>
+  <div class="fig"><img src="../../../../../src/simulation-remotion/out/act3_fresnel.png" alt="Cadru din actul 3: plăcile, corzile, tuburile Fresnel și omul" style="width:100%;border-radius:4px;border:1px solid var(--line)"></div>
+</section>
+
+<section class="card" id="o">
+  <span class="lines">Liniile 16–99 · EspNode, Ubertooth, FresnelTube</span>
+  <h2>Trei obiecte construite din forme simple</h2>
+  <div class="fig" id="objs"></div>
+  <p class="tip" id="objs-tip">Atinge un obiect.</p>
+  <div class="text">
+    <p>EspNode (18–52): o cutie metalică, o antenă, un inel care pulsează și o lumină punctiformă în culoarea nodului. Ubertooth (54–74): o cutie, o antenă chihlimbar și un inel care se rotește.</p>
+    <p>FresnelTube (76–99): un cilindru deschis, schelet, cu raza de 38 cm, între două noduri. Dacă atenuarea link-ului depășește 8 dB (linia 16), tubul devine roz și mai opac.</p>
+    <div class="note"><b>Ubertooth</b><p>Ubertooth este un receptor Bluetooth. El apare în video, dar codul din src/ nu are nicio parte pentru el.</p></div>
+  </div>
+</section>
+
+<section class="card" id="sc">
+  <span class="lines">Liniile 101–171 · SceneContent</span>
+  <h2>Straturile scenei, în ordinea din cod</h2>
+  <div class="fig" id="order"></div>
+  <div class="text">
+    <p>useLayoutEffect (105–109) mută camera și o îndreaptă spre țintă la fiecare cadru. Luminile (113–115): una ambientală, una direcțională și una punctiformă cian deasupra camerei.</p>
+    <p>Grila are 10 m și 20 de diviziuni. Podeaua are 6 × 6 m, semi-transparentă. Restul obiectelor apar doar când timeline le dă opacitate.</p>
+    <div class="why"><b>De ce useLayoutEffect și nu useEffect?</b><p>useLayoutEffect rulează înainte de desen. Camera este deja la locul nou când Remotion fotografiază cadrul.</p></div>
+  </div>
+</section>
+
+<section class="card" id="c">
+  <span class="lines">Liniile 173–197 · Scene3D și ThreeCanvas</span>
+  <h2>Pânza 3D peste tot cadrul</h2>
+  <div class="text">
+    <p>ThreeCanvas este pânza 3D a Remotion. Ea are mărimea videoclipului și stă sub stratul de text. Camera are un unghi de vedere de 45° și vede între 0.1 m și 100 m.</p>
+    <div class="why"><b>De ce ThreeCanvas și nu Canvas din @react-three/fiber?</b><p>ThreeCanvas sincronizează desenul 3D cu cadrul Remotion. Fiecare cadru randat conține exact starea 3D a acelui cadru.</p></div>
+  </div>
+  <div class="uses">Folosește: <a class="chip" href="layout.ts.html">layout.ts</a><a class="chip" href="SecurityCamera.tsx.html">SecurityCamera.tsx</a><a class="chip" href="SubcarrierStrings.tsx.html">SubcarrierStrings.tsx</a><a class="chip" href="HumanModel.tsx.html">HumanModel.tsx</a><a class="chip" href="timeline.ts.html">timeline.ts</a> · Folosit de: <a class="chip" href="MainScene.tsx.html">MainScene.tsx</a></div>
+</section>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../../assets/learn.js"></script>
+<script>
+(function () {
+  var s = L.svg("objs", "0 0 800 220", "EspNode, Ubertooth, FresnelTube");
+  L.el("rect", { x: 0, y: 0, width: 800, height: 220, rx: 6, fill: "#070b14" }, s);
+  var n = L.el("g", { "data-tip": "EspNode: cutie 25 × 15 × 25 cm, antenă 22 cm, inel pulsat, lumină punctiformă de 3 m." }, s);
+  L.el("rect", { x: 70, y: 110, width: 70, height: 40, rx: 4, fill: "#0d1b2a", stroke: "#00f0ff" }, n);
+  L.el("line", { x1: 105, y1: 110, x2: 105, y2: 60, stroke: "#00f0ff", "stroke-width": 4 }, n);
+  var ring = L.el("ellipse", { cx: 105, cy: 165, rx: 60, ry: 12, fill: "none", stroke: "#00f0ff", "stroke-width": 4, opacity: 0.6 }, n);
+  L.el("text", { x: 105, y: 205, "text-anchor": "middle", "font-size": 12, style: "fill:#e2e8f0" }, n, "EspNode");
+  var u = L.el("g", { "data-tip": "Ubertooth: cutie, antenă chihlimbar înclinată, inel care se rotește cu cadrul." }, s);
+  L.el("rect", { x: 340, y: 120, width: 80, height: 28, rx: 4, fill: "#1a1c22", stroke: "#ffb700" }, u);
+  L.el("line", { x1: 405, y1: 120, x2: 420, y2: 70, stroke: "#ffb700", "stroke-width": 3 }, u);
+  var ur = L.el("ellipse", { cx: 380, cy: 160, rx: 50, ry: 10, fill: "none", stroke: "#ffb700", "stroke-width": 3, "stroke-dasharray": "14 8", opacity: 0.6 }, u);
+  L.el("text", { x: 380, y: 205, "text-anchor": "middle", "font-size": 12, style: "fill:#e2e8f0" }, u, "Ubertooth");
+  var t = L.el("g", { "data-tip": "FresnelTube: cilindru deschis cu raza 38 cm. Peste 8 dB atenuare devine roz." }, s);
+  var tube = L.el("rect", { x: 520, y: 80, width: 250, height: 70, rx: 35, fill: "none", stroke: "#00f0ff", "stroke-width": 2, "stroke-dasharray": "5 4" }, t);
+  L.el("text", { x: 645, y: 205, "text-anchor": "middle", "font-size": 12, style: "fill:#e2e8f0" }, t, "FresnelTube");
+  var tl = L.el("text", { x: 645, y: 120, "text-anchor": "middle", "font-size": 12, style: "fill:#e2e8f0" }, t, "0 dB");
+  var f = 0;
+  setInterval(function () {
+    f++; ring.setAttribute("rx", 55 + Math.sin(f * 0.15) * 8); ur.setAttribute("stroke-dashoffset", -f * 1.5);
+    var db = -Math.abs(Math.sin(f * 0.02)) * 19, bl = Math.abs(db) > 8;
+    tube.setAttribute("stroke", bl ? "#ff2a55" : "#00f0ff"); tube.setAttribute("stroke-opacity", bl ? 0.9 : 0.4); tl.textContent = db.toFixed(1) + " dB";
+  }, 33);
+  L.tips(s, "objs-tip");
+  L.flow("order", [
+    { t: "camera", s: "L105–109", k: "violet" }, { t: "lumini", s: "L113–115", k: "reflect" }, { t: "camera video", s: "L117", k: "alert" },
+    { t: "grilă + podea", s: "L119–130", k: "muted" }, { t: "plăci ESP32", s: "L132–141", k: "signal" }, { t: "Ubertooth", s: "L143–145", k: "reflect" },
+    { t: "corzi", s: "L147–152", k: "signal" }, { t: "tuburi Fresnel", s: "L154–164", k: "good" }, { t: "omul", s: "L166–168", k: "reflect" },
+  ], { cols: 3, fs: 13 });
+})();
+</script>
+</body>
+</html>

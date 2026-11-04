@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="ro">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>record.py ilustrat</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="../assets/learn.css">
+</head>
+<body data-file="csi/record.py" data-root="../">
+<main>
+<header class="page">
+  <span class="eyebrow">src/csi/record.py · 50 de linii</span>
+  <h1>Captura de pe plăci, salvată pe disc</h1>
+  <p class="lede">record.py ascultă portul UDP un timp fix. El sortează pachetele după nodul care le-a trimis și le salvează într-un fișier .npz. Capturile test A, B și C au fost făcute așa.</p>
+  <nav class="toc" aria-label="Fișe"><a href="#imp">L1–7</a><a href="#rec">L10–23 receive</a><a href="#main">L26–46 main</a></nav>
+</header>
+
+<section class="card" id="imp">
+  <span class="lines">Liniile 1–7 · importuri și constanta de timp</span>
+  <h2>Patru unelte și o pauză de 0.1 s</h2>
+  <div class="text">
+    <p>argparse citește opțiunile din terminal. socket dă tipul de eroare pentru „timp expirat”. time măsoară durata. Din packets.py vin portul, citirea pachetelor și salvarea.</p>
+    <div class="why"><b>De ce READ_TIMEOUT_S = 0.1?</b><p>Fără limită, recv poate aștepta la nesfârșit dacă plăcile tac. Cu 0.1 s, bucla verifică de 10 ori pe secundă dacă timpul capturii s-a terminat.</p></div>
+  </div>
+</section>
+
+<section class="card" id="rec">
+  <span class="lines">Liniile 10–23 · funcția receive</span>
+  <h2>Fiecare pachet merge în cutia nodului său</h2>
+  <div class="fig" id="buckets"></div>
+  <div class="readout">
+    <div><small>Nodul 1</small><strong id="c1">0</strong></div>
+    <div><small>Nodul 2</small><strong id="c2">0</strong></div>
+    <div><small>Nodul 3</small><strong id="c3">0</strong></div>
+  </div>
+  <div class="text">
+    <p>Linia 12 calculează momentul de final. Bucla (14–20) cere o datagramă. Dacă timpul expiră, ea încearcă din nou. Altfel, ea citește pachetele și le adaugă în lista nodului lor.</p>
+    <p>Linia 21 prinde Ctrl+C. Captura se oprește, dar pachetele primite până atunci rămân. Linia 23 returnează listele în ordinea numărului de nod.</p>
+    <div class="why"><b>De ce time.monotonic și nu ora din calculator?</b><p>Ora poate sări înainte sau înapoi, de exemplu la sincronizarea automată. Ceasul monoton crește mereu. Durata capturii rămâne corectă.</p></div>
+    <div class="why"><b>De ce setdefault?</b><p>Funcția nu știe dinainte care noduri trimit. setdefault creează lista unui nod la primul lui pachet.</p></div>
+  </div>
+</section>
+
+<section class="card" id="main">
+  <span class="lines">Liniile 26–46 · funcția main</span>
+  <h2>Opțiunile din terminal și ordinea pașilor</h2>
+  <div class="tablewrap"><table class="t">
+    <thead><tr><th>Opțiune</th><th>Implicit</th><th>Ce schimbă</th></tr></thead>
+    <tbody>
+      <tr><td class="m">--port</td><td class="m">5005</td><td>Portul pe care ascultă. Trebuie să fie același ca în firmware.</td></tr>
+      <tr><td class="m">--duration</td><td class="m">20.0 s</td><td>Cât durează captura. Capturile A, B, C au aproximativ 20 s.</td></tr>
+      <tr><td class="m">--out</td><td class="m">data/capture_real.npz</td><td>Fișierul rezultat. Nu suprascrie capturile de test dacă nu îi dai alt nume.</td></tr>
+    </tbody>
+  </table></div>
+  <div class="fig" id="steps"></div>
+  <div class="text">
+    <div class="why"><b>De ce finally la închiderea socket-ului?</b><p>Socket-ul se închide și dacă receive dă o eroare. Portul devine liber pentru următoarea rulare.</p></div>
+    <div class="note"><b>Cheile p1, p2, p3 urmează ordinea, nu numărul nodului</b><p>save_recording numerotează listele după poziția lor. Dacă nodul 1 nu trimite nimic, lista nodului 2 se salvează ca p1. Câmpul node_id din fiecare rând păstrează totuși numărul real.</p></div>
+  </div>
+  <div class="uses">Folosește: <a class="chip" href="packets.py.html">packets.py</a> · Folosit de: <a class="chip" href="../tests/test_udp_transport.py.html">test_udp_transport.py</a> · A produs: <a class="chip" href="data/test_C_cadere_reala.npz.html">capturile .npz</a></div>
+</section>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../assets/learn.js"></script>
+<script>
+(function () {
+  var s = L.svg("buckets", "0 0 800 260", "Pachetele sosesc și intră în lista nodului lor");
+  L.box(s, 10, 100, 150, 60, "socket UDP", { k: "muted", sub: "port 5005" });
+  var bx = [[560, 20, "nodul 1", "reflect"], [560, 100, "nodul 2", "good"], [560, 180, "nodul 3", "violet"]];
+  bx.forEach(function (b) { L.box(s, b[0], b[1], 220, 58, b[2], { k: b[3], s: 13 }); });
+  L.box(s, 260, 100, 170, 60, "parse_datagram", { k: "signal", s: 13 });
+  L.arrow(s, 162, 130, 256, 130);
+  bx.forEach(function (b) { L.arrow(s, 432, 130, b[0] - 4, b[1] + 29, { dash: "4 4" }); });
+  var counts = [0, 0, 0], r = L.rng(3), cols = ["var(--reflect)", "var(--good)", "var(--violet)"];
+  function one() {
+    var n = r() < 0.55 ? 0 : r() < 0.6 ? 1 : 2, b = bx[n];
+    var dot = L.el("circle", { r: 7, cx: 20, cy: 130, fill: cols[n] }, s);
+    if (!L.G) return;
+    L.G.timeline({ onComplete: function () { s.removeChild(dot); counts[n]++; document.getElementById("c" + (n + 1)).textContent = counts[n]; } })
+      .to(dot, { attr: { cx: 345 }, duration: 0.7, ease: "none" })
+      .to(dot, { attr: { cx: b[0] + 30 + r() * 160, cy: b[1] + 29 }, duration: 0.6, ease: "power1.out" })
+      .to(dot, { opacity: 0, duration: 0.2 });
+  }
+  if (L.G) setInterval(one, 450); else one();
+  L.flow("steps", [
+    { t: "citește opțiunile", s: "L27–31", k: "muted" }, { t: "deschide portul", s: "L33–37 · eroare → ieșire", k: "signal" },
+    { t: "receive", s: "L39–42 · apoi close", k: "reflect" }, { t: "save_recording", s: "L44–46 · .npz", k: "good" },
+  ], { fs: 13 });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="ro">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>SummaryCards.tsx ilustrat</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="../../assets/learn.css">
+</head>
+<body data-file="simulation-remotion/src/SummaryCards.tsx" data-root="../../">
+<main>
+<header class="page">
+  <span class="eyebrow">src/simulation-remotion/src/SummaryCards.tsx · 85 de linii</span>
+  <h1>Cele patru carduri de la final</h1>
+  <p class="lede">În ultimul act, patru carduri urcă pe rând din partea de jos a imaginii. Fiecare card are o etichetă, o valoare mare și o descriere. Animația folosește un „resort” (spring) Remotion.</p>
+</header>
+
+<section class="card">
+  <span class="lines">Liniile 10–48 · CARDS și animația</span>
+  <h2>Intrarea cu resort, cu 6 cadre între carduri</h2>
+  <div class="controls"><button class="opt" id="replay" aria-pressed="false">↻ Rulează din nou</button></div>
+  <div class="fig" id="cards"></div>
+  <div class="text">
+    <p>Liniile 10–15 definesc cele patru carduri. Linia 21 nu desenează nimic dacă show este fals. Linia 23 calculează cadrul relativ de la începutul rezumatului (cadrul 2650).</p>
+    <p>Pentru fiecare card, spring pornește cu 6 cadre mai târziu decât cardul anterior (linia 41). interpolate transformă valoarea resortului în scară (0.8 → 1), opacitate (0 → 1) și deplasare (30 px → 0).</p>
+    <div class="why"><b>De ce un resort și nu o mișcare liniară?</b><p>Resortul depășește puțin ținta și revine. Mișcarea pare fizică, nu mecanică. damping 12 și stiffness 120 dau o singură oscilație mică.</p></div>
+    <div class="note"><b>Cifrele de pe carduri sunt text fix</b><p>„&lt; 500 ms”, „&gt; 95%” și „100%” nu se calculează din cod. Captura reală test C are o latență impact → alarmă de 3.02 s. Cardul de hardware menționează un Ubertooth, care nu apare în codul din src/.</p></div>
+  </div>
+  <div class="uses">Folosește: <a class="chip" href="layout.ts.html">layout.ts · COLORS</a><a class="chip" href="timeline.ts.html">timeline.ts · SUMMARY_START_FRAME</a> · Folosit de: <a class="chip" href="Hud.tsx.html">Hud.tsx</a></div>
+</section>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../../assets/learn.js"></script>
+<script>
+(function () {
+  var C = [["COST HARDWARE", "< 50 €", "3x ESP32 + 1x Ubertooth", "#00ff88"], ["INTIMITATE TOTALĂ", "100%", "Zero camere • Fără purtabile", "#00f0ff"], ["TIMP DE REACȚIE", "< 500 ms", "Alertă imediată la impact", "#ffb700"], ["ACURATEȚE DETECȚIE", "> 95%", "Optică ondulatorie curată", "#ff2a55"]];
+  var s = L.svg("cards", "0 0 800 200", "Cele patru carduri finale");
+  L.el("rect", { x: 0, y: 0, width: 800, height: 200, rx: 6, fill: "#070b14" }, s);
+  var gs = C.map(function (c, i) {
+    var x = 16 + i * 194, g = L.el("g", {}, s);
+    L.el("rect", { x: x, y: 40, width: 180, height: 120, rx: 14, fill: "rgba(10,16,29,0.92)", stroke: c[3], "stroke-opacity": 0.4 }, g);
+    L.el("text", { x: x + 90, y: 66, "text-anchor": "middle", "font-size": 10, "font-weight": 700, style: "fill:#8ca0ba" }, g, c[0]);
+    L.el("text", { x: x + 90, y: 108, "text-anchor": "middle", "font-size": 28, "font-weight": 800, style: "fill:" + c[3] }, g, c[1]);
+    L.el("text", { x: x + 90, y: 136, "text-anchor": "middle", "font-size": 10, style: "fill:#cfd9e8" }, g, c[2]);
+    return g;
+  });
+  function play() {
+    if (!L.G) return;
+    gs.forEach(function (g, i) { L.G.fromTo(g, { opacity: 0, y: 30, scale: 0.8, transformOrigin: "50% 50%" }, { opacity: 1, y: 0, scale: 1, duration: 0.8, delay: i * 0.2, ease: "elastic.out(1, 0.75)" }); });
+  }
+  document.getElementById("replay").addEventListener("click", play); play();
+})();
+</script>
+</body>
+</html>

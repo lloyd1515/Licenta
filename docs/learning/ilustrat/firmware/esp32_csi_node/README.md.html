@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="ro">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>README.md ilustrat</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="../../assets/learn.css">
+</head>
+<body data-file="firmware/esp32_csi_node/README.md" data-root="../../">
+<main>
+<header class="page">
+  <span class="eyebrow">src/firmware/esp32_csi_node/README.md · 58 de linii</span>
+  <h1>Manualul nodului ESP32</h1>
+  <p class="lede">README explică ce face firmware-ul, cum îl configurezi și cum arată pachetul trimis. Pagina ilustrează fiecare dintre cele patru secțiuni.</p>
+  <nav class="toc" aria-label="Fișe"><a href="#ce">L1–6 Rolul</a><a href="#id">L10–15 ID</a><a href="#retea">L19–27 Rețea</a><a href="#flash">L31–45 Flash</a><a href="#format">L49–58 Pachet</a></nav>
+</header>
+
+<section class="card" id="ce">
+  <span class="lines">Liniile 1–6 · ce face nodul</span>
+  <h2>Trei plăci care se ascultă una pe alta</h2>
+  <div class="fig" id="mesh"></div>
+  <div class="text">
+    <p>Fiecare placă face trei lucruri. Ea emite cadre Wi-Fi scurte către toate plăcile. Ea măsoară CSI pentru cadrele primite de la celelalte. Ea trimite fiecare măsurătoare la PC, ca pachet UDP.</p>
+    <div class="note"><b>Ritmul real</b><p>Linia 4 spune 250 Hz. Codul așteaptă un tick FreeRTOS după fiecare cadru, iar tick-ul este 10 ms. Ritmul maxim este deci aproximativ 100 Hz. Vezi pagina sdkconfig.</p></div>
+  </div>
+</section>
+
+<section class="card" id="id">
+  <span class="lines">Liniile 10–15 · ID-ul nodului</span>
+  <h2>Același cod, trei plăci diferite</h2>
+  <div class="controls" id="idctl" role="group" aria-label="Alege nodul">
+    <button class="opt" data-n="1" aria-pressed="false">NODE_ID 1</button>
+    <button class="opt" data-n="2" aria-pressed="false">NODE_ID 2</button>
+    <button class="opt" data-n="3" aria-pressed="true">NODE_ID 3 (valoarea din main.c)</button>
+  </div>
+  <div class="fig" id="ids"></div>
+  <div class="text">
+    <p>Înainte de flash, schimbi un singur număr din main.c. Numărul apare în fiecare pachet și în adresa MAC sursă a cadrelor de sondare.</p>
+    <div class="why"><b>De ce o constantă și nu un meniu?</b><p>Este cea mai simplă variantă pentru trei plăci. Dezavantajul: trebuie să compilezi de trei ori, cu alt număr.</p></div>
+  </div>
+</section>
+
+<section class="card" id="retea">
+  <span class="lines">Liniile 19–27 · rețeaua și portul</span>
+  <h2>Toate plăcile, aceeași rețea, același canal</h2>
+  <div class="fig" id="net"></div>
+  <div class="text">
+    <p>Plăcile se conectează la același router. Astfel, ele folosesc același canal Wi-Fi și se aud una pe alta. PC-ul ascultă pe portul 5005 cu aplicația sau cu record.py.</p>
+    <div class="why"><b>De ce contează firewall-ul?</b><p>Firewall-ul PC-ului poate bloca pachetele UDP care vin din rețea. Atunci aplicația nu primește nimic, deși plăcile trimit.</p></div>
+  </div>
+</section>
+
+<section class="card" id="flash">
+  <span class="lines">Liniile 31–45 · compilare și scriere pe placă</span>
+  <h2>Patru comenzi, în ordine</h2>
+  <div class="fig" id="steps"></div>
+  <p class="tip" id="steps-tip">Atinge un pas.</p>
+</section>
+
+<section class="card" id="format">
+  <span class="lines">Liniile 49–58 · formatul pachetului</span>
+  <h2>138 de octeți pentru fiecare măsurătoare</h2>
+  <div class="fig" id="pkt"></div>
+  <p class="tip" id="pkt-tip">Atinge un câmp.</p>
+  <div class="text">
+    <p>Antetul are 10 octeți. Restul de 128 de octeți conține CSI: 64 de subpurtătoare, fiecare cu două numere, I și Q. Proiectul păstrează apoi doar 52 dintre ele.</p>
+    <div class="why"><b>De ce un număr „magic” la început?</b><p>Receptorul verifică primii doi octeți. Dacă nu au valoarea așteptată, el ignoră datele. Astfel, pachete străine nu ajung în analiză.</p></div>
+  </div>
+  <div class="uses">Același format în: <a class="chip" href="main/main.c.html">main.c · csi_packet_t</a><a class="chip" href="../../csi/packets.py.html">packets.py</a></div>
+</section>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../../assets/learn.js"></script>
+<script>
+(function () {
+  var N = [[400, 40], [120, 250], [680, 250]];
+  var s = L.svg("mesh", "0 0 800 330", "Trei noduri care emit și ascultă, și un PC");
+  [[0, 1], [1, 2], [2, 0]].forEach(function (l, i) {
+    L.el("line", { x1: N[l[0]][0], y1: N[l[0]][1] + 20, x2: N[l[1]][0], y2: N[l[1]][1] + 20, stroke: "var(--signal)", "stroke-width": 2, "stroke-dasharray": "8 8", class: "mlk" }, s);
+  });
+  N.forEach(function (n, i) { L.box(s, n[0] - 60, n[1], 120, 44, "ESP32 #" + (i + 1), { k: "reflect", s: 13 }); });
+  L.box(s, 330, 260, 140, 50, "PC", { k: "good", sub: "UDP 5005", s: 13 });
+  N.forEach(function (n) { L.arrow(s, n[0], n[1] + 46, 400 + (n[0] - 400) * 0.15, 256, { dash: "3 5", c: "var(--good)" }); });
+  if (L.G) L.G.to(".mlk", { attr: { "stroke-dashoffset": -32 }, duration: 1, repeat: -1, ease: "none" });
+  L.text(s, 400, 160, "cadre de sondare (radio)", { s: 12, c: "var(--signal)" });
+  L.text(s, 400, 236, "măsurători CSI (UDP)", { s: 12, c: "var(--good)" });
+
+  var ids = L.svg("ids", "0 0 800 130", "Unde apare NODE_ID");
+  var b1 = L.box(ids, 20, 30, 230, 70, "pachet UDP", { k: "signal", sub: "octetul 3: node_id = 3" });
+  var b2 = L.box(ids, 290, 30, 230, 70, "MAC sursă", { k: "reflect", sub: "24:0A:C4:00:00:03" });
+  var b3 = L.box(ids, 560, 30, 220, 70, "log la pornire", { k: "muted", sub: "Nodul ESP32 #3 …" });
+  L.toggle("#idctl button.opt", function (d) {
+    b1.querySelectorAll("text")[1].firstChild.textContent = "octetul 3: node_id = " + d.n;
+    b2.querySelectorAll("text")[1].firstChild.textContent = "24:0A:C4:00:00:0" + d.n;
+    b3.querySelectorAll("text")[1].firstChild.textContent = "Nodul ESP32 #" + d.n + " …";
+  });
+
+  L.flow("net", [
+    { t: "3 × ESP32", s: "mod stație (STA)", k: "reflect" },
+    { t: "router csi-lab", s: "un singur canal", k: "muted", via: "Wi-Fi" },
+    { t: "PC · port 5005", s: "firewall deschis", k: "good", via: "UDP" },
+    { t: "aplicația / record.py", s: "--live --port 5005", k: "signal" },
+  ], { fs: 13 });
+
+  L.flow("steps", [
+    { t: "export.sh", s: "setează mediul", k: "muted", tip: "Pasul 1: încarcă uneltele ESP-IDF și setează IDF_PATH." },
+    { t: "set-target esp32", s: "alege cipul", k: "violet", tip: "Pasul 2: spune că placa este ESP32 clasic." },
+    { t: "menuconfig", s: "SSID, IP, port", k: "reflect", tip: "Pasul 3: deschide meniul din Kconfig.projbuild." },
+    { t: "flash monitor", s: "/dev/ttyUSB0", k: "good", tip: "Pasul 4: compilează, scrie pe placă prin USB, apoi arată mesajele plăcii." },
+  ], { tipId: "steps-tip", fs: 13 });
+
+  L.bytes("pkt", [
+    { n: "magic", b: 2, k: "violet", d: "valoarea fixă 0xA55A" }, { n: "node_id", b: 1, k: "reflect", d: "nodul care a primit cadrul" },
+    { n: "rssi", b: 1, k: "good", d: "puterea semnalului, în dBm" }, { n: "timestamp_us", b: 4, k: "signal", d: "timpul intern al plăcii, în µs" },
+    { n: "seq", b: 2, k: "muted", d: "contor de pachete" }, { n: "csi_iq", b: 128, k: "signal", d: "64 × (I, Q), câte un octet cu semn" },
+  ], { tipId: "pkt-tip", label: "Cele șase câmpuri ale pachetului" });
+})();
+</script>
+</body>
+</html>

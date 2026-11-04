@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="ro">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>package.json ilustrat</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="../assets/learn.css">
+</head>
+<body data-file="simulation-remotion/package.json" data-root="../">
+<main>
+<header class="page">
+  <span class="eyebrow">src/simulation-remotion/package.json · 25 de linii</span>
+  <h1>Cartea de identitate a proiectului video</h1>
+  <p class="lede">simulation-remotion este un proiect separat, în TypeScript. El creează un videoclip 3D de prezentare cu Remotion. package.json spune ce biblioteci folosește și ce comenzi are.</p>
+</header>
+
+<section class="card">
+  <span class="lines">Liniile 2–9 · nume, descriere, comenzi</span>
+  <h2>Trei comenzi npm</h2>
+  <div class="tablewrap"><table class="t">
+    <thead><tr><th>Comandă</th><th>Rulează</th><th>Rezultat</th></tr></thead>
+    <tbody>
+      <tr><td class="m">npm start</td><td class="m">remotion preview</td><td>Deschide un browser cu videoclipul și o bară de timp. Poți derula cadru cu cadru.</td></tr>
+      <tr><td class="m">npm run build</td><td class="m">remotion render MainScene out/video.mp4</td><td>Randează compoziția MainScene într-un fișier MP4.</td></tr>
+      <tr><td class="m">npm run upgrade</td><td class="m">remotion upgrade</td><td>Aduce toate pachetele Remotion la aceeași versiune nouă.</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section class="card">
+  <span class="lines">Liniile 10–24 · dependențele</span>
+  <h2>Cine pe cine folosește</h2>
+  <div class="fig" id="deps"></div>
+  <p class="tip" id="deps-tip">Atinge un pachet.</p>
+  <div class="text">
+    <p>dependencies sunt necesare la rulare. devDependencies sunt necesare doar la scrierea codului: tipurile TypeScript și compilatorul.</p>
+    <div class="why"><b>Ce înseamnă „^” din fața versiunii?</b><p>„^4.0.218” acceptă orice versiune 4.x mai nouă, dar nu 5.0. npm a ales efectiv 4.0.534, scrisă în package-lock.json.</p></div>
+    <div class="why"><b>De ce three și @types/three cu aceeași versiune?</b><p>Tipurile descriu funcțiile unei versiuni anume. O versiune diferită ar da erori false în editor.</p></div>
+  </div>
+  <div class="uses">Versiuni exacte în: <a class="chip" href="package-lock.json.html">package-lock.json</a> · Reguli TypeScript: <a class="chip" href="tsconfig.json.html">tsconfig.json</a></div>
+</section>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../assets/learn.js"></script>
+<script>
+(function () {
+  var s = L.svg("deps", "0 0 800 300", "Graful dependențelor");
+  var B = [
+    ["remotion", "^4.0.218", 320, 20, "reflect", "Motorul video: cadre, timp, compoziții."], ["@remotion/cli", "^4.0.218", 40, 20, "reflect", "Comenzile preview, render, upgrade."],
+    ["@remotion/three", "^4.0.218", 600, 20, "reflect", "Leagă Remotion de scenele 3D: ThreeCanvas."],
+    ["react", "^18.3.1", 180, 120, "signal", "Componentele: fiecare piesă a scenei este o funcție React."], ["react-dom", "^18.3.1", 40, 220, "signal", "Desenează componentele React în pagină."],
+    ["@react-three/fiber", "^8.17.10", 460, 120, "signal", "Scrie obiecte three.js ca elemente React: mesh, light."], ["three", "^0.160.0", 600, 220, "violet", "Biblioteca 3D: geometrii, materiale, cameră."],
+    ["typescript + @types", "^5.4.5 (dev)", 320, 220, "muted", "Doar pentru verificarea tipurilor în editor."],
+  ];
+  B.forEach(function (b) { L.box(s, b[2], b[3], 170, 56, b[0], { k: b[4], sub: b[1], s: 12.5, tip: b[0] + ": " + b[5] }); });
+  [[125, 76, 355, 20], [405, 76, 265, 120], [685, 76, 545, 120], [545, 176, 685, 220], [265, 176, 125, 220]].forEach(function (a) { L.arrow(s, a[0], a[1], a[2], a[3] - 2, { dash: "4 4" }); });
+  L.tips(s, "deps-tip");
+})();
+</script>
+</body>
+</html>

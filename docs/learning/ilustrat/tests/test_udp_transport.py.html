@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="ro">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>test_udp_transport.py ilustrat</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="../assets/learn.css">
+</head>
+<body data-file="tests/test_udp_transport.py" data-root="../">
+<main>
+<header class="page">
+  <span class="eyebrow">src/tests/test_udp_transport.py · 103 linii · pytest</span>
+  <h1>Testele care dovedesc că pachetele ajung întregi</h1>
+  <p class="lede">Fișierul are 6 funcții de test. Una rulează de 4 ori, cu date diferite, deci pytest numără 9 teste. Ele verifică formatul pachetului, transportul UDP și, la final, aplicația întreagă până la alarmă.</p>
+  <nav class="toc" aria-label="Fișe"><a href="#k">L1–21</a><a href="#u">L24–46 Format</a><a href="#n">L49–71 Rețea</a><a href="#g">L74–103 GUI</a></nav>
+</header>
+
+<section class="card">
+  <span class="lines">Tot fișierul · piramida testelor</span>
+  <h2>De la octeți la alarmă</h2>
+  <div class="fig" id="pyr"></div>
+  <p class="tip" id="pyr-tip">Atinge un nivel.</p>
+</section>
+
+<section class="card" id="k">
+  <span class="lines">Liniile 1–21 · constante și _packet</span>
+  <h2>Un pachet de probă, ușor de recunoscut</h2>
+  <div class="text">
+    <p>_packet creează un pachet cu valori care urcă și coboară: −26 + 26j, −25 + 25j și așa mai departe. Orice inversare sau deplasare de valori se vede imediat.</p>
+    <div class="tablewrap"><table class="t"><tbody>
+      <tr><td class="m">SIM_SPEED</td><td class="m">10</td><td>Scenariul de 20 s rulează în 2 s.</td></tr>
+      <tr><td class="m">RECEIVE_MARGIN_S</td><td class="m">1 s</td><td>Timp în plus pentru ultimele pachete.</td></tr>
+      <tr><td class="m">NODE_IDS, SAMPLES_PER_NODE</td><td class="m">[1, 2, 3], 5000</td><td>Fiecare nod simulat trebuie să trimită exact 5000 de pachete.</td></tr>
+    </tbody></table></div>
+  </div>
+</section>
+
+<section class="card" id="u">
+  <span class="lines">Liniile 24–46 · testele de format</span>
+  <h2>Patru întrebări despre octeți</h2>
+  <div class="tablewrap"><table class="t">
+    <thead><tr><th>Test</th><th>Verifică</th></tr></thead>
+    <tbody>
+      <tr><td class="m">…is_138_bytes_and_round_trips</td><td>Pachetul are 138 de octeți. Citirea dă înapoi exact aceleași valori.</td></tr>
+      <tr><td class="m">…clips_values_outside_int8</td><td>500 − 500j devine 127 − 128j: valorile se taie la limitele unui octet.</td></tr>
+      <tr><td class="m">…rejects_short_or_unaligned_data</td><td>4 cazuri: date goale, doar magicul, 138 de zerouri, un pachet fără ultimul octet. Toate dau o listă goală.</td></tr>
+      <tr><td class="m">…reads_several_packets</td><td>Două pachete lipite într-o datagramă dau două pachete, în ordine.</td></tr>
+    </tbody>
+  </table></div>
+  <div class="fig" id="cases"></div>
+</section>
+
+<section class="card" id="n">
+  <span class="lines">Liniile 49–71 · transportul real prin UDP</span>
+  <h2>15 000 de pachete, niciunul pierdut</h2>
+  <div class="fig" id="net"></div>
+  <div class="text">
+    <p>_receive_simulation deschide un socket pe portul 0: sistemul alege un port liber. Un fir trimite simularea cu udp_sim.send, în timp ce firul principal primește cu record.receive.</p>
+    <p>Testul verifică trei lucruri: nodurile sunt 1, 2, 3; fiecare are 5000 de pachete; fiecare pachet primit are aceiași octeți ca pachetul trimis.</p>
+    <div class="why"><b>De ce portul 0?</b><p>Un port fix poate fi ocupat de aplicație sau de alt test. Portul 0 cere sistemului un port liber de fiecare dată.</p></div>
+    <div class="why"><b>De ce compară octeții, nu doar numărul?</b><p>Un pachet poate ajunge, dar cu valori stricate. Comparația octet cu octet prinde și această problemă.</p></div>
+  </div>
+</section>
+
+<section class="card" id="g">
+  <span class="lines">Liniile 74–103 · testul aplicației întregi</span>
+  <h2>Din simulator până la starea ALARMĂ</h2>
+  <div class="fig" id="e2e"></div>
+  <div class="text">
+    <p>Testul pornește Qt fără ecran și un FrameSource în modul live. După 200 ms, un fir trimite simularea. O buclă Qt rulează 4 s, apoi testul oprește totul.</p>
+    <p>La final, testul cere două lucruri: un mesaj care conține „UDP port” și cel puțin un cadru în starea ALARMĂ.</p>
+    <div class="why"><b>De ce un port „sondat” și apoi închis?</b><p>Testul deschide un socket pe portul 0, citește numărul ales și îl închide. Apoi FrameSource deschide același port liber.</p></div>
+  </div>
+  <div class="uses">Testează: <a class="chip" href="../csi/packets.py.html">packets.py</a><a class="chip" href="../csi/record.py.html">record.py</a><a class="chip" href="../csi/udp_sim.py.html">udp_sim.py</a><a class="chip" href="../csi/gui/frame_source.py.html">gui/frame_source.py</a><a class="chip" href="../csi/fall_detector.py.html">fall_detector.py</a></div>
+</section>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../assets/learn.js"></script>
+<script>
+(function () {
+  var s = L.svg("pyr", "0 0 800 250", "Nivelurile testelor");
+  var lv = [[300, 200, "aplicația întreagă", "1 test · ~4 s", "alert", "test_gui_live_source_reaches_alarm…: simulator → UDP → FrameSource → detector → ALARMĂ."],
+    [200, 400, "transport UDP", "1 test · 15 000 de pachete", "reflect", "test_simulated_nodes_deliver_every_packet…: trimitere și primire reale pe 127.0.0.1."],
+    [100, 600, "formatul pachetului", "7 teste · fără rețea", "signal", "Cele 4 funcții de format, una cu 4 cazuri: rapide, fără socket."]];
+  lv.forEach(function (l, i) {
+    var y = 10 + i * 80, x = 400 - l[1] / 2;
+    L.box(s, x, y, l[1], 70, l[2], { k: l[4], sub: l[3], s: 14, tip: l[5] });
+  });
+  L.tips(s, "pyr-tip");
+
+  var c = L.svg("cases", "0 0 800 120", "Cele patru date respinse");
+  [["b\"\"", "nimic"], ["5A A5", "doar magicul"], ["00 × 138", "fără magic"], ["5A A5 … (137 B)", "un octet lipsă"]].forEach(function (x, i) {
+    L.box(c, 6 + i * 198, 10, 186, 60, x[0], { k: "alert", sub: x[1], s: 13 });
+    L.text(c, 99 + i * 198, 100, "→ []", { s: 13, c: "var(--good)" });
+  });
+
+  L.flow("net", [
+    { t: "socket port 0", s: "port liber", k: "muted" }, { t: "fir: send", s: "viteză 10×", k: "reflect", via: "UDP" },
+    { t: "receive 3 s", s: "record.py", k: "signal" }, { t: "3 × 5000", s: "octeți identici", k: "good" },
+  ], { fs: 13 });
+
+  L.flow("e2e", [
+    { t: "Qt offscreen", s: "QApplication", k: "muted" }, { t: "FrameSource live", s: "port liber", k: "signal" },
+    { t: "send după 200 ms", s: "fir separat", k: "reflect" }, { t: "bucla Qt 4 s", s: "colectează stări", k: "violet" },
+    { t: "ALARMĂ în stări?", s: "assert", k: "alert" },
+  ], { cols: 5, gap: 26, fs: 12.5 });
+})();
+</script>
+</body>
+</html>

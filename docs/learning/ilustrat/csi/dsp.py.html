@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="ro">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>dsp.py ilustrat</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="../assets/learn.css">
+</head>
+<body data-file="csi/dsp.py" data-root="../">
+<main>
+<script src="../assets/data/sim.js"></script>
+<script src="../assets/data/recC.js"></script>
+<header class="page">
+  <span class="eyebrow">src/csi/dsp.py · 92 de linii</span>
+  <h1>De la 52 de semnale zgomotoase la un singur semnal de mișcare</h1>
+  <p class="lede">dsp.py curăță datele și le comprimă. El scoate vârfurile de zgomot, elimină subpurtătoarele inutile, păstrează doar frecvențele mișcării umane și combină totul într-un singur semnal. Apoi el calculează spectrograma.</p>
+  <nav class="toc" aria-label="Fișe"><a href="#k">L11–35</a><a href="#h">L38–48 Hampel</a><a href="#v">L51–56 Varianță</a><a href="#b">L59–63 Trece-bandă</a><a href="#p">L66–70 PCA</a><a href="#s">L73–83 Spectrogramă</a><a href="#a">L86–92 Totul</a></nav>
+</header>
+
+<section class="card" id="a">
+  <span class="lines">Liniile 86–92 · analyze_recording, imaginea de ansamblu</span>
+  <h2>Lanțul de procesare</h2>
+  <div class="fig" id="chain"></div>
+  <p class="tip" id="chain-tip">Atinge un pas.</p>
+  <div class="text">
+    <p>analyze_recording leagă pașii. Fereastra spectrogramei are între 16 și 32 de eșantioane: o optime din lungimea semnalului, în aceste limite. Detectorul primește un singur semnal, numit „node”.</p>
+    <div class="note"><b>Două ramuri diferite</b><p>Spectrograma (linia 90) folosește media amplitudinilor brute, nu semnalul filtrat. Detectorul (linia 91) folosește semnalul de mișcare filtrat. Hampel nu apare în acest lanț. figures.py îl folosește doar pentru figurile simulate.</p></div>
+  </div>
+</section>
+
+<section class="card" id="k">
+  <span class="lines">Liniile 1–35 · importuri, constante, rezultate</span>
+  <h2>Valorile care reglează filtrele</h2>
+  <div class="tablewrap"><table class="t">
+    <thead><tr><th>Nume</th><th>Valoare</th><th>Rol</th></tr></thead>
+    <tbody>
+      <tr><td class="m">MAD_TO_SIGMA</td><td class="m">1.4826</td><td>Transformă MAD în abatere standard, pentru zgomot normal.</td></tr>
+      <tr><td class="m">MAD_EPSILON</td><td class="m">10⁻⁶</td><td>Evită împărțirea la zero pe un semnal constant.</td></tr>
+      <tr><td class="m">MIN / MAX_SUBCARRIER_VARIANCE</td><td class="m">0.05 / 350</td><td>Subpurtătoare moarte, respectiv subpurtătoare cu salturi uriașe.</td></tr>
+      <tr><td class="m">BAND_LOW / HIGH_HZ</td><td class="m">0.2 / 12 Hz</td><td>Banda mișcării umane: de la respirație lentă la pași rapizi.</td></tr>
+      <tr><td class="m">BAND_ORDER</td><td class="m">4</td><td>Panta filtrului. Ordin mai mare = margini mai abrupte.</td></tr>
+      <tr><td class="m">NYQUIST_MARGIN</td><td class="m">2.1</td><td>Limita de sus rămâne puțin sub jumătate din rată.</td></tr>
+      <tr><td class="m">MIN / MAX_WINDOW, WINDOW_DIVISOR</td><td class="m">16 / 32, 8</td><td>Mărimea ferestrei pentru spectrogramă.</td></tr>
+      <tr><td class="m">Spectrogram, Analysis</td><td>clase</td><td>Rezultatele: timp × frecvență × putere, și pachetul complet de analiză.</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section class="card" id="h">
+  <span class="lines">Liniile 38–48 · remove_outliers (filtrul Hampel)</span>
+  <h2>Vârfurile scurte devin mediana vecinilor</h2>
+  <div class="fig" id="hampel"></div>
+  <div class="text">
+    <p>Funcția privește 7 eșantioane: punctul și câte 3 vecini. Ea calculează mediana și MAD, abaterea absolută mediană. Dacă punctul este la mai mult de 3 abateri de mediană, el devine mediana.</p>
+    <div class="why"><b>De ce mediană și nu medie?</b><p>Un vârf mare trage media după el. Mediana ignoră un singur punct extrem. Filtrul vede deci corect ce este „normal” în jur.</p></div>
+    <div class="why"><b>De ce sliding_window_view?</b><p>Funcția creează toate ferestrele deodată, fără copii și fără buclă Python. Calculul pe 5000 × 52 de valori rămâne rapid.</p></div>
+  </div>
+  <p class="hint">Date simulate, link 1-2, subpurtătoarea 10, secundele 4–6. Gri = brut, albastru = după Hampel.</p>
+</section>
+
+<section class="card" id="v">
+  <span class="lines">Liniile 51–56 · drop_bad_subcarriers</span>
+  <h2>Subpurtătoarele moarte ies din calcul</h2>
+  <div class="fig" id="var"></div>
+  <p class="tip" id="var-tip">Atinge o bară.</p>
+  <div class="text">
+    <p>Funcția calculează varianța fiecărei coloane. Ea păstrează doar coloanele între 0.05 și 350. Dacă nicio coloană nu trece, funcția returnează datele neschimbate.</p>
+    <p>În captura test C, 11 coloane au varianța sub 0.05 (roșu). Rămân 41.</p>
+    <div class="why"><b>De ce contează pentru PCA?</b><p>O coloană constantă nu aduce informație. O coloană cu salturi uriașe ar domina PCA. Ambele strică semnalul de mișcare.</p></div>
+  </div>
+</section>
+
+<section class="card" id="b">
+  <span class="lines">Liniile 59–63 · bandpass</span>
+  <h2>Doar frecvențele mișcării umane</h2>
+  <div class="controls" id="rtctl" role="group" aria-label="Rata eșantionării">
+    <button class="opt" data-r="250" aria-pressed="true">250 Hz (simulare)</button>
+    <button class="opt" data-r="33.5" aria-pressed="false">33.5 Hz (test C)</button>
+    <button class="opt" data-r="20" aria-pressed="false">20 Hz (exemplu)</button>
+  </div>
+  <div class="fig" id="bp"></div>
+  <div class="readout">
+    <div><small>Nyquist (rată / 2)</small><strong id="ny">–</strong></div>
+    <div><small>Limita de sus folosită</small><strong id="hi">–</strong></div>
+  </div>
+  <div class="text">
+    <p>Linia 61 coboară limita de sus dacă rata este mică: cel mult rata împărțită la 2.1. Linia 62 proiectează un filtru Butterworth de ordin 4. Linia 63 îl aplică înainte și înapoi.</p>
+    <div class="why"><b>De ce filtfilt, adică înainte și înapoi?</b><p>Un filtru simplu întârzie semnalul. Aplicat și invers, întârzierea se anulează. Momentul impactului rămâne la locul lui în timp.</p></div>
+    <div class="why"><b>De ce 0.2 Hz jos?</b><p>Sub 0.2 Hz sunt schimbările foarte lente ale canalului: căldura plăcii, mobila mutată. Ele nu sunt mișcare umană.</p></div>
+  </div>
+  <p class="hint">Curba arată forma aproximativă a filtrului. Zona gri este peste Nyquist, unde datele nu pot avea frecvențe.</p>
+</section>
+
+<section class="card" id="p">
+  <span class="lines">Liniile 66–70 · motion_signal (PCA)</span>
+  <h2>Direcția în care datele se schimbă cel mai mult</h2>
+  <div class="fig" id="pca"></div>
+  <div class="text">
+    <p>Pagina arată doar două subpurtătoare, ca puncte în plan. Codul face același lucru în 41–52 de dimensiuni.</p>
+    <p>Linia 67 mută centrul datelor în zero. Linia 68 calculează matricea de covarianță. Linia 69 găsește vectorii proprii. Linia 70 proiectează datele pe vectorul cu cea mai mare varianță: PC1.</p>
+    <div class="why"><b>De ce PCA?</b><p>O persoană schimbă multe subpurtătoare în același timp. PCA găsește această schimbare comună. Zgomotul, diferit pe fiecare subpurtătoare, rămâne în componentele mici.</p></div>
+    <div class="why"><b>De ce coloana -1?</b><p>eigh returnează valorile proprii în ordine crescătoare. Ultima coloană corespunde celei mai mari valori.</p></div>
+  </div>
+</section>
+
+<section class="card" id="s">
+  <span class="lines">Liniile 73–83 · spectrogram și peak_frequencies_hz</span>
+  <h2>Ce frecvențe există la fiecare moment</h2>
+  <div class="fig" id="spec"></div>
+  <div class="fig" id="spec-ax"></div>
+  <div class="text">
+    <p>Funcția taie semnalul în ferestre suprapuse pe jumătate. Fiecare fereastră primește o formă Hann, apoi o transformată Fourier. Puterea devine decibeli: 10 · log₁₀(|X|² + 10⁻⁶).</p>
+    <p>peak_frequencies_hz alege, pentru fiecare moment, frecvența cu puterea cea mai mare. Aplicația afișează această valoare ca „Doppler”.</p>
+    <div class="note"><b>Limita datelor reale</b><p>Test C are 33.5 Hz. Spectrograma vede deci doar până la 16.8 Hz. Valoarea „Doppler” din replay nu poate ajunge la linia de referință de 35 Hz.</p></div>
+  </div>
+  <p class="hint">Spectrograma reală a capturii test C. Jos = 0 Hz, sus = 16.8 Hz.</p>
+  <div class="uses">Folosește: <a class="chip" href="packets.py.html">packets.py · Recording</a><a class="chip" href="fall_detector.py.html">fall_detector.py</a> · Folosit de: <a class="chip" href="gui/frames.py.html">gui/frames.py</a><a class="chip" href="gui/frame_source.py.html">gui/frame_source.py</a><a class="chip" href="figures.py.html">figures.py</a></div>
+</section>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../assets/learn.js"></script>
+<script>
+(function () {
+  L.flow("chain", [
+    { t: "Recording", s: "N × 52 amplitudini", k: "muted", tip: "Intrarea: tabelul din packets.py." },
+    { t: "drop_bad", s: "elimină coloanele moarte", k: "alert", tip: "Linia 87: varianță între 0.05 și 350." },
+    { t: "bandpass", s: "0.2–12 Hz", k: "signal", tip: "Linia 88: păstrează doar frecvențele mișcării umane." },
+    { t: "motion_signal", s: "PCA → PC1", k: "reflect", tip: "Linia 88: un singur semnal de mișcare." },
+    { t: "detect_fall", s: "automatul de stări", k: "good", tip: "Linia 91: detectorul primește semnalul de mișcare." },
+    { t: "media brută", s: "pe toate coloanele", k: "muted", tip: "Linia 90: ramura separată pentru spectrogramă." },
+    { t: "spectrogram", s: "fereastră 16–32", k: "violet", tip: "Liniile 89–90: STFT cu fereastră Hann." },
+    { t: "Analysis", s: "semnal · spectrogramă · detecție", k: "good", tip: "Linia 92: rezultatul complet." },
+  ], { cols: 4, fs: 12.5, tipId: "chain-tip", dot: false });
+
+  var D = window.DATA.sim, i0 = D.t.findIndex(function (t) { return t >= 4; }), i1 = D.t.findIndex(function (t) { return t >= 6; });
+  var tt = D.t.slice(i0, i1), raw = D.raw.slice(i0, i1), cl = D.clean.slice(i0, i1);
+  var mx = Math.max.apply(null, raw), mn = Math.min.apply(null, raw);
+  var hp = L.plot("hampel", { h: 230, xmin: 4, xmax: 6, ymin: mn * 0.95, ymax: mx * 1.05, xticks: [4, 5, 6], xlabel: "timp (s)", ylabel: "|CSI|", series: [{ x: tt, y: raw, c: "var(--muted)", w: 1.2 }, { x: tt, y: cl, c: "var(--signal)", w: 2 }], label: "Semnalul înainte și după filtrul Hampel" });
+  raw.forEach(function (v, i) { if (Math.abs(v - cl[i]) > 1e-6) L.el("circle", { cx: hp.sx(tt[i]), cy: hp.sy(v), r: 4, fill: "var(--alert)" }, hp.over); });
+
+  var C = window.DATA.recC, vs = L.svg("var", "0 0 800 190", "Varianța pe subpurtătoare în test C");
+  var vmax = Math.max.apply(null, C["var"]) * 1.1, bw = 760 / 52;
+  C["var"].forEach(function (v, i) { var h = Math.max(1, v / vmax * 140), bad = v < 0.05 || v > 350; L.el("rect", { x: 30 + i * bw + 1, y: 160 - h, width: bw - 2, height: h, rx: 1, fill: bad ? "var(--alert)" : "var(--signal)", "data-tip": "Coloana " + i + ": varianță " + v.toFixed(2) + (bad ? " → eliminată" : " → păstrată") }, vs); });
+  L.text(vs, 30, 180, "0", { s: 11, cls: "muted", a: "start" }); L.text(vs, 790, 180, "51", { s: 11, cls: "muted", a: "end" });
+  L.tips(vs, "var-tip");
+
+  var bp = L.plot("bp", { h: 230, xmin: 0, xmax: 40, ymin: 0, ymax: 1.1, xticks: [0, 0.2, 5, 10, 12, 20, 30, 40], xfmt: function (v) { return v === 0.2 ? "0.2" : v; }, yticks: [0, 0.5, 1], xlabel: "frecvență (Hz)", ylabel: "câștig", series: [], label: "Răspunsul aproximativ al filtrului trece-bandă" });
+  var gray = L.el("rect", { y: bp.m.t, height: bp.H - bp.m.t - bp.m.b, fill: "var(--soft-alert)" }, bp.over);
+  L.toggle("#rtctl button.opt", function (d) {
+    var rate = +d.r, ny = rate / 2, hi = Math.min(12, rate / 2.1), lo = 0.2, f0 = Math.sqrt(lo * hi), B = hi - lo, xs = [], ys = [];
+    for (var f = 0.05; f <= 40; f += 0.05) { var x = (f * f - f0 * f0) / (f * B); xs.push(f); ys.push(f > ny ? 0 : 1 / Math.sqrt(1 + Math.pow(x, 8))); }
+    bp.draw([{ x: xs, y: ys, c: "var(--signal)", w: 2.5 }]);
+    gray.setAttribute("x", bp.sx(Math.min(ny, 40))); gray.setAttribute("width", Math.max(0, bp.sx(40) - bp.sx(Math.min(ny, 40))));
+    document.getElementById("ny").textContent = ny.toFixed(1) + " Hz";
+    document.getElementById("hi").textContent = hi.toFixed(2) + " Hz";
+  });
+
+  var ps = L.svg("pca", "0 0 800 300", "Puncte în plan și axa principală");
+  var r = L.rng(11), pts = [], ang = 0.55;
+  for (var k = 0; k < 140; k++) { var a = r.n() * 70, b = r.n() * 16; pts.push([400 + a * Math.cos(ang) - b * Math.sin(ang), 150 - (a * Math.sin(ang) + b * Math.cos(ang))]); }
+  L.el("line", { x1: 400, y1: 10, x2: 400, y2: 290, stroke: "var(--line)" }, ps); L.el("line", { x1: 150, y1: 150, x2: 650, y2: 150, stroke: "var(--line)" }, ps);
+  L.text(ps, 655, 146, "subpurtătoarea A", { s: 11, a: "start", cls: "muted" }); L.text(ps, 405, 20, "subpurtătoarea B", { s: 11, a: "start", cls: "muted" });
+  var axis = L.el("line", { stroke: "var(--reflect)", "stroke-width": 3 }, ps);
+  var projG = L.el("g", {}, ps);
+  pts.forEach(function (p) { L.el("circle", { cx: p[0], cy: p[1], r: 3.5, fill: "var(--signal)", opacity: 0.7 }, ps); });
+  var lab = L.text(ps, 20, 280, "", { s: 12, a: "start" });
+  function setAxis(t) {
+    axis.setAttribute("x1", 400 - 230 * Math.cos(t)); axis.setAttribute("y1", 150 + 230 * Math.sin(t)); axis.setAttribute("x2", 400 + 230 * Math.cos(t)); axis.setAttribute("y2", 150 - 230 * Math.sin(t));
+    var v = 0; pts.forEach(function (p) { var pr = (p[0] - 400) * Math.cos(t) - (p[1] - 150) * Math.sin(t); v += pr * pr; });
+    lab.firstChild.textContent = "varianța proiecției: " + (v / pts.length).toFixed(0) + (Math.abs(t - ang) < 0.03 ? "  ← maximă: PC1" : "");
+  }
+  var st = { t: -0.6 };
+  if (L.G) L.G.to(st, { t: ang, duration: 2.5, ease: "power2.out", repeat: -1, repeatDelay: 1.5, onUpdate: function () { setAxis(st.t); } }); else setAxis(ang);
+
+  var cols = C.specT.map(function (_, j) { return C.specP.map(function (row) { return row[j]; }); });
+  var all = [].concat.apply([], cols), lo = Math.min.apply(null, all), hi = Math.max.apply(null, all);
+  L.heat("spec", cols, { vmin: lo, vmax: hi, h: 180, label: "Spectrograma testului C" });
+  var ax = L.svg("spec-ax", "0 0 800 26", "Axa timpului");
+  [0, 5, 10, 15, 20].forEach(function (t) { L.text(ax, t / C.dur * 800, 16, t + " s", { s: 11, cls: "muted", a: t === 0 ? "start" : t === 20 ? "end" : "middle" }); });
+})();
+</script>
+</body>
+</html>
