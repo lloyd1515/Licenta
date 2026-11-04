@@ -4,7 +4,7 @@
 - **Publicație:** *IEEE Signal Processing Letters (SPL)*, Vol. 24, Nr. 12, pp. 1808–1812, Dec. 2017
 - **DOI:** [10.1109/LSP.2017.2758838](https://doi.org/10.1109/LSP.2017.2758838)
 - **Preprint arXiv:** [arXiv:1709.06201](https://arxiv.org/abs/1709.06201)
-- **Fișier PDF Local:** [`docs/Materials/CSI_Sensing/PDFs/P7_Liu_2017_Time_Reversal_Machine.pdf`](file:///home/vlads4r4/dev/Licenta/docs/Materials/CSI_Sensing/PDFs/P7_Liu_2017_Time_Reversal_Machine.pdf)
+- **Fișier PDF Local:** lipsă. Fișierul vechi conținea alt articol (eliminat 2026-11-04). Articole înrudite despre time reversal (grupul K. J. Ray Liu): [`docs/Materials/CSI_Sensing/sources-2026-10-21/Chen_Liu_2016_WiFi_TRIPS_Time_Reversal.pdf`](file:///home/vlads4r4/dev/Licenta/docs/Materials/CSI_Sensing/sources-2026-10-21/Chen_Liu_2016_WiFi_TRIPS_Time_Reversal.pdf), [`docs/Materials/CSI_Sensing/sources-2026-10-21/Chen_Liu_2018_TR_BREATH_Time_Reversal.pdf`](file:///home/vlads4r4/dev/Licenta/docs/Materials/CSI_Sensing/sources-2026-10-21/Chen_Liu_2018_TR_BREATH_Time_Reversal.pdf)
 - **Cod BibTeX:** `@article{liu2017timereversal, ...}` în `references_csi.bib`
 
 ---

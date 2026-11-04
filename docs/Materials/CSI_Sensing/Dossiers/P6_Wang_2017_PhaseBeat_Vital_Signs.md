@@ -4,7 +4,7 @@
 - **Publicație:** *IEEE Transactions on Mobile Computing (TMC)*, Vol. 16, Nr. 10, pp. 2803–2816, Oct. 2017
 - **DOI:** [10.1109/TMC.2017.2706338](https://doi.org/10.1109/TMC.2017.2706338)
 - **Preprint arXiv:** [arXiv:1709.02897](https://arxiv.org/abs/1709.02897)
-- **Fișier PDF Local:** [`docs/Materials/CSI_Sensing/PDFs/P6_Wang_2017_PhaseBeat_VitalSigns.pdf`](file:///home/vlads4r4/dev/Licenta/docs/Materials/CSI_Sensing/PDFs/P6_Wang_2017_PhaseBeat_VitalSigns.pdf)
+- **Fișier PDF Local:** lipsă. Fișierul vechi conținea alt articol (eliminat 2026-11-04). Versiunea extinsă PhaseBeat a acelorași autori (2020): [`docs/Materials/CSI_Sensing/sources-2026-10-21/Wang_Mao_2020_PhaseBeat_Vital_Signs.pdf`](file:///home/vlads4r4/dev/Licenta/docs/Materials/CSI_Sensing/sources-2026-10-21/Wang_Mao_2020_PhaseBeat_Vital_Signs.pdf)
 - **Cod BibTeX:** `@article{wang2017phasebeat, ...}` în `references_csi.bib`
 
 ---

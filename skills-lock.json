@@ -13,12 +13,6 @@
       "skillPath": "plugins/stitch-utilities/skills/enhance-prompt/SKILL.md",
       "computedHash": "71cc23e9ec5fc6361e12453495fa8c683f6cf26f3efaf9b230b0f43e0a32cc96"
     },
-    "latex-paper-en": {
-      "source": "bahayonghang/academic-writing-skills",
-      "sourceType": "github",
-      "skillPath": "academic-writing-skills/latex-paper-en/SKILL.md",
-      "computedHash": "c1ca54bd7c9896b273cdf44b2b6fb30b242369c12d63d9d678b420512348e2c9"
-    },
     "react-vite-dashboard": {
       "source": "google-labs-code/stitch-skills",
       "sourceType": "github",

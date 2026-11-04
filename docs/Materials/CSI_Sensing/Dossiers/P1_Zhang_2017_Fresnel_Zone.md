@@ -31,4 +31,4 @@ $$r_1 = \frac{1}{2} \sqrt{\lambda D}$$
 ## 2. Rolul în Proiectul Nostru de Licență
 
 1. **Modelarea hărții camerei:** Implementată în [`src/dsp_lab/synthetic_gen.py`](file:///home/vlads4r4/dev/Licenta/src/dsp_lab/synthetic_gen.py) și afișată în interfața PyQt6 [`src/gui/widgets.py`](file:///home/vlads4r4/dev/Licenta/src/gui/widgets.py).
-2. **Audit automat:** Verificat la nivel de milimetru în testul academic [`verify_academic_compliance.py`](file:///home/vlads4r4/dev/Licenta/.agents/skills/verify-csi-academic/scripts/verify_academic_compliance.py) (`audit_p1_fresnel_theory`).
+2. **Audit automat:** Verificat la nivel de milimetru în testul academic `verify_academic_compliance.py` (`audit_p1_fresnel_theory`), din skill-ul `verify-csi-academic`, eliminat pe 2026-11-04.

@@ -4,7 +4,7 @@
 - **Publicație:** *ACM MobiCom 2022*, pp. 707–720, Oct. 2022
 - **DOI:** [10.1145/3495243.3560530](https://doi.org/10.1145/3495243.3560530)
 - **Preprint arXiv:** [arXiv:2209.05607](https://arxiv.org/abs/2209.05607)
-- **Fișier PDF Local:** [`docs/Materials/CSI_Sensing/PDFs/P8_Abedi_2022_WiPeep.pdf`](file:///home/vlads4r4/dev/Licenta/docs/Materials/CSI_Sensing/PDFs/P8_Abedi_2022_WiPeep.pdf)
+- **Fișier PDF Local:** lipsă. Fișierul vechi conținea alt articol (eliminat 2026-11-04). Articol înrudit al aceluiași prim autor: [`docs/Materials/CSI_Sensing/sources-2026-10-21/Abedi_2023_WiFi_Physical_Layer_Stays_Awake.pdf`](file:///home/vlads4r4/dev/Licenta/docs/Materials/CSI_Sensing/sources-2026-10-21/Abedi_2023_WiFi_Physical_Layer_Stays_Awake.pdf)
 - **Cod BibTeX:** `@inproceedings{abedi2022wipeep, ...}` în `references_csi.bib`
 
 ---

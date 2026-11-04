@@ -1,7 +1,0 @@
-{
-  "tool_name": "Bash",
-  "tool_input_preview": "{\"command\":\"cd /home/vlads4r4/dev/Licenta/Email_Profesor && (google-chrome --headless --disable-gpu --no-sandbox --remote-debugging-port=9222 --user-data-dir=/tmp/claude-1000/-home-vlads4r4-dev-Licent...",
-  "error": "Exit code 144\nwritten /home/vlads4r4/dev/Licenta/Email_Profesor/Anexa_Tehnica_Licenta.pdf",
-  "timestamp": "2026-07-31T16:36:47.964Z",
-  "retry_count": 1
-}

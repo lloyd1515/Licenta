@@ -3,7 +3,7 @@
 - **Autori:** Fadel Adib, Dina Katabi
 - **Publicație:** *ACM SIGCOMM 2013*, pp. 75–86, Aug. 2013
 - **DOI:** [10.1145/2486001.2486039](https://doi.org/10.1145/2486001.2486039)
-- **Fișier PDF Local:** [`docs/Materials/CSI_Sensing/PDFs/P5_Adib_2013_See_Through_Walls.pdf`](file:///home/vlads4r4/dev/Licenta/docs/Materials/CSI_Sensing/PDFs/P5_Adib_2013_See_Through_Walls.pdf)
+- **Fișier PDF Local:** [`docs/Materials/CSI_Sensing/sources-2026-10-21/Adib_2013_See_Through_Walls_with_WiFi.pdf`](file:///home/vlads4r4/dev/Licenta/docs/Materials/CSI_Sensing/sources-2026-10-21/Adib_2013_See_Through_Walls_with_WiFi.pdf)
 - **Cod BibTeX:** `@inproceedings{adib2013seethroughwalls, ...}` în `references_csi.bib`
 
 ---

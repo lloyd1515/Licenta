@@ -4,7 +4,7 @@
 - **Publicație:** *IEEE Internet of Things Journal (IoT-J)*, Vol. 9, Nr. 10, pp. 7000–7014, Mai 2021
 - **DOI:** [10.1109/JIOT.2021.3116035](https://doi.org/10.1109/JIOT.2021.3116035)
 - **Preprint arXiv:** [arXiv:2109.11718](https://arxiv.org/abs/2109.11718)
-- **Fișier PDF Local:** [`docs/Materials/CSI_Sensing/PDFs/P2_Hernandez_2021_WiFi_Sensing_Edge.pdf`](file:///home/vlads4r4/dev/Licenta/docs/Materials/CSI_Sensing/PDFs/P2_Hernandez_2021_WiFi_Sensing_Edge.pdf)
+- **Fișier PDF Local:** lipsă. Fișierul vechi conținea alt articol (eliminat 2026-11-04). Articol apropiat al acelorași autori (IEEE COMST 2022): [`docs/Materials/CSI_Sensing/sources-2026-10-21/Hernandez_2022_WiFi_Sensing_on_the_Edge.pdf`](file:///home/vlads4r4/dev/Licenta/docs/Materials/CSI_Sensing/sources-2026-10-21/Hernandez_2022_WiFi_Sensing_on_the_Edge.pdf)
 - **Cod BibTeX:** `@article{hernandez2021wifi, ...}` în `references_csi.bib`
 
 ---

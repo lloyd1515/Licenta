@@ -1,7 +1,0 @@
-{
-  "tool_name": "Read",
-  "tool_input_preview": "{\"file_path\":\"/home/vlads4r4/dev/Licenta/LicentaVault/Rezultate Triangulare Date Reale.md\"}",
-  "error": "File content (327.9KB) exceeds maximum allowed size (256KB). Use offset and limit parameters to read specific portions of the file, or search for specific content instead of reading the whole file.",
-  "timestamp": "2026-07-29T10:54:05.425Z",
-  "retry_count": 1
-}

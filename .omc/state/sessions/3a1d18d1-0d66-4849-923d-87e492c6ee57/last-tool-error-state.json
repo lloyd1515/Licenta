@@ -1,7 +1,0 @@
-{
-  "tool_name": "Bash",
-  "tool_input_preview": "{\"command\":\"cd /home/vlads4r4/dev/Licenta/Email_Profesor && ls -a .omc && cat .omc/* 2>/dev/null | head -40; which google-chrome chromium chromium-browser google-chrome-stable weasyprint 2>/dev/null\"}",
-  "error": "Exit code 4\n.\n..\nsessions\nstate\n/home/vlads4r4/.local/bin/google-chrome",
-  "timestamp": "2026-07-31T16:15:32.164Z",
-  "retry_count": 1
-}
