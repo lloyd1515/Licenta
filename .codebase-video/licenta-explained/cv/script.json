@@ -6,45 +6,47 @@
   "speed": 1.05,
   "poster": "a1-shape",
   "readsFine": [
-    "52",
-    "33",
-    "20",
-    "669",
-    "138",
-    "10",
-    "128",
-    "30",
-    "40",
-    "50",
-    "41",
-    "11",
-    "0.2",
-    "12",
-    "17.5",
-    "17.63",
-    "3",
-    "83",
-    "2.5",
     "0.06",
-    "0.2,",
-    "7",
-    "1.0",
-    "4",
-    "1,",
-    "2.5,",
-    "50.",
-    "41.",
-    "17.5.",
-    "17.63.",
-    "83.",
-    "3.",
-    "12.",
-    "52.",
-    "40,",
-    "50,",
-    "1.",
     "0.06,",
-    "0.2."
+    "0.2",
+    "0.2,",
+    "0.2.",
+    "1,",
+    "1.",
+    "1.0",
+    "10",
+    "11",
+    "12",
+    "12.",
+    "128",
+    "138",
+    "16.7,",
+    "17.5",
+    "17.5.",
+    "17.63",
+    "17.63.",
+    "2.5",
+    "2.5,",
+    "20",
+    "3",
+    "3.",
+    "30",
+    "33",
+    "4",
+    "40",
+    "40,",
+    "41",
+    "41.",
+    "50",
+    "50,",
+    "50.",
+    "52",
+    "52.",
+    "669",
+    "7",
+    "83",
+    "83.",
+    "fifteen"
   ],
   "source": {
     "repo": "/home/vlads4r4/dev/Licenta",
@@ -173,7 +175,7 @@
       "id": "intro",
       "lead": 0.2,
       "pad": 0.3,
-      "say": "Someone just fell in this room. No camera saw it. Nobody wore a sensor. The Wi-Fi did. In nine minutes you'll know exactly how, down to the line of code that rang this alarm."
+      "say": "Someone just fell in this room. No camera saw it. Nobody wore a sensor. The Wi-Fi did. In twelve minutes you'll know exactly how, down to the line of code that rang this alarm."
     },
     {
       "id": "k1-why",
@@ -323,10 +325,97 @@
       "say": "Try it yourself. From the source folder, run the app in replay mode. It plays this exact fall on a loop, with no hardware. Then a challenge: in the fall detector, change the still window from 2.5 to 1.0 seconds. Does the alarm come sooner? And does it now ring when someone just sits down?"
     },
     {
+      "id": "k4-why",
+      "chapter": "Why these numbers",
+      "lead": 0.6,
+      "pad": 0.3,
+      "say": "Before we finish, a fair question: why these numbers, and not others?"
+    },
+    {
+      "id": "a4-standard",
+      "lead": 0.2,
+      "pad": 0.2,
+      "say": "Some numbers are not our choice. Wi-Fi itself splits every message into 52 narrow waves. That comes from the Wi-Fi standard, so every board sees the same stations. The envelope size is our own format: an address, plus the readings. And the message rate is simply measured. It changed from one recording to the next, so the code never assumes a fixed rate. It reads the real rate from every recording."
+    },
+    {
+      "id": "a4-chosen",
+      "lead": 0.2,
+      "pad": 0.2,
+      "say": "Other numbers are choices, and each one is a trade. The filter keeps only wobbles as fast as a human body moves. The steepness limit sits between two real lines: walking reached about 16.7, and the fall only just crossed it. That margin is small, and we say so. The still window is the other trade. Shorter, and the alarm comes sooner, but sitting down may ring it. Longer, and help comes later."
+    },
+    {
+      "id": "a4-measured",
+      "lead": 0.2,
+      "pad": 0.2,
+      "say": "And some numbers are results. Three real recordings went in: an empty room, someone walking, and one real fall. All three came out right: no alarm, no alarm, alarm, about three seconds after the impact. One surprise: the empty room had the steepest spike of all, from radio noise. A separate check saw that the room was too quiet, and stopped the detector. And one fall is not a statistic, so the thesis reports each recording, not percentages."
+    },
+    {
+      "id": "a4-sources",
+      "lead": 0.2,
+      "pad": 0.2,
+      "say": "These choices were not invented here. Earlier research showed that human activity changes the radio signal slowly, so fast changes are noise. It showed that the signal changes caused by a body are correlated across all stations, so they can be merged into one line. And it showed that after a fall, the signal goes from busy to stable. Here are those sentences, highlighted in the original papers."
+    },
+    {
+      "id": "k5-why",
+      "chapter": "What if someone just goes to sleep?",
+      "lead": 0.6,
+      "pad": 0.3,
+      "say": "Now a hard question: what if someone just goes to bed?"
+    },
+    {
+      "id": "a5-bed",
+      "lead": 0.2,
+      "pad": 0.2,
+      "say": "Picture this. After lunch, someone walks to the bedroom and lies down for a nap. If they lie down slowly, the motion line bends gently. The steepness stays near two, far below the limit, and nothing rings. But if they flop onto the bed, the line jumps in a split second, then goes flat while they sleep. To the detector, that is a sharp jerk followed by stillness. That is exactly the shape of a fall, so the alarm rings."
+    },
+    {
+      "id": "d5-norm",
+      "lead": 0.3,
+      "pad": 0.2,
+      "say": "Why can't it tell a soft bed from a hard floor? Look at the first line. Each motion line is divided by its own biggest swing, so it always peaks at one. A thump on a mattress and a crash on tiles become the same size. Then gradient measures only how fast the line changes. So speed is the only clue left, and a fast flop looks like a fall. We checked this with made-up test signals, not with a real recording. The slow lie-down stayed calm. The flop rang the alarm."
+    },
+    {
+      "id": "a5-fixes",
+      "lead": 0.2,
+      "pad": 0.2,
+      "say": "So how could we fix it? Five ideas. First, mark the bed as a zone where a fall needs more proof. Second, put boards at different heights, to see if the body reached the floor. Third, wait longer and check for breathing, because a sleeper breathes calmly. Fourth, after a jerk, play a sound and let the person cancel it. Fifth, use the clock: stillness in bed at night is just sleep."
+    },
+    {
+      "id": "a5-proof",
+      "lead": 0.2,
+      "pad": 0.2,
+      "say": "We are not the first to meet this problem. An earlier fall detector found that lying down and sitting down can look just like a fall. And the breathing fix is not a guess: other research measured breathing with ordinary Wi-Fi."
+    },
+    {
+      "id": "k6-why",
+      "chapter": "How is this different?",
+      "lead": 0.6,
+      "pad": 0.3,
+      "say": "Last question: what makes this different from what you can already buy?"
+    },
+    {
+      "id": "a6-market",
+      "lead": 0.2,
+      "pad": 0.2,
+      "say": "Watches and pendants detect falls well, but people take them off to sleep or to charge them. Cameras see everything, and that is the problem in a bedroom or a bathroom. Radar sensors need no camera, but they need special hardware, at a few hundred dollars per room. Wi-Fi products exist too, but their software is closed and sold by subscription. This project uses three boards worth about fifteen dollars, its rules fit on one screen, and it needs no training data."
+    },
+    {
+      "id": "a6-papers",
+      "lead": 0.2,
+      "pad": 0.2,
+      "say": "Research papers tell the same story. An early system saw people through walls, but it needed special radios. Later work showed that cheap boards like the ESP32 can read the same channel information. And one warning applies to all of them: if Wi-Fi can sense you, an outsider might sense you too."
+    },
+    {
+      "id": "a6-honest",
+      "lead": 0.2,
+      "pad": 0.2,
+      "say": "And the honest part. This is a prototype: one room, one real fall, and no tests with older people. The next steps are more recordings, more rooms, and a fix for the bed."
+    },
+    {
       "id": "outro",
       "lead": 0.3,
       "hold": 1.0,
-      "say": "Ripples, radio stations, letters, a spreadsheet, three clean ups, one steep moment, and a careful alarm. That is the whole idea."
+      "say": "Ripples, radio stations, letters, a spreadsheet, three clean ups, one steep moment, and a careful alarm. Plus a bed it can still confuse, and a cheap, open answer to expensive products. That is the whole idea."
     }
   ]
 }

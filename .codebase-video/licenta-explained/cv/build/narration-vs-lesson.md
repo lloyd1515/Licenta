@@ -155,3 +155,22 @@ Code card 2 `src/csi/fall_detector.py:28`:
 STILL_WINDOW_S = 2.5
 ```
 on "change the still window", then a cross-fade to the same card showing `STILL_WINDOW_S = 1.0` on "to 1.0 seconds" (in-place change: `slide: 0`). Two question chips on their words: "alarm sooner?" and "rings when someone sits?".
+
+---
+
+## Chapter 4-6 addition (2026-10-21). Module split: **builder C = d5** (d5-norm only). Do not touch other modules.
+
+## d5-norm: why a soft bed looks like a hard floor
+Code `src/csi/fall_detector.py:53-58` (same lines as d2-slope, shown again):
+```python
+def _normalized(motion):
+    return motion / (np.max(np.abs(motion)) + NORMALIZE_EPSILON)
+
+
+def _slopes(normalized, rate_hz):
+    return np.abs(np.gradient(normalized, 1.0 / rate_hz))
+```
+Glow: `_normalized` return line on "Look at the first line" until "Then gradient"; `_slopes` return line on "Then gradient measures".
+Callouts: on "divided by its own biggest swing" → "`np.max(np.abs(motion))` = the biggest swing → every line peaks at 1"; on "A thump on a mattress" → "mattress or tiles: same size after this line"; on "Then gradient" → "`np.gradient` = only how fast the line changes"; on "We checked this" → "test signals were made up (synthetic), not recorded".
+Picture (right side): two raw motion lines stacked, labelled "flop on a mattress" (small swing, muted) and "fall on tiles" (big swing, red). On "divided by its own biggest swing" both rescale to the same height (animate the y-scale), with a dashed "1" line. On "only how fast" a steepness meter appears under both and both meters jump over a red "17.5" line together. On "The slow lie-down stayed calm" a result card: "slow lie-down: steepness 1.84 → no alarm" (green); on "The flop rang the alarm": "flop: steepness 20.78 → ALARM after 2.5 s" (red). Small mono footnote under the cards: "synthetic test, 3 links, 250 Hz".
+Spoken numbers: none (exact values on screen only).

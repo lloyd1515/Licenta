@@ -5,7 +5,7 @@ description: Make a newcomer-friendly YouTube-style explainer video of this repo
 
 # Explainer video playbook
 
-Pattern proven on `media/licenta-explained.mp4` (7:20). One voice track and the code scenes come from
+Pattern proven on `media/licenta-explained.mp4` (11:55). One voice track and the code scenes come from
 **codebase-video**; the analogy / hook scenes come from **HyperFrames**, rendered silent to the exact scene
 times and laid over the codebase-video render by `scripts/stitch.py`.
 

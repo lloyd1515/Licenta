@@ -78,3 +78,68 @@ Dark room seen from the front: floor line, three small violet boards (rounded re
 ## outro: the whole idea (dur 10.0)
 - S0 "Ripples, radio stations, letters, a spreadsheet, three clean ups, one steep moment, and a careful alarm.": a left→right row (two rows if needed) of 7 small icons appearing one per word group in time with the sentence: ripples, radio dial, envelope, grid, broom ×3 (or "3 clean-ups"), steep slope, smoke alarm. Each with a 1-2 word label.
 - S1 "That is the whole idea.": the row connects with a thin accent line; title "How Wi-Fi notices a fall" fades in above.
+
+---
+# Chapter 4-6 addition (2026-10-21). Same DESIGN.md. Colours: accent blue for "ours", red for alarm, green for OK, amber for "trade / caution", muted grey for others.
+PDF images live in assets/pdf/ (see assets/pdf/manifest.json: id, quote, pdf, page, authors_year_title, image, page_image). Show a PDF crop as a white "paper" card with a soft shadow, max 1500 px wide; first show <id>-page.png small (whole page, highlight visible) for ~1 s, then zoom/cross-fade into <id>.png; caption under the card in mono: "<authors_year_title>, p. <page>". Never redraw or retype the PDF text; use the image.
+
+## a4-standard: numbers that are not our choice
+Three-column board titled "Where each number comes from": columns "Standard", "Our format", "Measured" (later scenes fill the other columns in their own frames; here only this scene's items).
+- S0 "Some numbers are not our choice.": board title + three empty column headers: STANDARD (violet), OUR CHOICE (amber), MEASURED (green).
+- S1/S2 "52 narrow waves… Wi-Fi standard": card in STANDARD: "52 subcarriers" + small "802.11n, 20 MHz channel".
+- S3 "The envelope size is our own format": card in OUR CHOICE: "138 bytes = 10 address + 128 readings" + tiny "magic A55A".
+- S4-S6 "the message rate is simply measured…": card in MEASURED: three chips "Test A 52.5/s", "Test B 27.8/s", "Test C 33.5/s"; on "reads the real rate" a small mono line `rate_hz` from each recording.
+
+## a4-chosen: numbers that are choices (trades)
+- S0: header "Choices = trades" (amber).
+- S1 "The filter keeps…": band bar 0 → 17 Hz with highlighted zone 0.2–12 Hz, label "human motion".
+- S2 "The steepness limit sits between two real lines": horizontal scale 15 → 19 with three markers: "walking 16.71" (green), red dashed limit "17.5", "real fall 17.63" (red). On "only just crossed it" zoom on the gap 17.5–17.63; on "margin is small" an amber label "margin: 0.13".
+- S3-S5 "The still window…": a slider "still window" with marker at 2.5 s; left end labelled "shorter: faster alarm, but sitting down may ring", right end "longer: fewer false alarms, slower help".
+
+## a4-measured: results
+- S0: header "Results".
+- S1/S2 "Three real recordings… no alarm, no alarm, alarm": three cards A (empty room) / B (walking) / C (real fall), each gets a big result on its word: ✓ no alarm, ✓ no alarm, ✓ ALARM (red) with "3.02 s after impact" under C.
+- S3/S4 "the empty room had the steepest spike… stopped the detector": card A expands: "steepest spike: 31.97 (noise)" then a gate icon: "room too quiet: motion 9.6 < 11 → detector off".
+- S5 "one fall is not a statistic": a crossed-out "100%" (muted) and text "1 real fall → reported per recording".
+
+## a4-sources: where the choices come from (source papers S1, S2, S3)
+- One PDF card per finding, in order S1 (body speed → low frequency), S2 (subcarriers correlated → PCA), S3 (fall = sudden change then still), each on its sentence; on "Here are those sentences" show the three cards side by side, small.
+
+
+
+## a5-bed: going to sleep
+Bedroom side view: a bed (left-centre), floor line, three small violet boards on walls.
+- S0/S1 "After lunch, someone walks to the bedroom and lies down": stick figure walks in from the right, reaches the bed.
+- S2/S3 "If they lie down slowly… nothing rings": split screen left "slow": figure lowers onto the bed over ~2 s; below, a motion line bends gently; a steepness meter stays low "≈ 1.8" far under a red "17.5" line; green tag "no alarm".
+- S4/S5 "But if they flop onto the bed…": right side "flop": figure drops onto the bed fast; the line jumps (red spike) then is flat (blue) with small "zzz".
+- S6 "To the detector, that is a sharp jerk followed by stillness": spike labelled "jerk", flat labelled "still" (same style as a1-shape card 3).
+- S7 "exactly the shape of a fall, so the alarm rings": red banner "FALL DETECTED" over the sleeping figure, amber tag "false alarm".
+
+## a5-fixes: five fixes
+Numbered list cards appearing one per sentence, each with a small icon drawing:
+1 "bed zone: a fall needs more proof" (room map with the bed rectangle shaded),
+2 "boards at different heights: did the body reach the floor?" (wall with boards at 3 heights),
+3 "wait longer, check breathing" (calm sine line labelled "breathing"),
+4 "play a sound, let the person cancel" (speaker icon + "Cancel" button, countdown 15 s),
+5 "use the clock: night + bed + still = sleep" (moon + clock).
+
+## a5-proof: written down and backed by research
+- Whole scene: PDF card S6 (breathing from Wi-Fi CSI).
+
+
+## a6-market: what you can buy
+Grid of 5 product cards appearing one per sentence (icons drawn simply, no logos):
+1 "Watches and pendants" — tag "wearable: taken off to sleep / charge" (Apple Watch, Philips Lifeline),
+2 "Cameras" — tag "privacy: bedroom, bathroom" (SafelyYou, Nobi),
+3 "Radar" — tag "special hardware ≈ $250 / unit" (Vayyar Care),
+4 "Wi-Fi products" — tag "closed software, subscription" (Origin Wireless / Hex, Cognitive Systems),
+5 "This project" (accent border, larger) — "3 × ESP32 ≈ $15 · open source · rules on one screen · no training data".
+Footer mono: "prices approximate, public product pages, Oct 2026".
+
+## a6-papers: research
+- S0 "An early system saw people through walls, but it needed special radios": PDF card S7 (Adib 2013 Wi-Vi, USRP).
+- S1 "cheap boards like the ESP32 can read the same channel information": PDF card S8.
+- S2 "if Wi-Fi can sense you, an outsider might sense you too": PDF card S9, amber border.
+
+## a6-honest: limits
+Checklist with amber ✕ marks, one per phrase: "1 room", "1 real fall", "no tests with older people", "bed flop → false alarm". On "The next steps" a green arrow to three chips: "more recordings", "more rooms", "fix the bed case".
