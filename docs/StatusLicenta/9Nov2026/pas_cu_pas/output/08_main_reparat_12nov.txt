@@ -1,0 +1,397 @@
+# 12 nov. 2026 - main.c reparat (observatiile din raspunsuri_tehnice_5nov.html, sectiunea 1.4)
+# Partea 1 (A-C): o placa, ESP32 pe /dev/ttyUSB0, MAC fc:e8:c0:e1:1e:d0. Hotspot zaqmlp oprit (motiv 201 = NO_AP_FOUND).
+# Rularile B si C folosesc o copie de diagnostic a main.c: contoare la 5 s
+#   probe ok/err = rezultatul esp_wifi_80211_tx; csi = apeluri on_csi; ht = sig_mode 1;
+#   fwi = first_word_invalid 1; len!=128 = CSI cu alta lungime; lenmax = cea mai mare lungime.
+
+## A. main.c din proiect, 45 s
+I (832) wifi:mode : sta (fc:e8:c0:e1:1e:d0)
+I (842) wifi:Set ps type: 0, coexist: 0
+I (842) CSI_NODE: Nodul ESP32 #3 initializat (SSID zaqmlp)
+I (972) CSI_NODE: CSI #0 len=128 first_word_invalid=1 sig_mode=0 rssi=-71
+I (982) CSI_NODE: CSI #1 len=128 first_word_invalid=1 sig_mode=0 rssi=-72
+I (992) CSI_NODE: CSI #2 len=128 first_word_invalid=1 sig_mode=0 rssi=-72
+I (992) CSI_NODE: CSI #3 len=128 first_word_invalid=1 sig_mode=0 rssi=-72
+I (992) CSI_NODE: CSI #4 len=128 first_word_invalid=1 sig_mode=0 rssi=-71
+I (1002) CSI_NODE: CSI #5 len=128 first_word_invalid=1 sig_mode=0 rssi=-72
+I (1022) CSI_NODE: CSI #6 len=128 first_word_invalid=1 sig_mode=0 rssi=-86
+I (1032) CSI_NODE: CSI #7 len=128 first_word_invalid=1 sig_mode=0 rssi=-71
+I (1042) CSI_NODE: CSI #8 len=128 first_word_invalid=1 sig_mode=0 rssi=-71
+I (1052) CSI_NODE: CSI #9 len=128 first_word_invalid=1 sig_mode=0 rssi=-84
+
+## B. copie de diagnostic, configurarea CSI noua (doar LLTF), 30 s
+I (792) CSI_NODE: Nodul ESP32 #3 initializat (SSID zaqmlp)
+I (3202) DIAG: deconectat, motiv 201
+I (5622) DIAG: deconectat, motiv 201
+I (5782) DIAG: 5 s: probe ok=500 err=0 | csi=105 ht=0 fwi=105 len!=128: 0 lenmax=128
+I (8032) DIAG: deconectat, motiv 201
+I (10782) DIAG: 5 s: probe ok=500 err=0 | csi=113 ht=3 fwi=113 len!=128: 0 lenmax=128
+I (12872) DIAG: deconectat, motiv 201
+I (15292) DIAG: deconectat, motiv 201
+I (15782) DIAG: 5 s: probe ok=500 err=0 | csi=106 ht=1 fwi=106 len!=128: 0 lenmax=128
+I (17712) DIAG: deconectat, motiv 201
+I (20122) DIAG: deconectat, motiv 201
+I (22542) DIAG: deconectat, motiv 201
+I (24962) DIAG: deconectat, motiv 201
+I (25782) DIAG: 5 s: probe ok=500 err=0 | csi=90 ht=0 fwi=90 len!=128: 0 lenmax=128
+I (27372) DIAG: deconectat, motiv 201
+
+## C. copie de diagnostic, configurarea CSI veche (LLTF + HT-LTF + STBC + merge), 30 s
+I (832) CSI_NODE: Nodul ESP32 #3 initializat (SSID zaqmlp)
+I (5822) DIAG: 5 s: probe ok=500 err=0 | csi=96 ht=2 fwi=96 len!=128: 2 lenmax=384
+I (8082) DIAG: deconectat, motiv 201
+I (10502) DIAG: deconectat, motiv 201
+I (10822) DIAG: 5 s: probe ok=500 err=0 | csi=132 ht=0 fwi=132 len!=128: 0 lenmax=128
+I (12922) DIAG: deconectat, motiv 201
+I (15332) DIAG: deconectat, motiv 201
+I (15822) DIAG: 5 s: probe ok=500 err=0 | csi=122 ht=0 fwi=122 len!=128: 0 lenmax=128
+I (17752) DIAG: deconectat, motiv 201
+I (20172) DIAG: deconectat, motiv 201
+I (20822) DIAG: 5 s: probe ok=500 err=0 | csi=116 ht=0 fwi=116 len!=128: 0 lenmax=128
+I (22582) DIAG: deconectat, motiv 201
+I (25002) DIAG: deconectat, motiv 201
+I (25822) DIAG: 5 s: probe ok=500 err=0 | csi=83 ht=0 fwi=83 len!=128: 0 lenmax=128
+I (27422) DIAG: deconectat, motiv 201
+
+# Partea 2 (D-I): doua placi. A = fc:e8:c0:e1:1e:d0 (/dev/ttyUSB0), B = fc:e8:c0:e1:1a:ec (/dev/ttyUSB1).
+# Telefonul cu hotspot-ul zaqmlp (canalul 1) intre placi; maximum 0,5 m intre cele trei dispozitive.
+# Coloane noi: rx probe vecin = probe-urile celeilalte placi, dupa rata; csi probe vecin / date vecin = CSI din
+# probe-urile / din alte cadre ale vecinului; hdr probe = CSI cu hdr[0] = 0x40 (de la orice sursa).
+# D si E: inainte de filtrul probe request din on_csi (linia 36); F-I: cu filtrul.
+# D si E au scris in jurnal la fiecare schimbare a erorii (versiune inlocuita apoi cu un rezumat la 5 s).
+
+## D. A: en_sys_seq=false, B: codul nou (fara filtru), 40 s
+-- placa A
+I (832) CSI_NODE: Nodul ESP32 #3 initializat (SSID zaqmlp)
+I (3652) wifi:connected with zaqmlp, aid = 5, channel 1, BW20, bssid = f6:2b:8c:e2:21:ac
+I (3672) DIAG: conectat
+I (5882) DIAG: 5 s: tx ok=500 err=0 | rx probe vecin 1M=0 6M=88 alta=0 | csi total=678 ht=254 len!=128=0 fwi=678 | csi probe vecin=88 date vecin=167
+I (10882) DIAG: 5 s: tx ok=500 err=0 | rx probe vecin 1M=0 6M=102 alta=0 | csi total=928 ht=470 len!=128=0 fwi=928 | csi probe vecin=102 date vecin=240
+I (15882) DIAG: 5 s: tx ok=500 err=0 | rx probe vecin 1M=0 6M=81 alta=0 | csi total=997 ht=499 len!=128=0 fwi=997 | csi probe vecin=81 date vecin=253
+I (20882) DIAG: 5 s: tx ok=500 err=0 | rx probe vecin 1M=0 6M=79 alta=0 | csi total=1021 ht=515 len!=128=0 fwi=1021 | csi probe vecin=79 date vecin=260
+I (25882) DIAG: 5 s: tx ok=500 err=0 | rx probe vecin 1M=0 6M=104 alta=0 | csi total=1058 ht=558 len!=128=0 fwi=1058 | csi probe vecin=104 date vecin=305
+I (30882) DIAG: 5 s: tx ok=500 err=0 | rx probe vecin 1M=0 6M=117 alta=0 | csi total=940 ht=529 len!=128=0 fwi=940 | csi probe vecin=117 date vecin=279
+I (35882) DIAG: 5 s: tx ok=500 err=0 | rx probe vecin 1M=0 6M=92 alta=0 | csi total=1043 ht=517 len!=128=0 fwi=1043 | csi probe vecin=92 date vecin=281
+-- placa B
+I (772) CSI_NODE: Nodul ESP32 #3 initializat (SSID zaqmlp)
+I (1282) wifi:connected with zaqmlp, aid = 4, channel 1, BW20, bssid = f6:2b:8c:e2:21:ac
+I (1302) DIAG: conectat
+I (6102) DIAG: 5 s: tx ok=254 err=246 | rx probe vecin 1M=4 6M=223 alta=0 | csi total=1804 ht=271 len!=128=0 fwi=1804 | csi probe vecin=223 date vecin=259
+I (11102) DIAG: 5 s: tx ok=111 err=389 | rx probe vecin 1M=0 6M=416 alta=0 | csi total=1584 ht=901 len!=128=0 fwi=1584 | csi probe vecin=416 date vecin=809
+I (16102) DIAG: 5 s: tx ok=97 err=403 | rx probe vecin 1M=0 6M=407 alta=0 | csi total=1717 ht=971 len!=128=0 fwi=1717 | csi probe vecin=407 date vecin=854
+I (21102) DIAG: 5 s: tx ok=84 err=416 | rx probe vecin 1M=0 6M=432 alta=0 | csi total=1803 ht=1014 len!=128=0 fwi=1803 | csi probe vecin=432 date vecin=891
+I (26102) DIAG: 5 s: tx ok=108 err=392 | rx probe vecin 1M=0 6M=430 alta=0 | csi total=1833 ht=1038 len!=128=0 fwi=1833 | csi probe vecin=430 date vecin=922
+I (31102) DIAG: 5 s: tx ok=130 err=370 | rx probe vecin 1M=0 6M=419 alta=0 | csi total=1595 ht=928 len!=128=0 fwi=1595 | csi probe vecin=419 date vecin=807
+I (36102) DIAG: 5 s: tx ok=103 err=397 | rx probe vecin 1M=0 6M=429 alta=0 | csi total=1820 ht=1025 len!=128=0 fwi=1820 | csi probe vecin=429 date vecin=906
+(plus 585 linii 'probe: ESP_ERR_NO_MEM' / 'probe: ESP_OK' din versiunea veche a jurnalului, scoase aici)
+
+## E. A: codul nou, B: en_sys_seq=false (fara filtru), 40 s
+-- placa A
+I (772) CSI_NODE: Nodul ESP32 #3 initializat (SSID zaqmlp)
+I (3592) wifi:connected with zaqmlp, aid = 8, channel 1, BW20, bssid = f6:2b:8c:e2:21:ac
+I (3612) DIAG: conectat
+I (5812) DIAG: 5 s: tx ok=500 err=0 | rx probe vecin 1M=0 6M=89 alta=0 | csi total=623 ht=264 len!=128=0 fwi=623 | csi probe vecin=89 date vecin=135
+I (10812) DIAG: 5 s: tx ok=416 err=84 | rx probe vecin 1M=0 6M=149 alta=0 | csi total=1280 ht=829 len!=128=0 fwi=1280 | csi probe vecin=149 date vecin=555
+I (15812) DIAG: 5 s: tx ok=489 err=11 | rx probe vecin 1M=0 6M=108 alta=0 | csi total=1338 ht=742 len!=128=0 fwi=1338 | csi probe vecin=108 date vecin=476
+I (20812) DIAG: 5 s: tx ok=406 err=94 | rx probe vecin 1M=0 6M=146 alta=0 | csi total=1877 ht=1254 len!=128=0 fwi=1877 | csi probe vecin=146 date vecin=928
+I (25812) DIAG: 5 s: tx ok=412 err=88 | rx probe vecin 1M=0 6M=141 alta=0 | csi total=2009 ht=1316 len!=128=0 fwi=2009 | csi probe vecin=141 date vecin=1011
+I (30812) DIAG: 5 s: tx ok=356 err=144 | rx probe vecin 1M=0 6M=171 alta=0 | csi total=2275 ht=1588 len!=128=0 fwi=2275 | csi probe vecin=171 date vecin=1251
+I (35812) DIAG: 5 s: tx ok=338 err=162 | rx probe vecin 1M=0 6M=159 alta=0 | csi total=2203 ht=1603 len!=128=0 fwi=2203 | csi probe vecin=159 date vecin=1261
+(plus 445 linii 'probe: ESP_ERR_NO_MEM' / 'probe: ESP_OK' din versiunea veche a jurnalului, scoase aici)
+-- placa B
+I (812) CSI_NODE: Nodul ESP32 #3 initializat (SSID zaqmlp)
+I (1282) wifi:connected with zaqmlp, aid = 7, channel 1, BW20, bssid = f6:2b:8c:e2:21:ac
+I (1302) DIAG: conectat
+I (6132) DIAG: 5 s: tx ok=269 err=231 | rx probe vecin 1M=4 6M=230 alta=0 | csi total=1807 ht=367 len!=128=0 fwi=1807 | csi probe vecin=230 date vecin=330
+I (11132) DIAG: 5 s: tx ok=170 err=330 | rx probe vecin 1M=0 6M=349 alta=0 | csi total=2027 ht=1331 len!=128=0 fwi=2027 | csi probe vecin=349 date vecin=1154
+I (16132) DIAG: 5 s: tx ok=123 err=377 | rx probe vecin 1M=0 6M=418 alta=0 | csi total=2582 ht=1643 len!=128=0 fwi=2582 | csi probe vecin=418 date vecin=1437
+I (21132) DIAG: 5 s: tx ok=160 err=340 | rx probe vecin 1M=0 6M=340 alta=0 | csi total=2825 ht=1995 len!=128=0 fwi=2825 | csi probe vecin=340 date vecin=1747
+I (26132) DIAG: 5 s: tx ok=163 err=337 | rx probe vecin 1M=0 6M=355 alta=0 | csi total=3031 ht=2106 len!=128=0 fwi=3031 | csi probe vecin=355 date vecin=1817
+I (31132) DIAG: 5 s: tx ok=185 err=315 | rx probe vecin 1M=0 6M=318 alta=0 | csi total=3044 ht=2198 len!=128=0 fwi=3044 | csi probe vecin=318 date vecin=1944
+I (36132) DIAG: 5 s: tx ok=177 err=323 | rx probe vecin 1M=0 6M=298 alta=0 | csi total=2766 ht=2042 len!=128=0 fwi=2766 | csi probe vecin=298 date vecin=1796
+(plus 768 linii 'probe: ESP_ERR_NO_MEM' / 'probe: ESP_OK' din versiunea veche a jurnalului, scoase aici)
+
+## F. A si B: codul nou + filtrul probe request, 45 s
+-- placa A
+I (772) CSI_NODE: Nodul ESP32 #3 initializat (SSID zaqmlp)
+I (3552) wifi:connected with zaqmlp, aid = 1, channel 1, BW20, bssid = f6:2b:8c:e2:21:ac
+I (3562) DIAG: conectat
+I (5792) DIAG: 5 s: tx ok=500 err=0 | rx probe vecin 1M=0 6M=170 alta=0 | csi total=685 ht=107 len!=128=0 fwi=686 | csi probe vecin=170 date vecin=47 | hdr probe=170
+I (20792) DIAG: 5 s: tx ok=500 err=0 | rx probe vecin 1M=0 6M=339 alta=0 | csi total=1176 ht=236 len!=128=0 fwi=1176 | csi probe vecin=339 date vecin=60 | hdr probe=339
+I (25792) DIAG: 5 s: tx ok=500 err=0 | rx probe vecin 1M=0 6M=373 alta=0 | csi total=1332 ht=389 len!=128=0 fwi=1332 | csi probe vecin=373 date vecin=201 | hdr probe=373
+I (30792) DIAG: 5 s: tx ok=500 err=0 | rx probe vecin 1M=0 6M=414 alta=0 | csi total=1440 ht=452 len!=128=0 fwi=1440 | csi probe vecin=414 date vecin=278 | hdr probe=414
+I (35792) DIAG: 5 s: tx ok=500 err=0 | rx probe vecin 1M=0 6M=406 alta=0 | csi total=1375 ht=465 len!=128=0 fwi=1375 | csi probe vecin=406 date vecin=339 | hdr probe=406
+-- placa B
+I (772) CSI_NODE: Nodul ESP32 #3 initializat (SSID zaqmlp)
+I (1322) wifi:connected with zaqmlp, aid = 10, channel 1, BW20, bssid = f6:2b:8c:e2:21:ac
+I (1352) DIAG: conectat
+I (6032) DIAG: 5 s: tx ok=356 err=144 | rx probe vecin 1M=2 6M=215 alta=0 | csi total=1826 ht=98 len!=128=0 fwi=1826 | csi probe vecin=215 date vecin=88 | hdr probe=220
+I (11032) DIAG: 5 s: tx ok=350 err=150 | rx probe vecin 1M=0 6M=400 alta=0 | csi total=1558 ht=348 len!=128=0 fwi=1558 | csi probe vecin=400 date vecin=302 | hdr probe=403
+I (16032) DIAG: 5 s: tx ok=384 err=116 | rx probe vecin 1M=0 6M=402 alta=0 | csi total=1456 ht=429 len!=128=0 fwi=1456 | csi probe vecin=402 date vecin=356 | hdr probe=404
+I (21042) DIAG: 5 s: tx ok=364 err=136 | rx probe vecin 1M=0 6M=388 alta=0 | csi total=1538 ht=386 len!=128=0 fwi=1538 | csi probe vecin=388 date vecin=327 | hdr probe=388
+I (26042) DIAG: 5 s: tx ok=413 err=87 | rx probe vecin 1M=0 6M=391 alta=0 | csi total=1512 ht=449 len!=128=0 fwi=1512 | csi probe vecin=391 date vecin=367 | hdr probe=397
+I (31042) DIAG: 5 s: tx ok=451 err=49 | rx probe vecin 1M=0 6M=416 alta=0 | csi total=1536 ht=492 len!=128=0 fwi=1536 | csi probe vecin=416 date vecin=431 | hdr probe=416
+I (36042) DIAG: 5 s: tx ok=448 err=52 | rx probe vecin 1M=0 6M=416 alta=0 | csi total=1454 ht=478 len!=128=0 fwi=1454 | csi probe vecin=416 date vecin=420 | hdr probe=416
+I (41042) DIAG: 5 s: tx ok=456 err=44 | rx probe vecin 1M=0 6M=396 alta=0 | csi total=1289 ht=470 len!=128=0 fwi=1289 | csi probe vecin=396 date vecin=403 | hdr probe=397
+(plus 507 linii 'probe: ESP_ERR_NO_MEM' / 'probe: ESP_OK' din versiunea veche a jurnalului, scoase aici)
+
+## G. A: fara esp_wifi_config_80211_tx_rate (rata implicita), B: codul nou, 45 s
+-- placa A
+I (771) CSI_NODE: Nodul ESP32 #3 initializat (SSID zaqmlp)
+I (4541) wifi:connected with zaqmlp, aid = 5, channel 1, BW20, bssid = f6:2b:8c:e2:21:ac
+I (4561) DIAG: conectat
+I (5771) DIAG: 5 s: tx ok=500 err=0 | rx probe vecin 1M=0 6M=214 alta=0 | csi total=284 ht=0 len!=128=0 fwi=284 | csi probe vecin=214 date vecin=10 | hdr probe=214
+I (10771) DIAG: 5 s: tx ok=500 err=0 | rx probe vecin 1M=0 6M=406 alta=0 | csi total=443 ht=1 len!=128=0 fwi=443 | csi probe vecin=406 date vecin=3 | hdr probe=406
+I (15771) DIAG: 5 s: tx ok=500 err=0 | rx probe vecin 1M=0 6M=428 alta=0 | csi total=450 ht=0 len!=128=0 fwi=450 | csi probe vecin=428 date vecin=0 | hdr probe=428
+I (20771) DIAG: 5 s: tx ok=496 err=4 | rx probe vecin 1M=0 6M=431 alta=0 | csi total=461 ht=0 len!=128=0 fwi=461 | csi probe vecin=431 date vecin=1 | hdr probe=431
+W (20771) CSI_NODE: probe: 4 din 500 esuate in 5 s (ESP_ERR_NO_MEM)
+I (25781) DIAG: 5 s: tx ok=500 err=0 | rx probe vecin 1M=0 6M=379 alta=0 | csi total=419 ht=0 len!=128=0 fwi=419 | csi probe vecin=379 date vecin=0 | hdr probe=379
+I (30781) DIAG: 5 s: tx ok=500 err=0 | rx probe vecin 1M=0 6M=420 alta=0 | csi total=446 ht=3 len!=128=0 fwi=446 | csi probe vecin=420 date vecin=1 | hdr probe=420
+I (35781) DIAG: 5 s: tx ok=500 err=0 | rx probe vecin 1M=0 6M=405 alta=0 | csi total=446 ht=0 len!=128=0 fwi=446 | csi probe vecin=405 date vecin=0 | hdr probe=405
+I (40781) DIAG: 5 s: tx ok=500 err=0 | rx probe vecin 1M=0 6M=424 alta=0 | csi total=492 ht=1 len!=128=0 fwi=492 | csi probe vecin=424 date vecin=0 | hdr probe=424
+-- placa B
+I (812) CSI_NODE: Nodul ESP32 #3 initializat (SSID zaqmlp)
+I (1422) wifi:connected with zaqmlp, aid = 3, channel 1, BW20, bssid = f6:2b:8c:e2:21:ac
+I (1442) DIAG: conectat
+I (6062) DIAG: 5 s: tx ok=440 err=60 | rx probe vecin 1M=261 6M=0 alta=0 | csi total=1143 ht=47 len!=128=0 fwi=1143 | csi probe vecin=0 date vecin=43 | hdr probe=7
+W (6062) CSI_NODE: probe: 60 din 500 esuate in 5 s (ESP_ERR_NO_MEM)
+I (11072) DIAG: 5 s: tx ok=485 err=15 | rx probe vecin 1M=475 6M=0 alta=0 | csi total=556 ht=407 len!=128=0 fwi=556 | csi probe vecin=0 date vecin=295 | hdr probe=2
+W (11072) CSI_NODE: probe: 15 din 500 esuate in 5 s (ESP_ERR_NO_MEM)
+I (16082) DIAG: 5 s: tx ok=471 err=29 | rx probe vecin 1M=470 6M=0 alta=0 | csi total=561 ht=447 len!=128=0 fwi=561 | csi probe vecin=0 date vecin=284 | hdr probe=1
+W (16082) CSI_NODE: probe: 29 din 500 esuate in 5 s (ESP_ERR_NO_MEM)
+I (21092) DIAG: 5 s: tx ok=500 err=0 | rx probe vecin 1M=471 6M=0 alta=0 | csi total=568 ht=479 len!=128=0 fwi=568 | csi probe vecin=0 date vecin=354 | hdr probe=1
+I (26092) DIAG: 5 s: tx ok=427 err=73 | rx probe vecin 1M=467 6M=0 alta=0 | csi total=571 ht=392 len!=128=0 fwi=571 | csi probe vecin=0 date vecin=308 | hdr probe=1
+W (26092) CSI_NODE: probe: 73 din 500 esuate in 5 s (ESP_ERR_NO_MEM)
+I (31102) DIAG: 5 s: tx ok=470 err=30 | rx probe vecin 1M=474 6M=0 alta=0 | csi total=576 ht=449 len!=128=0 fwi=576 | csi probe vecin=0 date vecin=358 | hdr probe=0
+W (31102) CSI_NODE: probe: 30 din 500 esuate in 5 s (ESP_ERR_NO_MEM)
+I (36112) DIAG: 5 s: tx ok=448 err=52 | rx probe vecin 1M=466 6M=0 alta=0 | csi total=598 ht=435 len!=128=0 fwi=598 | csi probe vecin=0 date vecin=328 | hdr probe=1
+W (36112) CSI_NODE: probe: 52 din 500 esuate in 5 s (ESP_ERR_NO_MEM)
+I (41122) DIAG: 5 s: tx ok=471 err=29 | rx probe vecin 1M=464 6M=0 alta=0 | csi total=601 ht=430 len!=128=0 fwi=601 | csi probe vecin=0 date vecin=322 | hdr probe=0
+W (41122) CSI_NODE: probe: 29 din 500 esuate in 5 s (ESP_ERR_NO_MEM)
+
+## H. A si B: codul final, 60 s
+-- placa A
+I (832) CSI_NODE: Nodul ESP32 #3 initializat (SSID zaqmlp)
+I (3612) wifi:connected with zaqmlp, aid = 8, channel 1, BW20, bssid = f6:2b:8c:e2:21:ac
+I (3632) DIAG: conectat
+I (5852) DIAG: 5 s: tx ok=500 err=0 | rx probe vecin 1M=0 6M=209 alta=0 | csi total=715 ht=142 len!=128=0 fwi=715 | csi probe vecin=209 date vecin=66 | hdr probe=209
+I (15852) DIAG: 5 s: tx ok=461 err=39 | rx probe vecin 1M=0 6M=448 alta=0 | csi total=975 ht=444 len!=128=0 fwi=975 | csi probe vecin=448 date vecin=173 | hdr probe=448
+W (15852) CSI_NODE: probe: 39 din 500 esuate in 5 s (ESP_ERR_NO_MEM)
+I (20862) DIAG: 5 s: tx ok=481 err=19 | rx probe vecin 1M=0 6M=407 alta=1 | csi total=970 ht=417 len!=128=0 fwi=970 | csi probe vecin=407 date vecin=152 | hdr probe=408
+W (20862) CSI_NODE: probe: 19 din 500 esuate in 5 s (ESP_ERR_NO_MEM)
+I (25872) DIAG: 5 s: tx ok=500 err=0 | rx probe vecin 1M=0 6M=453 alta=0 | csi total=1176 ht=539 len!=128=0 fwi=1176 | csi probe vecin=453 date vecin=262 | hdr probe=453
+W (30872) CSI_NODE: probe: 24 din 500 esuate in 5 s (ESP_ERR_NO_MEM)
+I (35882) DIAG: 5 s: tx ok=467 err=33 | rx probe vecin 1M=0 6M=447 alta=0 | csi total=1078 ht=503 len!=128=0 fwi=1078 | csi probe vecin=447 date vecin=251 | hdr probe=447
+W (35882) CSI_NODE: probe: 33 din 500 esuate in 5 s (ESP_ERR_NO_MEM)
+I (40892) DIAG: 5 s: tx ok=455 err=45 | rx probe vecin 1M=0 6M=470 alta=0 | csi total=1016 ht=476 len!=128=0 fwi=1016 | csi probe vecin=470 date vecin=188 | hdr probe=470
+W (40892) CSI_NODE: probe: 45 din 500 esuate in 5 s (ESP_ERR_NO_MEM)
+I (45902) DIAG: 5 s: tx ok=478 err=22 | rx probe vecin 1M=0 6M=467 alta=0 | csi total=1032 ht=497 len!=128=0 fwi=1032 | csi probe vecin=467 date vecin=220 | hdr probe=467
+W (45902) CSI_NODE: probe: 22 din 500 esuate in 5 s (ESP_ERR_NO_MEM)
+I (50912) DIAG: 5 s: tx ok=485 err=15 | rx probe vecin 1M=0 6M=457 alta=0 | csi total=1056 ht=451 len!=128=0 fwi=1056 | csi probe vecin=457 date vecin=191 | hdr probe=457
+W (50912) CSI_NODE: probe: 15 din 500 esuate in 5 s (ESP_ERR_NO_MEM)
+I (55922) DIAG: 5 s: tx ok=500 err=0 | rx probe vecin 1M=0 6M=429 alta=0 | csi total=1124 ht=457 len!=128=0 fwi=1124 | csi probe vecin=429 date vecin=235 | hdr probe=429
+-- placa B
+I (772) CSI_NODE: Nodul ESP32 #3 initializat (SSID zaqmlp)
+I (1302) wifi:connected with zaqmlp, aid = 6, channel 1, BW20, bssid = f6:2b:8c:e2:21:ac
+I (1322) DIAG: conectat
+I (6042) DIAG: 5 s: tx ok=383 err=117 | rx probe vecin 1M=3 6M=213 alta=0 | csi total=1814 ht=140 len!=128=0 fwi=1814 | csi probe vecin=213 date vecin=128 | hdr probe=225
+W (6042) CSI_NODE: probe: 117 din 500 esuate in 5 s (ESP_ERR_NO_MEM)
+I (11052) DIAG: 5 s: tx ok=486 err=14 | rx probe vecin 1M=0 6M=404 alta=0 | csi total=1365 ht=530 len!=128=0 fwi=1365 | csi probe vecin=404 date vecin=429 | hdr probe=405
+W (11052) CSI_NODE: probe: 14 din 500 esuate in 5 s (ESP_ERR_NO_MEM)
+I (16062) DIAG: 5 s: tx ok=479 err=21 | rx probe vecin 1M=0 6M=369 alta=0 | csi total=1318 ht=601 len!=128=0 fwi=1318 | csi probe vecin=369 date vecin=458 | hdr probe=369
+W (16062) CSI_NODE: probe: 21 din 500 esuate in 5 s (ESP_ERR_NO_MEM)
+I (21072) DIAG: 5 s: tx ok=435 err=65 | rx probe vecin 1M=0 6M=371 alta=0 | csi total=1353 ht=536 len!=128=0 fwi=1353 | csi probe vecin=371 date vecin=406 | hdr probe=374
+W (21072) CSI_NODE: probe: 65 din 500 esuate in 5 s (ESP_ERR_NO_MEM)
+I (26082) DIAG: 5 s: tx ok=486 err=14 | rx probe vecin 1M=0 6M=399 alta=0 | csi total=1319 ht=637 len!=128=0 fwi=1319 | csi probe vecin=399 date vecin=527 | hdr probe=399
+W (26082) CSI_NODE: probe: 14 din 500 esuate in 5 s (ESP_ERR_NO_MEM)
+I (31092) DIAG: 5 s: tx ok=500 err=0 | rx probe vecin 1M=0 6M=396 alta=0 | csi total=1247 ht=659 len!=128=0 fwi=1247 | csi probe vecin=396 date vecin=515 | hdr probe=396
+I (36092) DIAG: 5 s: tx ok=500 err=0 | rx probe vecin 1M=0 6M=379 alta=0 | csi total=1147 ht=552 len!=128=0 fwi=1147 | csi probe vecin=379 date vecin=438 | hdr probe=379
+I (41092) DIAG: 5 s: tx ok=500 err=0 | rx probe vecin 1M=0 6M=374 alta=0 | csi total=1307 ht=623 len!=128=0 fwi=1307 | csi probe vecin=374 date vecin=449 | hdr probe=376
+I (46092) DIAG: 5 s: tx ok=500 err=0 | rx probe vecin 1M=0 6M=394 alta=0 | csi total=1255 ht=615 len!=128=0 fwi=1255 | csi probe vecin=394 date vecin=474 | hdr probe=395
+I (51092) DIAG: 5 s: tx ok=500 err=0 | rx probe vecin 1M=0 6M=394 alta=0 | csi total=1331 ht=689 len!=128=0 fwi=1331 | csi probe vecin=394 date vecin=549 | hdr probe=395
+I (56092) DIAG: 5 s: tx ok=461 err=39 | rx probe vecin 1M=0 6M=393 alta=0 | csi total=1277 ht=559 len!=128=0 fwi=1277 | csi probe vecin=393 date vecin=433 | hdr probe=395
+W (56092) CSI_NODE: probe: 39 din 500 esuate in 5 s (ESP_ERR_NO_MEM)
+
+## I. firmware-ul real din proiect (fara contoare): A cu NODE_ID 3, B cu NODE_ID 2, 30 s
+-- placa A
+I (831) CSI_NODE: Nodul ESP32 #3 initializat (SSID zaqmlp)
+I (3611) wifi:connected with zaqmlp, aid = 1, channel 1, BW20, bssid = f6:2b:8c:e2:21:ac
+-- placa B
+I (811) CSI_NODE: Nodul ESP32 #2 initializat (SSID zaqmlp)
+I (1281) wifi:connected with zaqmlp, aid = 9, channel 1, BW20, bssid = f6:2b:8c:e2:21:ac
+W (6061) CSI_NODE: probe: 95 din 500 esuate in 5 s (ESP_ERR_NO_MEM)
+W (11061) CSI_NODE: probe: 17 din 500 esuate in 5 s (ESP_ERR_NO_MEM)
+W (16061) CSI_NODE: probe: 65 din 500 esuate in 5 s (ESP_ERR_NO_MEM)
+W (21061) CSI_NODE: probe: 124 din 500 esuate in 5 s (ESP_ERR_NO_MEM)
+W (26061) CSI_NODE: probe: 110 din 500 esuate in 5 s (ESP_ERR_NO_MEM)
+
+# Partea 3 (J-M): PC-ul conectat la hotspot (wlo1, 10.136.19.222). Pe PC: unelte/verifica_udp.py (parse_packet din src/csi_ui.py).
+# Placile: A cu NODE_ID 3, B cu NODE_ID 2. In K-M, copia de diagnostic numara si: udp ok/err (sendto; errno 118 = fara IP,
+# 12 = ENOMEM) si cadrele AP -> toate statiile (AP bcast), cu rata 11b.
+
+## J. firmware-ul real, UDP broadcast, PC 15 s (prima verificare)
+datagrame: 2358, invalide: 0, marime asteptata 138 B
+  10.136.19.115 -> node_id 3: 1284 pachete
+  10.136.19.139 -> node_id 2: 1074 pachete
+nod 2: 1074 pachete in 15.0 s = 71.8 pachete/s; seq lipsa: 43 (3.8%)
+  RSSI: medie -60.9 dBm, min -62, max -59
+  k=0 si k=1 zero in 100% din pachete; indici mereu 0: [0, 1, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37]
+nod 3: 1284 pachete in 15.0 s = 85.6 pachete/s; seq lipsa: 1 (0.1%)
+  RSSI: medie -54.4 dBm, min -60, max -53
+  k=0 si k=1 zero in 100% din pachete; indici mereu 0: [0, 1, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37]
+
+## J2. a doua verificare, 15 s (aceleasi placi, alt moment)
+datagrame: 1443, invalide: 0, marime asteptata 138 B
+  10.136.19.115 -> node_id 3: 904 pachete
+  10.136.19.139 -> node_id 2: 539 pachete
+nod 2: 539 pachete in 15.0 s = 36.0 pachete/s; seq lipsa: 665 (55.2%)
+  RSSI: medie -59.7 dBm, min -95, max -56
+  k=0 si k=1 zero in 100% din pachete; indici mereu 0: [0, 1, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37]
+nod 3: 904 pachete in 15.0 s = 60.4 pachete/s; seq lipsa: 2 (0.2%)
+  RSSI: medie -53.0 dBm, min -59, max -52
+  k=0 si k=1 zero in 100% din pachete; indici mereu 0: [0, 1, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37]
+
+## K. diagnostic, UDP broadcast (fara contorul AP bcast), placi 48 s, PC 35 s
+-- PC
+datagrame: 4842, invalide: 0, marime asteptata 138 B
+  10.136.19.115 -> node_id 3: 2534 pachete
+  10.136.19.139 -> node_id 2: 2308 pachete
+nod 2: 2308 pachete in 35.0 s = 66.0 pachete/s; seq lipsa: 729 (24.0%)
+  RSSI: medie -57.6 dBm, min -94, max -36
+  k=0 si k=1 zero in 100% din pachete; indici mereu 0: [0, 1, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37]
+nod 3: 2534 pachete in 35.0 s = 72.4 pachete/s; seq lipsa: 257 (9.2%)
+  RSSI: medie -54.5 dBm, min -84, max -38
+  k=0 si k=1 zero in 100% din pachete; indici mereu 0: [0, 1, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37]
+-- placa A
+I (832) CSI_NODE: Nodul ESP32 #3 initializat (SSID zaqmlp)
+I (3672) DIAG: conectat
+I (4662) CSI_NODE: IP 10.136.19.115, UDP catre 255.255.255.255:5005
+I (5862) DIAG: 5 s: tx ok=500 err=0 | rx probe vecin 1M=0 6M=236 alta=0 | csi total=948 ht=231 len!=128=0 fwi=948 | csi probe vecin=236 date vecin=133 | hdr probe=237 | udp ok=117 err=120 errno=118
+I (10862) DIAG: 5 s: tx ok=500 err=0 | rx probe vecin 1M=0 6M=467 alta=0 | csi total=2011 ht=496 len!=128=0 fwi=2011 | csi probe vecin=467 date vecin=286 | hdr probe=467 | udp ok=467 err=0 errno=118
+I (20862) DIAG: 5 s: tx ok=500 err=0 | rx probe vecin 1M=0 6M=353 alta=0 | csi total=1340 ht=297 len!=128=0 fwi=1340 | csi probe vecin=353 date vecin=149 | hdr probe=353 | udp ok=353 err=0 errno=118
+I (25862) DIAG: 5 s: tx ok=500 err=0 | rx probe vecin 1M=0 6M=342 alta=0 | csi total=1490 ht=370 len!=128=0 fwi=1490 | csi probe vecin=342 date vecin=217 | hdr probe=343 | udp ok=343 err=0 errno=118
+I (30862) DIAG: 5 s: tx ok=500 err=0 | rx probe vecin 1M=0 6M=396 alta=0 | csi total=1386 ht=478 len!=128=0 fwi=1386 | csi probe vecin=396 date vecin=331 | hdr probe=396 | udp ok=396 err=0 errno=118
+I (35862) DIAG: 5 s: tx ok=500 err=0 | rx probe vecin 1M=0 6M=423 alta=0 | csi total=1425 ht=550 len!=128=0 fwi=1425 | csi probe vecin=423 date vecin=489 | hdr probe=423 | udp ok=423 err=0 errno=118
+I (40862) DIAG: 5 s: tx ok=500 err=0 | rx probe vecin 1M=0 6M=407 alta=0 | csi total=1224 ht=501 len!=128=0 fwi=1224 | csi probe vecin=407 date vecin=343 | hdr probe=407 | udp ok=407 err=0 errno=118
+-- placa B
+I (772) CSI_NODE: Nodul ESP32 #2 initializat (SSID zaqmlp)
+I (1362) DIAG: conectat
+I (2362) CSI_NODE: IP 10.136.19.139, UDP catre 255.255.255.255:5005
+I (6022) DIAG: 5 s: tx ok=498 err=2 | rx probe vecin 1M=3 6M=225 alta=0 | csi total=1848 ht=161 len!=128=0 fwi=1848 | csi probe vecin=225 date vecin=144 | hdr probe=230 | udp ok=215 err=15 errno=12
+W (6022) CSI_NODE: probe: 2 din 500 esuate in 5 s (ESP_ERR_NO_MEM)
+I (11032) DIAG: 5 s: tx ok=495 err=5 | rx probe vecin 1M=0 6M=443 alta=0 | csi total=2094 ht=543 len!=128=0 fwi=2094 | csi probe vecin=443 date vecin=479 | hdr probe=446 | udp ok=443 err=3 errno=12
+W (11032) CSI_NODE: probe: 5 din 500 esuate in 5 s (ESP_ERR_NO_MEM)
+I (16042) DIAG: 5 s: tx ok=426 err=74 | rx probe vecin 1M=0 6M=431 alta=0 | csi total=1543 ht=476 len!=128=0 fwi=1543 | csi probe vecin=431 date vecin=393 | hdr probe=432 | udp ok=333 err=99 errno=12
+W (16042) CSI_NODE: probe: 74 din 500 esuate in 5 s (ESP_ERR_NO_MEM)
+I (21052) DIAG: 5 s: tx ok=388 err=112 | rx probe vecin 1M=0 6M=451 alta=0 | csi total=1616 ht=425 len!=128=0 fwi=1616 | csi probe vecin=451 date vecin=363 | hdr probe=453 | udp ok=270 err=183 errno=12
+W (21052) CSI_NODE: probe: 112 din 500 esuate in 5 s (ESP_ERR_NO_MEM)
+I (26062) DIAG: 5 s: tx ok=364 err=136 | rx probe vecin 1M=0 6M=429 alta=0 | csi total=1723 ht=411 len!=128=0 fwi=1723 | csi probe vecin=429 date vecin=341 | hdr probe=430 | udp ok=266 err=164 errno=12
+W (26062) CSI_NODE: probe: 136 din 500 esuate in 5 s (ESP_ERR_NO_MEM)
+I (31072) DIAG: 5 s: tx ok=500 err=0 | rx probe vecin 1M=0 6M=418 alta=0 | csi total=1404 ht=492 len!=128=0 fwi=1404 | csi probe vecin=418 date vecin=323 | hdr probe=418 | udp ok=418 err=0 errno=12
+I (36072) DIAG: 5 s: tx ok=500 err=0 | rx probe vecin 1M=0 6M=423 alta=0 | csi total=1467 ht=633 len!=128=0 fwi=1467 | csi probe vecin=423 date vecin=549 | hdr probe=423 | udp ok=423 err=0 errno=12
+I (41072) DIAG: 5 s: tx ok=487 err=13 | rx probe vecin 1M=0 6M=412 alta=0 | csi total=1310 ht=537 len!=128=0 fwi=1310 | csi probe vecin=412 date vecin=346 | hdr probe=412 | udp ok=397 err=15 errno=12
+W (41072) CSI_NODE: probe: 13 din 500 esuate in 5 s (ESP_ERR_NO_MEM)
+I (46082) DIAG: 5 s: tx ok=500 err=0 | rx probe vecin 1M=0 6M=421 alta=0 | csi total=1569 ht=597 len!=128=0 fwi=1569 | csi probe vecin=421 date vecin=455 | hdr probe=421 | udp ok=421 err=0 errno=12
+
+## L. diagnostic, UDP broadcast, placi 48 s, PC 35 s
+-- PC
+datagrame: 5504, invalide: 0, marime asteptata 138 B
+  10.136.19.115 -> node_id 3: 2765 pachete
+  10.136.19.139 -> node_id 2: 2739 pachete
+nod 2: 2739 pachete in 35.0 s = 78.3 pachete/s; seq lipsa: 147 (5.1%)
+  RSSI: medie -59.9 dBm, min -66, max -58
+  k=0 si k=1 zero in 100% din pachete; indici mereu 0: [0, 1, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37]
+nod 3: 2765 pachete in 35.0 s = 79.0 pachete/s; seq lipsa: 148 (5.1%)
+  RSSI: medie -58.0 dBm, min -62, max -57
+  k=0 si k=1 zero in 100% din pachete; indici mereu 0: [0, 1, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37]
+-- placa A
+I (842) CSI_NODE: Nodul ESP32 #3 initializat (SSID zaqmlp)
+I (3652) DIAG: conectat
+I (4652) CSI_NODE: IP 10.136.19.115, UDP catre 255.255.255.255:5005
+I (5852) DIAG: 5 s: tx ok=500 err=0 | rx probe vecin 1M=0 6M=208 alta=0 | csi total=777 ht=227 len!=128=0 fwi=777 | csi probe vecin=208 date vecin=161 | hdr probe=208 | udp ok=98 err=110 errno=118 | AP bcast=281 11b=281
+I (10862) DIAG: 5 s: tx ok=500 err=0 | rx probe vecin 1M=0 6M=419 alta=0 | csi total=1501 ht=551 len!=128=0 fwi=1501 | csi probe vecin=419 date vecin=448 | hdr probe=419 | udp ok=419 err=0 errno=118 | AP bcast=834 11b=834
+I (20882) DIAG: 5 s: tx ok=500 err=0 | rx probe vecin 1M=0 6M=417 alta=0 | csi total=1409 ht=527 len!=128=0 fwi=1409 | csi probe vecin=417 date vecin=396 | hdr probe=417 | udp ok=417 err=0 errno=118 | AP bcast=803 11b=803
+I (25892) DIAG: 5 s: tx ok=500 err=0 | rx probe vecin 1M=0 6M=413 alta=0 | csi total=1490 ht=511 len!=128=0 fwi=1490 | csi probe vecin=413 date vecin=379 | hdr probe=413 | udp ok=413 err=0 errno=118 | AP bcast=807 11b=807
+I (35912) DIAG: 5 s: tx ok=500 err=0 | rx probe vecin 1M=0 6M=411 alta=0 | csi total=1364 ht=566 len!=128=0 fwi=1364 | csi probe vecin=411 date vecin=407 | hdr probe=411 | udp ok=411 err=0 errno=118 | AP bcast=809 11b=809
+I (45932) DIAG: 5 s: tx ok=500 err=0 | rx probe vecin 1M=0 6M=412 alta=0 | csi total=1438 ht=540 len!=128=0 fwi=1438 | csi probe vecin=412 date vecin=424 | hdr probe=412 | udp ok=412 err=0 errno=118 | AP bcast=803 11b=803
+-- placa B
+I (812) CSI_NODE: Nodul ESP32 #2 initializat (SSID zaqmlp)
+I (1232) DIAG: conectat
+I (2232) CSI_NODE: IP 10.136.19.139, UDP catre 255.255.255.255:5005
+I (6092) DIAG: 5 s: tx ok=500 err=0 | rx probe vecin 1M=3 6M=220 alta=0 | csi total=1764 ht=184 len!=128=0 fwi=1764 | csi probe vecin=220 date vecin=154 | hdr probe=225 | udp ok=212 err=13 errno=118 | AP bcast=322 11b=322
+I (11102) DIAG: 5 s: tx ok=500 err=0 | rx probe vecin 1M=0 6M=426 alta=0 | csi total=1613 ht=631 len!=128=0 fwi=1613 | csi probe vecin=426 date vecin=513 | hdr probe=426 | udp ok=426 err=0 errno=118 | AP bcast=828 11b=828
+I (16112) DIAG: 5 s: tx ok=500 err=0 | rx probe vecin 1M=0 6M=409 alta=0 | csi total=1609 ht=664 len!=128=0 fwi=1609 | csi probe vecin=409 date vecin=539 | hdr probe=409 | udp ok=409 err=0 errno=118 | AP bcast=816 11b=816
+I (21122) DIAG: 5 s: tx ok=500 err=0 | rx probe vecin 1M=0 6M=420 alta=0 | csi total=1619 ht=678 len!=128=0 fwi=1619 | csi probe vecin=420 date vecin=549 | hdr probe=420 | udp ok=420 err=0 errno=118 | AP bcast=806 11b=806
+I (26132) DIAG: 5 s: tx ok=500 err=0 | rx probe vecin 1M=0 6M=394 alta=0 | csi total=1636 ht=650 len!=128=0 fwi=1636 | csi probe vecin=394 date vecin=503 | hdr probe=394 | udp ok=395 err=0 errno=118 | AP bcast=811 11b=811
+I (31142) DIAG: 5 s: tx ok=500 err=0 | rx probe vecin 1M=0 6M=413 alta=0 | csi total=1616 ht=639 len!=128=0 fwi=1616 | csi probe vecin=413 date vecin=508 | hdr probe=414 | udp ok=414 err=0 errno=118 | AP bcast=861 11b=861
+I (36152) DIAG: 5 s: tx ok=500 err=0 | rx probe vecin 1M=0 6M=423 alta=0 | csi total=1585 ht=692 len!=128=0 fwi=1585 | csi probe vecin=423 date vecin=526 | hdr probe=423 | udp ok=423 err=0 errno=118 | AP bcast=814 11b=814
+I (41162) DIAG: 5 s: tx ok=500 err=0 | rx probe vecin 1M=0 6M=410 alta=0 | csi total=1571 ht=666 len!=128=0 fwi=1572 | csi probe vecin=411 date vecin=512 | hdr probe=411 | udp ok=411 err=0 errno=118 | AP bcast=825 11b=825
+I (46172) DIAG: 5 s: tx ok=500 err=0 | rx probe vecin 1M=0 6M=406 alta=0 | csi total=1627 ht=654 len!=128=0 fwi=1627 | csi probe vecin=406 date vecin=517 | hdr probe=406 | udp ok=406 err=0 errno=118 | AP bcast=805 11b=805
+
+## M. diagnostic, UDP unicast catre PC (CONFIG_CSI_UDP_HOST=10.136.19.222), placi 48 s, PC 35 s
+-- PC
+datagrame: 6277, invalide: 0, marime asteptata 138 B
+  10.136.19.115 -> node_id 3: 3192 pachete
+  10.136.19.139 -> node_id 2: 3085 pachete
+nod 2: 3085 pachete in 35.0 s = 88.2 pachete/s; seq lipsa: 0 (0.0%)
+  RSSI: medie -59.3 dBm, min -96, max -58
+  k=0 si k=1 zero in 100% din pachete; indici mereu 0: [0, 1, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37]
+nod 3: 3192 pachete in 35.0 s = 91.3 pachete/s; seq lipsa: 0 (0.0%)
+  RSSI: medie -57.9 dBm, min -63, max -53
+  k=0 si k=1 zero in 100% din pachete; indici mereu 0: [0, 1, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37]
+-- placa A
+I (832) CSI_NODE: Nodul ESP32 #3 initializat (SSID zaqmlp)
+I (3642) DIAG: conectat
+I (4642) CSI_NODE: IP 10.136.19.115, UDP catre 10.136.19.222:5005
+I (5842) DIAG: 5 s: tx ok=500 err=0 | rx probe vecin 1M=0 6M=222 alta=0 | csi total=898 ht=163 len!=128=0 fwi=898 | csi probe vecin=222 date vecin=163 | hdr probe=222 | udp ok=112 err=110 errno=118 | AP bcast=11 11b=11
+I (10852) DIAG: 5 s: tx ok=500 err=0 | rx probe vecin 1M=0 6M=452 alta=0 | csi total=2062 ht=537 len!=128=0 fwi=2062 | csi probe vecin=452 date vecin=530 | hdr probe=453 | udp ok=453 err=0 errno=118 | AP bcast=2 11b=2
+I (15862) DIAG: 5 s: tx ok=500 err=0 | rx probe vecin 1M=0 6M=450 alta=0 | csi total=1901 ht=498 len!=128=0 fwi=1901 | csi probe vecin=450 date vecin=487 | hdr probe=450 | udp ok=450 err=0 errno=118 | AP bcast=0 11b=0
+I (20872) DIAG: 5 s: tx ok=500 err=0 | rx probe vecin 1M=0 6M=450 alta=0 | csi total=1860 ht=504 len!=128=0 fwi=1860 | csi probe vecin=450 date vecin=493 | hdr probe=450 | udp ok=450 err=0 errno=118 | AP bcast=2 11b=1
+I (25882) DIAG: 5 s: tx ok=500 err=0 | rx probe vecin 1M=0 6M=451 alta=0 | csi total=1980 ht=512 len!=128=0 fwi=1980 | csi probe vecin=451 date vecin=493 | hdr probe=451 | udp ok=451 err=0 errno=118 | AP bcast=0 11b=0
+I (30892) DIAG: 5 s: tx ok=500 err=0 | rx probe vecin 1M=0 6M=457 alta=0 | csi total=1999 ht=499 len!=128=0 fwi=1999 | csi probe vecin=457 date vecin=485 | hdr probe=457 | udp ok=457 err=0 errno=118 | AP bcast=1 11b=1
+I (35902) DIAG: 5 s: tx ok=500 err=0 | rx probe vecin 1M=0 6M=466 alta=0 | csi total=2132 ht=510 len!=128=0 fwi=2132 | csi probe vecin=466 date vecin=500 | hdr probe=466 | udp ok=466 err=0 errno=118 | AP bcast=0 11b=0
+I (40912) DIAG: 5 s: tx ok=500 err=0 | rx probe vecin 1M=0 6M=459 alta=0 | csi total=1917 ht=460 len!=128=0 fwi=1917 | csi probe vecin=459 date vecin=452 | hdr probe=459 | udp ok=459 err=0 errno=118 | AP bcast=0 11b=0
+I (45922) DIAG: 5 s: tx ok=500 err=0 | rx probe vecin 1M=0 6M=446 alta=0 | csi total=1978 ht=507 len!=128=0 fwi=1978 | csi probe vecin=446 date vecin=500 | hdr probe=446 | udp ok=446 err=0 errno=118 | AP bcast=0 11b=0
+-- placa B
+I (772) CSI_NODE: Nodul ESP32 #2 initializat (SSID zaqmlp)
+I (1212) DIAG: conectat
+I (2212) CSI_NODE: IP 10.136.19.139, UDP catre 10.136.19.222:5005
+I (6052) DIAG: 5 s: tx ok=500 err=0 | rx probe vecin 1M=3 6M=236 alta=0 | csi total=2144 ht=116 len!=128=0 fwi=2144 | csi probe vecin=236 date vecin=124 | hdr probe=240 | udp ok=221 err=19 errno=12 | AP bcast=21 11b=21
+I (11062) DIAG: 5 s: tx ok=500 err=0 | rx probe vecin 1M=0 6M=454 alta=0 | csi total=2084 ht=410 len!=128=0 fwi=2084 | csi probe vecin=454 date vecin=399 | hdr probe=454 | udp ok=454 err=0 errno=12 | AP bcast=2 11b=2
+I (16072) DIAG: 5 s: tx ok=500 err=0 | rx probe vecin 1M=0 6M=438 alta=0 | csi total=1905 ht=409 len!=128=0 fwi=1905 | csi probe vecin=438 date vecin=390 | hdr probe=438 | udp ok=439 err=0 errno=12 | AP bcast=0 11b=0
+I (21082) DIAG: 5 s: tx ok=500 err=0 | rx probe vecin 1M=0 6M=445 alta=0 | csi total=1872 ht=385 len!=128=0 fwi=1872 | csi probe vecin=445 date vecin=364 | hdr probe=446 | udp ok=447 err=0 errno=12 | AP bcast=0 11b=0
+I (26092) DIAG: 5 s: tx ok=500 err=0 | rx probe vecin 1M=0 6M=435 alta=0 | csi total=2063 ht=367 len!=128=0 fwi=2063 | csi probe vecin=435 date vecin=352 | hdr probe=436 | udp ok=436 err=0 errno=12 | AP bcast=0 11b=0
+I (31102) DIAG: 5 s: tx ok=500 err=0 | rx probe vecin 1M=0 6M=445 alta=0 | csi total=2078 ht=394 len!=128=0 fwi=2078 | csi probe vecin=445 date vecin=382 | hdr probe=446 | udp ok=446 err=0 errno=12 | AP bcast=1 11b=1
+I (36112) DIAG: 5 s: tx ok=500 err=0 | rx probe vecin 1M=0 6M=450 alta=0 | csi total=2218 ht=403 len!=128=0 fwi=2218 | csi probe vecin=450 date vecin=388 | hdr probe=450 | udp ok=450 err=0 errno=12 | AP bcast=0 11b=0
+I (41122) DIAG: 5 s: tx ok=500 err=0 | rx probe vecin 1M=0 6M=431 alta=0 | csi total=2112 ht=394 len!=128=0 fwi=2112 | csi probe vecin=431 date vecin=380 | hdr probe=432 | udp ok=432 err=0 errno=12 | AP bcast=0 11b=0
+I (46132) DIAG: 5 s: tx ok=500 err=0 | rx probe vecin 1M=0 6M=429 alta=0 | csi total=2056 ht=381 len!=128=0 fwi=2056 | csi probe vecin=429 date vecin=360 | hdr probe=433 | udp ok=433 err=0 errno=12 | AP bcast=0 11b=0
+
+# Partea 4 (N-P): cautarea ESP_ERR_NO_MEM, 2 min pe rulare. PC: verifica_udp.py. Sumele exclud prima fereastra (pornirea).
+
+## N. 100 Hz, UDP unicast catre PC
+nod 2: 10810 pachete in 120.0 s = 90.1 pachete/s; seq lipsa: 1 (0.0%)
+nod 3: 10906 pachete in 120.0 s = 90.9 pachete/s; seq lipsa: 1 (0.0%)
+placa A: 16 ferestre DIAG | probe esuate 0 din 8000 | sendto esuate 0 din 7245
+placa B: 25 ferestre DIAG | probe esuate 0 din 12500 | sendto esuate 0 din 11254
+
+## O. 100 Hz, UDP broadcast
+nod 2: 9550 pachete in 120.0 s = 79.6 pachete/s; seq lipsa: 375 (3.8%)
+nod 3: 9456 pachete in 120.0 s = 78.8 pachete/s; seq lipsa: 366 (3.7%)
+placa A: 25 ferestre DIAG | probe esuate 0 din 12500 | sendto esuate 0 din 10240
+placa B: 25 ferestre DIAG | probe esuate 0 din 12500 | sendto esuate 0 din 10343
+
+## P. 50 Hz (vTaskDelay(2)), UDP unicast catre PC
+nod 2: 5686 pachete in 120.0 s = 47.4 pachete/s; seq lipsa: 1 (0.0%)
+nod 3: 5578 pachete in 120.0 s = 46.5 pachete/s; seq lipsa: 62825 (91.8%)
+placa A: nicio linie DIAG intreaga (jurnal stricat dupa repornire)
+placa B: 12 ferestre DIAG | probe esuate 0 din 6000 | sendto esuate 0 din 5687
+(P: seq lipsa 91.8% la nodul 3 vine de la repornirea placii A: seq a pornit din nou de la 0)
+
+## P, placa A: panica in udp_sender_task (singura panica din toate rularile)
+Guru Meditation Error: Core  1 panic'ed (LoadProhibited). Exception was unhandled.
+PC      : 0x4000c2e0  PS      : 0x00060430  A0      : 0x800de871  A1      : 0x3ffccdf0  
+A2      : 0x3ffb9c04  A3      : 0x00000000  A4      : 0x0000008a  A5      : 0x3ffb9c04  
+EXCVADDR: 0x00000000  LBEG    : 0x4000c2e0  LEND    : 0x4000c2f6  LCOUNT  : 0x00000007  
+Backtrace: 0x4000c2dd:0x3ffccdf0 0x400de86e:0x3ffcce00 0x400d6f44:0x3ffcce60 0x4008cc99:0x3ffccea0
+rst:0xc (SW_CPU_RESET),boot:0x13 (SPI_FAST_FLASH_BOOT)
+addr2line: 0x400de86e lwip_sendto (sockets.c:1662, MEMCPY din data); 0x400d6f44 sendto in udp_sender_task; A3 (sursa) = 0, A4 (lungime) = 0x8a = 138

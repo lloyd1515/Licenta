@@ -1,0 +1,440 @@
+<!doctype html>
+<html lang="ro">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Răspunsuri tehnice CSI</title>
+<style>
+  :root {
+    --bg: #fbfaf7;
+    --fg: #1d1d1b;
+    --muted: #5f5d57;
+    --line: #dedbd2;
+    --card: #ffffff;
+    --code-bg: #f1efe8;
+    --accent: #1f5f8b;
+    --doc: #1f6f43;   --doc-bg: #e3f2e8;
+    --dis: #6a3fa0;   --dis-bg: #eee6f8;
+    --mas: #8a5a00;   --mas-bg: #fbefd6;
+    --ded: #8b2f2f;   --ded-bg: #f8e3e3;
+    --src: #2f5f7a;   --src-bg: #e2eef5;
+    --warn-bg: #fff4e0; --warn-line: #e0a040;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #171716; --fg: #e8e6e1; --muted: #a8a59d; --line: #3a3934;
+      --card: #201f1d; --code-bg: #2a2926; --accent: #7cb7e0;
+      --doc: #8fd3a8; --doc-bg: #1f3428; --dis: #c9a8f0; --dis-bg: #2e2440;
+      --mas: #f0c46a; --mas-bg: #3a2e14; --ded: #f0a0a0; --ded-bg: #3d2222; --src: #9cc8e4; --src-bg: #1d3140;
+      --warn-bg: #33291a; --warn-line: #b07a2a;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #171716; --fg: #e8e6e1; --muted: #a8a59d; --line: #3a3934;
+    --card: #201f1d; --code-bg: #2a2926; --accent: #7cb7e0;
+    --doc: #8fd3a8; --doc-bg: #1f3428; --dis: #c9a8f0; --dis-bg: #2e2440;
+    --mas: #f0c46a; --mas-bg: #3a2e14; --ded: #f0a0a0; --ded-bg: #3d2222; --src: #9cc8e4; --src-bg: #1d3140;
+    --warn-bg: #33291a; --warn-line: #b07a2a;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--fg);
+    font: 16px/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+  main { max-width: 900px; margin: 0 auto; padding: 32px 16px 80px; }
+  h1 { font-size: 1.7rem; line-height: 1.25; margin: 0 0 6px; }
+  h2 { font-size: 1.3rem; margin: 44px 0 10px; padding-top: 12px; border-top: 1px solid var(--line); }
+  h3 { font-size: 1.05rem; margin: 26px 0 8px; }
+  p, li { max-width: 72ch; }
+  a { color: var(--accent); }
+  .sub { color: var(--muted); margin: 0 0 18px; }
+  code { font: 0.88em/1.4 ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace; background: var(--code-bg); padding: 1px 5px; border-radius: 4px; }
+  pre { background: var(--code-bg); padding: 12px 14px; border-radius: 8px; overflow-x: auto; font: 0.85rem/1.5 ui-monospace, Menlo, Consolas, monospace; }
+  pre code { background: none; padding: 0; }
+  .wrap { overflow-x: auto; margin: 10px 0 14px; border: 1px solid var(--line); border-radius: 8px; background: var(--card); }
+  table { border-collapse: collapse; width: 100%; font-size: 0.92rem; }
+  th, td { text-align: left; vertical-align: top; padding: 7px 10px; border-bottom: 1px solid var(--line); }
+  th { background: var(--code-bg); font-weight: 600; }
+  tr:last-child td { border-bottom: none; }
+  .tag { display: inline-block; font-size: 0.72rem; font-weight: 600; letter-spacing: .02em; padding: 1px 7px; border-radius: 999px; white-space: nowrap; vertical-align: 1px; }
+  .doc { color: var(--doc); background: var(--doc-bg); }
+  .dis { color: var(--dis); background: var(--dis-bg); }
+  .mas { color: var(--mas); background: var(--mas-bg); }
+  .ded { color: var(--ded); background: var(--ded-bg); }
+  .src { color: var(--src); background: var(--src-bg); }
+  .note { background: var(--warn-bg); border-left: 4px solid var(--warn-line); padding: 10px 14px; border-radius: 6px; margin: 14px 0; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; margin: 14px 0; }
+  nav ol { padding-left: 20px; margin: 6px 0; }
+  .flow { display: grid; gap: 8px; margin: 14px 0; }
+  .step { display: grid; grid-template-columns: 34px 1fr; gap: 10px; align-items: start; background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; }
+  .num { width: 28px; height: 28px; border-radius: 50%; background: var(--accent); color: var(--bg); display: grid; place-items: center; font-weight: 700; font-size: 0.9rem; }
+  .step p { margin: 2px 0; }
+  .where { color: var(--muted); font-size: 0.85rem; }
+  footer { margin-top: 48px; color: var(--muted); font-size: 0.85rem; }
+</style>
+</head>
+<body>
+<main>
+
+<h1>Răspunsuri tehnice la notele din 5 noiembrie 2026</h1>
+<p class="sub">Partea practică: funcțiile <code>esp_wifi</code>, regiștrii, parametrii de recepție și drumul CSI de la controllerul Wi-Fi la <code>on_csi</code>. Codul analizat este firmware-ul proiectului, <code>src/firmware/esp32_csi_node/main/main.c</code>. ESP-IDF v5.1.7, placa ESP32. Măsurătorile vin din programele de test din <code>pas_cu_pas/</code>, cu aceeași versiune ESP-IDF și aceleași biblioteci. Documentația pentru teză este în <a href="../../../thesis/licenta.pdf">PDF-ul lucrării</a>, nu aici.</p>
+
+<div class="card">
+  <strong>Cum citești etichetele.</strong> Fiecare afirmație are o etichetă cu tipul dovezii:
+  <ul>
+    <li><span class="tag doc">documentat</span> scris de Espressif în header-e (<code>esp_wifi.h</code>, <code>esp_wifi_types.h</code>) sau în ghidul <code>wifi.rst</code>;</li>
+    <li><span class="tag src">cod deschis</span> citit de noi din fișierele <code>.c</code> și <code>.h</code> ale ESP-IDF (nu din biblioteci închise);</li>
+    <li><span class="tag dis">dezasamblat</span> citit de noi din instrucțiunile mașină ale bibliotecilor închise (<code>objdump -dr</code>);</li>
+    <li><span class="tag mas">măsurat</span> văzut pe placă, în jurnalele din <code>pas_cu_pas/output/</code>;</li>
+    <li><span class="tag ded">dedus</span> interpretarea noastră. Nu este confirmată de Espressif.</li>
+  </ul>
+</div>
+
+<nav class="card">
+  <strong>Cuprins</strong>
+  <ol>
+    <li><a href="#proiect"><code>main.c</code> din proiect, apel cu apel</a></li>
+    <li><a href="#drum">Drumul CSI: de la controllerul Wi-Fi la <code>on_csi</code></a> (nota cu „!”)</li>
+    <li><a href="#registri">Ce fac funcțiile cu regiștrii de control</a></li>
+    <li><a href="#receptie">Cum se modifică parametrii de recepție</a></li>
+    <li><a href="#biblioteca">Ce face biblioteca <code>esp_wifi</code></a></li>
+    <li><a href="#limite">Ce nu putem ști</a></li>
+    <li><a href="#surse">Surse și comenzi de verificare</a></li>
+  </ol>
+</nav>
+
+<!-- ============================================================ -->
+<h2 id="proiect">1. <code>main.c</code> din proiect, apel cu apel</h2>
+
+<p>Fișierul: <code>src/firmware/esp32_csi_node/main/main.c</code> (119 linii după reparațiile din 12 nov. 2026, ESP-IDF v5.1.7). Programul are o funcție de pornire și patru funcții care rulează după ea:</p>
+<div class="wrap"><table>
+  <tr><th>Funcție</th><th>Cine o rulează</th><th>Ce face</th></tr>
+  <tr><td><code>app_main</code> (l. 87–119)</td><td>task-ul <code>main</code>, o singură dată</td><td>configurează Wi-Fi, modul promiscuu și CSI; pornește două task-uri</td></tr>
+  <tr><td><code>on_wifi_event</code> (l. 80–85)</td><td>task-ul <code>sys_evt</code></td><td>se conectează la AP la pornire și după fiecare deconectare</td></tr>
+  <tr><td><code>on_csi</code> (l. 32–46)</td><td>task-ul Wi-Fi, la fiecare CSI</td><td>păstrează doar CSI din cadre „probe request”; copiază primii 128 de octeți într-un pachet, pune 0 în octeții invalizi, pune pachetul în coadă și numără pierderile</td></tr>
+  <tr><td><code>udp_sender_task</code> (l. 49–62)</td><td>task propriu, nucleul 1, prioritatea 10</td><td>trimite pachetele din coadă prin UDP, la <code>255.255.255.255:5005</code></td></tr>
+  <tr><td><code>probe_sender_task</code> (l. 65–77)</td><td>task propriu, nucleul 0, prioritatea 5</td><td>trimite un cadru „probe request” la 6 Mbps la fiecare tick (10 ms); la fiecare 5 s scrie câte probe-uri au eșuat</td></tr>
+</table></div>
+
+<h3>1.1 <code>app_main</code>: fiecare apel, până la nivelul cel mai de jos</h3>
+<div class="wrap"><table>
+  <tr><th>Linia</th><th>Apelul</th><th>Ce se întâmplă dedesubt</th><th>Unde ajunge</th></tr>
+  <tr><td>88–90, 93</td><td><code>nvs_flash_init</code>, <code>esp_netif_init</code>, <code>esp_event_loop_create_default</code>, <code>esp_netif_create_default_wifi_sta</code></td><td>memoria NVS, stiva TCP/IP (task-ul <code>tiT</code>), bucla de evenimente (task-ul <code>sys_evt</code>), interfața stației. Explicate linie cu linie în <code>notite_curs_main.md</code>, secțiunile 5–8. <span class="tag src">cod deschis</span></td><td>RAM, flash (NVS)</td></tr>
+  <tr><td>91</td><td><code>xRingbufferCreate(16 * 1024, RINGBUF_TYPE_NOSPLIT)</code></td><td>coada de 16 KiB dintre <code>on_csi</code> și task-ul UDP <span class="tag src">cod deschis</span></td><td>RAM</td></tr>
+  <tr><td>94–95</td><td><code>WIFI_INIT_CONFIG_DEFAULT()</code>, <code>esp_wifi_init</code></td><td><code>.csi_enable = 1</code>, deoarece proiectul are <code>CONFIG_ESP_WIFI_CSI_ENABLED=y</code> în <code>sdkconfig.defaults</code>. Driverul creează task-ul Wi-Fi. <span class="tag doc">documentat</span> (notițe, secțiunea 9)</td><td>RAM</td></tr>
+  <tr><td>96–97</td><td><code>esp_event_handler_register</code> ×2</td><td>înregistrează <code>on_wifi_event</code> pentru toate evenimentele <code>WIFI_EVENT</code> și pentru <code>IP_EVENT_STA_GOT_IP</code> <span class="tag src">cod deschis</span></td><td>RAM</td></tr>
+  <tr><td>98</td><td><code>esp_wifi_set_storage(WIFI_STORAGE_RAM)</code></td><td>Fără mesaj către task-ul Wi-Fi. Verifică inițializarea (<code>0x3001</code>) și valoarea (mai mare decât 1: <code>0x102</code>). Ia blocarea globală, scrie un octet în structura <code>g_ic</code> (la <code>+0x21F</code>) și eliberează blocarea. <span class="tag dis">dezasamblat</span> Efect: setările Wi-Fi nu se mai scriu în flash, doar în RAM. <span class="tag doc">documentat</span></td><td>RAM (<code>g_ic</code>), niciun registru</td></tr>
+  <tr><td>99</td><td><code>esp_wifi_set_mode(WIFI_MODE_STA)</code></td><td>mesaj → <code>wifi_set_mode_process</code> → <code>wifi_mode_set</code>, <code>_do_wifi_start</code> <span class="tag dis">dezasamblat</span></td><td>starea driverului</td></tr>
+  <tr><td>100–101</td><td><code>esp_wifi_set_config(WIFI_IF_STA, &amp;sta)</code></td><td>copiază setările în mesaj (<code>memcpy</code>) → <code>wifi_set_config_process</code>. Interfață greșită: <code>0x3004</code> = <code>ESP_ERR_WIFI_IF</code>. <span class="tag dis">dezasamblat</span> <span class="tag doc">documentat</span> (codul erorii)</td><td>starea driverului</td></tr>
+  <tr><td>103</td><td><code>esp_wifi_config_80211_tx_rate(WIFI_IF_STA, WIFI_PHY_RATE_6M)</code></td><td>Fără mesaj. Verifică inițializarea (<code>0x3001</code>), interfața („invalid interface”) și rata („invalid rate”). Apoi <code>ic_set_80211_tx_rate</code> → <code>trc_set_80211_tx_rate</code> (<code>libpp.a</code>) scrie rata în tabloul <code>g_80211_tx_rate</code>, un cuvânt de 32 de biți pentru fiecare interfață. <span class="tag dis">dezasamblat</span> <code>esp_wifi_80211_tx</code> citește valoarea cu <code>ic_get_80211_tx_rate</code> (tabelul 1.3). Header-ul cere apelul între <code>esp_wifi_init</code> și <code>esp_wifi_start</code>. <span class="tag doc">documentat</span></td><td>RAM (<code>g_80211_tx_rate</code>), niciun registru</td></tr>
+  <tr><td>104</td><td><code>esp_wifi_start()</code></td><td>mesaj → <code>wifi_start_process</code> → <code>wifi_hw_start</code> → <code>wifi_reset_mac</code>, <code>ic_mac_init</code>, <code>chm_init</code>, <code>chip_enable</code>, <code>pm_mac_wakeup</code>; apoi <code>ieee80211_update_phy_country</code>. Aici pornește hardware-ul radio. <span class="tag dis">dezasamblat</span></td><td>MAC și radio (regiștrii nu au fost urmăriți)</td></tr>
+  <tr><td>105</td><td><code>esp_wifi_set_ps(WIFI_PS_NONE)</code></td><td>mesaj → <code>wifi_set_ps_process</code> → <code>pm_set_sleep_type</code> (<code>libpp.a</code>) <span class="tag dis">dezasamblat</span>. Implicit este <code>WIFI_PS_MIN_MODEM</code>: stația se trezește doar pentru beacon-uri. <code>WIFI_PS_NONE</code> = fără economie de energie, radioul ascultă tot timpul. <span class="tag doc">documentat</span></td><td>modulul de economie de energie (<code>g_pm</code>)</td></tr>
+  <tr><td>107–108</td><td><code>esp_wifi_set_promiscuous_filter(MASK_ALL)</code></td><td>masca se copiază în RAM, apoi <code>wdev_set_promis_misc_pkt</code> rescrie regiștrii de recepție (secțiunea 3.2) <span class="tag dis">dezasamblat</span></td><td><code>wDevCtrl+0x34</code>; regiștrii MAC</td></tr>
+  <tr><td>109</td><td><code>esp_wifi_set_promiscuous(true)</code></td><td><code>wifi_set_promis_process</code> → <code>wdev_set_promis</code> → <code>hal_sniffer_rx_set_promis</code> <span class="tag dis">dezasamblat</span></td><td><code>0x3FF730F8</code>, <code>0x3FF730FC</code>, <code>0x3FF73104</code>, <code>0x3FF73C40</code></td></tr>
+  <tr><td>111–112</td><td><code>esp_wifi_set_csi_config(&amp;csi)</code></td><td><code>ic_csi_set_config</code> → <code>phy_chan_dump_cfg</code>, <code>phy_chan_filt_set</code>. Valorile exacte sunt în tabelul 1.2. <span class="tag dis">dezasamblat</span></td><td>regiștrii PHY <code>0x3FF5Cxxx</code> și bitul 29 din <code>0x3FF730F8/FC</code></td></tr>
+  <tr><td>113</td><td><code>esp_wifi_set_csi_rx_cb(on_csi, NULL)</code></td><td><code>g_wdev_csi_rx = on_csi</code>, fără mesaj <span class="tag dis">dezasamblat</span></td><td>RAM, niciun registru</td></tr>
+  <tr><td>114</td><td><code>esp_wifi_set_csi(true)</code></td><td>mesaj → <code>wifi_set_csi</code> → <code>ic_set_csi</code> → <code>hal_mac_set_csi</code> <span class="tag dis">dezasamblat</span></td><td><code>0x3FF7309C</code>, bitul 23 = 1</td></tr>
+  <tr><td>115</td><td><code>esp_wifi_get_mac(WIFI_IF_STA, probe + 10)</code></td><td>copiază adresa MAC a stației (6 octeți) în câmpul „sursă” al probe-ului, octeții 10–15 <span class="tag doc">documentat</span>. Pe placa testată: <code>fc:e8:c0:e1:1e:d0</code> <span class="tag mas">măsurat</span></td><td>RAM (<code>probe</code>)</td></tr>
+  <tr><td>117–118</td><td><code>xTaskCreatePinnedToCore</code> ×2</td><td>pornește <code>udp_sender_task</code> și <code>probe_sender_task</code> <span class="tag src">cod deschis</span></td><td>planificatorul FreeRTOS</td></tr>
+</table></div>
+
+<h3>1.2 Ce valori scrie configurarea CSI din proiect</h3>
+<p>Linia 111 scrie două câmpuri: <code>lltf_en = true</code> și <code>channel_filter_en = false</code>. În C, câmpurile nescrise dintr-o inițializare cu nume primesc valoarea 0. Deci configurarea reală este:</p>
+<div class="wrap"><table>
+  <tr><th>Câmp</th><th>Valoarea în proiect</th><th>Registru și bit</th><th>Efect</th></tr>
+  <tr><td><code>lltf_en</code></td><td>1 (scris)</td><td><code>0x3FF5CD0C</code> bitul 1 = 1</td><td>păstrează LLTF</td></tr>
+  <tr><td><code>htltf_en</code></td><td>0 (nescris)</td><td><code>0x3FF5CD0C</code> bitul 0 = 0</td><td>fără HT-LTF: <code>len</code> = 128 și la cadrele HT</td></tr>
+  <tr><td><code>stbc_htltf2_en</code></td><td>0 (nescris)</td><td><code>0x3FF5CD0C</code> bitul 2 = 0</td><td>fără STBC-HT-LTF</td></tr>
+  <tr><td><code>ltf_merge_en</code></td><td>0 (nescris)</td><td><code>0x3FF5C074</code> bitul 13 = 1</td><td>fără efect: nu există HT-LTF</td></tr>
+  <tr><td><code>channel_filter_en</code></td><td><strong>0 (scris)</strong></td><td><code>0x3FF5CC0C</code> biții 21, 22 = 1; <code>0x3FF5CD04</code>, <code>0x3FF5CD08</code> biții 0–2 = 0</td><td><strong>filtrul de canal este oprit</strong>: subpurtătoarele vecine rămân independente</td></tr>
+  <tr><td><code>manu_scale</code></td><td>0 (nescris)</td><td><code>0x3FF5CD0C</code> bitul 3 = 0</td><td>scalare automată</td></tr>
+  <tr><td><code>shift</code></td><td>0 (nescris)</td><td><code>0x3FF5CD0C</code> biții 4–7 = 0</td><td>fără efect la scalarea automată</td></tr>
+  <tr><td><code>dump_ack_en</code></td><td>0 (nescris)</td><td><code>0x3FF730F8</code>, <code>0x3FF730FC</code> bitul 29 = 0</td><td>fără CSI pentru ACK</td></tr>
+</table></div>
+<p>Biții 0–7 din <code>0x3FF5CD0C</code> devin <code>0x02</code> (înainte de 12 nov.: <code>0x07</code>). Legătura câmp → bit: <span class="tag dis">dezasamblat</span> (secțiunea 3.3).</p>
+
+<h3>1.3 Funcțiile care rulează după <code>app_main</code></h3>
+<div class="wrap"><table>
+  <tr><th>Linia</th><th>Apelul</th><th>Ce se întâmplă dedesubt</th></tr>
+  <tr><td>84</td><td><code>esp_wifi_connect()</code></td><td>mesaj → <code>wifi_connect_process</code> → <code>ieee80211_sta_connect</code> <span class="tag dis">dezasamblat</span></td></tr>
+  <tr><td>32</td><td><code>IRAM_ATTR</code> la <code>on_csi</code></td><td>pune codul funcției în IRAM, nu în flash („Forces code into IRAM instead of flash”, <code>esp_attr.h</code>) <span class="tag src">cod deschis</span></td></tr>
+  <tr><td>36</td><td><code>info-&gt;hdr[0] != 0x40</code></td><td>ignoră CSI din orice cadru care nu este „probe request”. <code>hdr</code> este antetul cadrului <span class="tag doc">documentat</span>. Primul octet este câmpul „frame control”; <code>0x40</code> = probe request. În test, numărul de CSI cu <code>hdr[0] = 0x40</code> a fost egal cu numărul de probe-uri primite de la vecin <span class="tag mas">măsurat</span></td></tr>
+  <tr><td>41</td><td><code>esp_timer_get_time()</code></td><td>scrie 1 în registrul de actualizare <code>0x3FF5F080</code>, apoi citește contorul din <code>0x3FF5F078</code> (jos) și <code>0x3FF5F07C</code> (sus); timer-ul LAC din grupul TIMG0 (<code>esp_timer_impl_lac.c</code>) <span class="tag src">cod deschis</span></td></tr>
+  <tr><td>42</td><td><code>memcpy(..., min(len, 128))</code></td><td>copiază doar primii 128 de octeți din <code>buf</code> = blocul LLTF (64 de subpurtătoare × 2 octeți) <span class="tag doc">documentat</span> (ordinea blocurilor)</td></tr>
+  <tr><td>43</td><td><code>memset(packet.csi_iq, 0, 4)</code></td><td>dacă <code>first_word_invalid</code> este 1, octeții 0–3 (subpurtătoarele k = 0 și k = 1) devin 0. Ghidul spune că acești octeți sunt invalizi <span class="tag doc">documentat</span></td></tr>
+  <tr><td>44–45</td><td><code>xRingbufferSend(..., 0)</code></td><td>timpul de așteptare este 0: dacă coada nu are loc, funcția revine imediat și pachetul se pierde <span class="tag doc">documentat</span> (<code>ringbuf.h</code>). Codul numără pierderile și scrie un avertisment la prima pierdere și apoi la fiecare 100.</td></tr>
+  <tr><td>50–59</td><td><code>socket</code>, <code>setsockopt(SO_BROADCAST)</code>, <code>sendto</code></td><td>stiva lwIP trimite pachetul de 138 de octeți prin Wi-Fi. Fără adresă IP, <code>sendto</code> eșuează (comentariul din <code>main.c</code>). <span class="tag src">cod deschis</span></td></tr>
+  <tr><td>69–73</td><td><code>esp_wifi_80211_tx(WIFI_IF_STA, probe, 64, true)</code></td><td>fără mesaj: <code>ieee80211_raw_frame_sanity_check</code> → <code>ic_ebuf_alloc</code> → <code>ic_get_80211_tx_rate</code> (citește 6 Mbps, scris la linia 103) → <code>ieee80211_post_hmac_tx</code> → <code>pp_post</code> (coada task-ului Wi-Fi), apoi hardware-ul MAC emite cadrul <span class="tag dis">dezasamblat</span>. Cu <code>true</code>, driverul scrie numărul de secvență. Liniile 70–73 numără eșecurile și scriu un rezumat la fiecare 5 s.</td></tr>
+  <tr><td>75</td><td><code>vTaskDelay(1)</code></td><td>1 tick = 10 ms, deoarece <code>CONFIG_FREERTOS_HZ=100</code> în <code>sdkconfig</code> <span class="tag src">cod deschis</span></td></tr>
+</table></div>
+
+<h3>1.4 Observații despre <code>main.c</code>: reparații și teste (12 nov. 2026)</h3>
+<p>Primul test a folosit o singură placă, cu hotspot-ul oprit. Al doilea test a folosit două plăci ESP32:</p>
+<ul>
+  <li>placa A: MAC <code>fc:e8:c0:e1:1e:d0</code>, pe <code>/dev/ttyUSB0</code>, <code>NODE_ID 3</code>;</li>
+  <li>placa B: MAC <code>fc:e8:c0:e1:1a:ec</code>, pe <code>/dev/ttyUSB1</code>, <code>NODE_ID 2</code>;</li>
+  <li>telefonul cu hotspot-ul <code>zaqmlp</code> (canalul 1, BW20) a fost între plăci. Distanța maximă dintre cele trei dispozitive a fost 0,5 m. RSSI între plăci: −54…−56 dBm <span class="tag mas">măsurat</span>.</li>
+</ul>
+<p>Pentru numărători, am folosit o copie de diagnostic a <code>main.c</code>, cu contoare afișate la fiecare 5 s. Scriptul <code>unelte/gen_diag_main.py</code> generează copia. Jurnalele sunt în <code>pas_cu_pas/output/08_main_reparat_12nov.txt</code>. La final, PC-ul s-a conectat la hotspot (<code>10.136.19.222</code>). Scriptul <code>unelte/verifica_udp.py</code> a citit pachetele cu <code>parse_packet</code> din <code>csi_ui.py</code>. Rândurile 12 și 13 dau rezultatele.</p>
+<div class="wrap"><table>
+  <tr><th>Nr.</th><th>Problema</th><th>Reparația în <code>main.c</code></th><th>Rezultatul testului</th></tr>
+  <tr><td>1</td><td>Filtrul de canal era oprit fără intenție vizibilă. Header-ul spune că implicit este activ <span class="tag doc">documentat</span>.</td><td>Linia 111 scrie explicit <code>.channel_filter_en = false</code>. Motivul, din header: „Disable it to keep independence of adjacent sub-carrier” <span class="tag doc">documentat</span>.</td><td>Regiștrii rămân la fel ca înainte. Nu există ceva de măsurat. <strong>Reparat.</strong></td></tr>
+  <tr><td>2</td><td>Probe-urile plecau la rata implicită, fără LLTF, deci fără CSI la celelalte noduri.</td><td>Linia 103: <code>esp_wifi_config_80211_tx_rate(WIFI_IF_STA, WIFI_PHY_RATE_6M)</code>, între <code>esp_wifi_init</code> și <code>esp_wifi_start</code>, cum cere header-ul <span class="tag doc">documentat</span>. Corectură: versiunea veche a acestei pagini spunea „după <code>esp_wifi_start()</code>”. Aceasta era greșit.</td><td>Cu linia 103, placa vecină a primit 370–470 de probe la 6 Mbps la fiecare 5 s. Fiecare probe a dat exact un CSI. Fără linia 103, placa B a primit 464–475 de probe la <strong>1 Mbps</strong> la fiecare 5 s și <strong>0 CSI</strong> din ele <span class="tag mas">măsurat</span>. <strong>Reparat și confirmat.</strong></td></tr>
+  <tr><td>3</td><td>Ghidul spune: cu <code>en_sys_seq = false</code>, după conectare funcția întoarce <code>ESP_ERR_INVALID_ARG</code> <span class="tag doc">documentat</span>. Rezultatul nu era verificat.</td><td>Linia 69 trimite <code>true</code>, cum cere ghidul. Liniile 70–73 numără eșecurile și scriu un rezumat la fiecare 5 s.</td><td>Cu placa conectată și <code>false</code>: <strong>0</strong> erori <code>ESP_ERR_INVALID_ARG</code>, în 2 rulări de 40 s (o dată pe A, o dată pe B) <span class="tag mas">măsurat</span>. Deci regula din ghid nu s-a aplicat pentru acest probe request. <code>true</code> rămâne, deoarece ghidul îl cere. Eroarea reală a fost alta (nr. 10).</td></tr>
+  <tr><td>4</td><td>Adresa sursă a probe-ului era inventată (<code>24:0A:C4:00:00:03</code>). Ghidul recomandă adresa MAC a stației <span class="tag doc">documentat</span>.</td><td>Linia 115: <code>esp_wifi_get_mac(WIFI_IF_STA, probe + 10)</code>.</td><td>Fiecare placă a recunoscut probe-urile vecinului după adresa MAC reală a acestuia <span class="tag mas">măsurat</span>. <strong>Reparat.</strong></td></tr>
+  <tr><td>5</td><td><code>first_word_invalid</code> nu ajungea la PC.</td><td>Linia 43: dacă indicatorul este 1, octeții 0–3 (k = 0 și k = 1) devin 0. Formatul pachetului rămâne 138 de octeți.</td><td>Indicatorul a fost 1 la toate CSI din toate rulările (de exemplu, 963 din 963 cu o placă) <span class="tag mas">măsurat</span>. Deci pe aceste plăci k = 0 și k = 1 sunt mereu 0 în pachet. <strong>Reparat.</strong></td></tr>
+  <tr><td>6</td><td>La PC ajungea doar LLTF, dar configurarea cerea și HT-LTF și STBC-HT-LTF.</td><td>Linia 111 cere doar <code>lltf_en</code>. Configurarea corespunde acum cu ce trimite pachetul.</td><td>Comparație: cu configurarea veche, cadrele HT au avut <code>len</code> = 384. Cu cea nouă, toate CSI au avut <code>len</code> = 128, și la cadrele HT <span class="tag mas">măsurat</span>. <strong>Reparat.</strong></td></tr>
+  <tr><td>7</td><td>Comentariul spunea „64 perechi I/Q”, dar ordinea din buffer este Q, apoi I <span class="tag doc">documentat</span>.</td><td>Comentariul de la linia 15 și tabelul din <code>README.md</code> spun acum (Q, I).</td><td><strong>Reparat.</strong> <code>csi_ui.py</code> folosește <code>np.hypot</code>, deci amplitudinea nu se schimbă.</td></tr>
+  <tr><td>8</td><td>Pierderile din coadă nu se vedeau pe placă.</td><td>Liniile 44–45 numără pierderile. Placa scrie un avertisment la prima pierdere și apoi la fiecare 100.</td><td>Niciun avertisment în nicio rulare, chiar la circa 600 CSI/s (înainte de reparația nr. 9) <span class="tag mas">măsurat</span>. <strong>Reparat.</strong></td></tr>
+  <tr><td>9</td><td><strong>Nou: buclă între noduri.</strong> Fiecare placă măsura CSI și din cadrele UDP ale celeilalte. Fiecare CSI dădea un pachet UDP nou, deci un CSI nou la vecin. CSI din cadrele de date ale vecinului a crescut de la 330 la 1944 la fiecare 5 s <span class="tag mas">măsurat</span>.</td><td>Linia 36 păstrează doar CSI din cadre probe request (<code>hdr[0] = 0x40</code>).</td><td>Fără filtru: până la 83% din probe-uri au eșuat. Cu filtru: numărul de CSI a rămas stabil, 970–1370 la fiecare 5 s pe placă, după primele 5 s <span class="tag mas">măsurat</span>. Restricție: filtrul acceptă și probe request de la alte dispozitive. Acestea au fost 0–12 la fiecare 5 s, față de 210–470 de probe de la vecin <span class="tag mas">măsurat</span>.</td></tr>
+  <tr><td>10</td><td><strong>Nou, nereparat:</strong> <code>esp_wifi_80211_tx</code> întoarce <code>ESP_ERR_NO_MEM</code> la o parte din probe-uri.</td><td>Nicio reparație. Liniile 70–73 arată acum problema în jurnal.</td><td>Eroarea apare în rafale și doar în unele rulări. În rularea K din jurnal, placa B a avut 74–136 de probe-uri eșuate din 500, în trei ferestre de 5 s. În aceleași ferestre, <code>sendto</code> a eșuat de 99–183 de ori, cu <code>errno</code> 12 (<code>ENOMEM</code>). În rulările L și M, ambele plăci au avut 0 eșecuri <span class="tag mas">măsurat</span>. Cauza nu este cunoscută. Ipoteză: memoria de transmisie Wi-Fi se umple când canalul este ocupat <span class="tag ded">dedus</span>. Apoi am făcut trei rulări de câte 2 min: 100 Hz cu unicast, 100 Hz cu broadcast și 50 Hz cu unicast. Toate au avut 0 eșecuri <span class="tag mas">măsurat</span>. Eroarea nu s-a repetat, deci testul la 50 Hz nu arată cauza.</td></tr>
+  <tr><td>11</td><td><strong>Nou, nereparat:</strong> pachetul UDP nu spune ce nod a emis probe-ul.</td><td>Nicio reparație. Reparația schimbă formatul pachetului și <code>csi_ui.py</code>.</td><td>Cu două plăci, fiecare placă are un singur vecin. Cu trei noduri, un nod primește CSI de la ceilalți doi în același flux, fără să știe sursa <span class="tag ded">dedus</span>.</td></tr>
+  <tr><td>12</td><td><strong>Nou:</strong> destinația UDP implicită este <code>255.255.255.255</code>. AP-ul retransmite fiecare pachet broadcast către toate stațiile.</td><td>Plăcile trimit acum unicast către PC: <code>CONFIG_CSI_UDP_HOST = "10.136.19.222"</code> în <code>~/esp/csi-node/sdkconfig</code>, în afara repository-ului. <code>csi_ui.py</code> arată acum toate nodurile într-o singură fereastră, cu o coloană pentru fiecare nod.</td><td>Broadcast: AP-ul a retransmis circa 162 de cadre/s, toate la rate 11b. PC-ul a pierdut 0,1–24% din pachetele unui nod (după <code>seq</code>), o dată 55% <span class="tag mas">măsurat</span>. Unicast către PC: 0–2 cadre broadcast de la AP la fiecare 5 s, <strong>0% pachete pierdute</strong>, 88–91 de pachete/s pe nod <span class="tag mas">măsurat</span>. Restricție: la unicast, dacă mai multe programe ascultă portul 5005, doar unul primește pachetele <span class="tag ded">dedus</span>. Deci <code>csi_ui.py</code> merge atunci într-o singură fereastră. Fereastra nouă, cu unicast: 2 coloane, 184 de pachete/s în total <span class="tag mas">măsurat</span>.</td></tr>
+  <tr><td>13</td><td>Verificare cap-coadă: placă → UDP → <code>parse_packet</code> din <code>csi_ui.py</code>.</td><td>—</td><td>0 pachete invalide din 23 519 <span class="tag mas">măsurat</span>. Indicii mereu 0: 0, 1 și 27–37. Deci sunt 52 de subpurtătoare active (k = ±1…±26), cum spune standardul 802.11a <span class="tag doc">documentat</span> <span class="tag mas">măsurat</span>. Indicele 1 (k = +1) este 0 din cauza <code>first_word_invalid</code>. Deci rămân 51 de subpurtătoare utile. RSSI mediu între plăci: −53…−61 dBm <span class="tag mas">măsurat</span>.</td></tr>
+  <tr><td>14</td><td><strong>Nou:</strong> placa A a repornit o dată în rularea la 50 Hz („Guru Meditation”, <code>LoadProhibited</code>). Backtrace: <code>udp_sender_task</code> → <code>sendto</code> → copiere de la adresa 0 <span class="tag mas">măsurat</span>. Deci <code>xRingbufferReceive</code> a întors <code>NULL</code> <span class="tag ded">dedus</span>. Header-ul spune că funcția întoarce <code>NULL</code> la expirarea timpului <span class="tag doc">documentat</span>. Cu <code>portMAX_DELAY</code>, cauza nu este cunoscută.</td><td>Linia 58: <code>if (!packet) continue;</code></td><td>Panica a apărut o dată în circa 25 de rulări ale plăcilor. Nu am putut repeta panica, deci reparația nu este verificată pe placă.</td></tr>
+</table></div>
+
+<!-- ============================================================ -->
+<h2 id="drum">2. Drumul CSI: de la controllerul Wi-Fi la <code>on_csi</code></h2>
+
+<p>Pe scurt: aplicația doar <em>pornește</em> măsurarea și <em>înregistrează</em> o funcție. Hardware-ul calculează CSI. Biblioteca <code>libpp.a</code> copiază rezultatul și apelează funcția noastră.</p>
+
+<h3>2.1 Pregătirea (în <code>app_main</code>)</h3>
+<div class="flow">
+  <div class="step"><div class="num">1</div><div>
+    <p><code>CONFIG_ESP_WIFI_CSI_ENABLED=y</code> (în proiect: <code>sdkconfig.defaults</code>) face câmpul <code>.csi_enable = 1</code> din <code>WIFI_INIT_CONFIG_DEFAULT()</code>. <span class="tag doc">documentat</span></p>
+    <p>Fără această opțiune, <code>esp_wifi_set_csi</code> și <code>esp_wifi_set_csi_config</code> întorc <code>ESP_FAIL</code> (−1): ambele apelează <code>config_get_wifi_csi_enable</code> și ies cu −1 dacă rezultatul este 0. <span class="tag dis">dezasamblat</span></p>
+  </div></div>
+  <div class="step"><div class="num">2</div><div>
+    <p><code>esp_wifi_set_csi_rx_cb(on_csi, NULL)</code> (<code>main.c</code>, linia 113) scrie adresa lui <code>on_csi</code> în variabila globală <code>g_wdev_csi_rx</code> și <code>NULL</code> în <code>g_wdev_csi_rx_ctx</code>. Nu atinge niciun registru. <span class="tag dis">dezasamblat</span></p>
+    <p class="where"><code>esp_wifi_set_csi_rx_cb</code> → <code>ic_register_csi_rx_cb</code> → <code>wdev_set_csi_rx_cb</code> (<code>libpp.a</code>)</p>
+  </div></div>
+  <div class="step"><div class="num">3</div><div>
+    <p><code>esp_wifi_set_csi(true)</code> (linia 114) trimite un mesaj task-ului Wi-Fi. Acolo, <code>hal_mac_set_csi</code> pune pe 1 <strong>bitul 23 din registrul <code>0x3FF7309C</code></strong>. <span class="tag dis">dezasamblat</span></p>
+    <p class="where"><code>esp_wifi_set_csi</code> → <code>ieee80211_ioctl</code> → coada task-ului Wi-Fi → <code>wifi_set_csi</code> → <code>ic_set_csi</code> → <code>hal_mac_set_csi</code></p>
+  </div></div>
+</div>
+
+<h3>2.2 La fiecare cadru primit</h3>
+<div class="flow">
+  <div class="step"><div class="num">4</div><div>
+    <p>Un cadru OFDM ajunge la antenă. În proiect, modul promiscuu cu <code>WIFI_PROMIS_FILTER_MASK_ALL</code> acceptă cadrele tuturor dispozitivelor de pe canal (liniile 107–109). În testele din <code>pas_cu_pas/</code>, sursa a fost răspunsul la un ping la fiecare 20 ms. <span class="tag mas">măsurat</span></p>
+  </div></div>
+  <div class="step"><div class="num">5</div><div>
+    <p>Hardware-ul compară câmpul de antrenare cunoscut din preambul (LLTF, apoi HT-LTF dacă există) cu ce a primit. Rezultatul, pe fiecare subpurtătoare, este CSI. Teoria este în teză, secțiunea 4.4. <span class="tag doc">documentat</span> (ce câmpuri) · <span class="tag ded">dedus</span> (algoritmul exact nu este public)</p>
+    <p>Registrul <code>0x3FF5CD0C</code> decide ce câmpuri LTF se păstrează și cum se scalează valorile (secțiunea 3). <span class="tag dis">dezasamblat</span></p>
+  </div></div>
+  <div class="step"><div class="num">6</div><div>
+    <p><code>wdev_csi_rx_process</code> (<code>libpp.a</code>, în task-ul Wi-Fi) verifică dacă <code>g_wdev_csi_rx</code> nu este <code>NULL</code>. Apoi alocă 64 de octeți pentru <code>wifi_csi_info_t</code> și îi completează: <code>rx_ctrl</code> (28 de octeți), adresa sursei (din antetul 802.11, poziția 10), adresa destinației (poziția 4), zgomotul de fond, <code>buf</code>, <code>len</code>, <code>first_word_invalid</code>. <span class="tag dis">dezasamblat</span></p>
+  </div></div>
+  <div class="step"><div class="num">7</div><div>
+    <p>Aceeași funcție apelează <code>on_csi(ctx, info)</code>. După <code>return</code>, eliberează <code>info</code>. Deci datele trebuie copiate în <code>on_csi</code>, nu păstrate prin pointer. <span class="tag dis">dezasamblat</span> <span class="tag doc">documentat</span></p>
+    <p>Ghidul spune că funcția rulează în task-ul Wi-Fi și trebuie să fie scurtă: „do not do lengthy operations in the callback function”. <span class="tag doc">documentat</span></p>
+    <p>În proiect, <code>on_csi</code> păstrează doar CSI din probe request, copiază primii 128 de octeți într-un pachet de 138 de octeți și îl pune în coadă (liniile 36–45). Task-ul <code>udp_sender_task</code> îl trimite apoi prin UDP.</p>
+  </div></div>
+  <div class="step"><div class="num">8</div><div>
+    <p>În <code>buf</code>, fiecare subpurtătoare ocupă 2 octeți cu semn: <strong>întâi partea imaginară (Q), apoi partea reală (I)</strong>. Pentru LLTF, ordinea este 0…31, apoi −32…−1. Proiectul trimite octeții în această ordine. În <code>csi_ui.py</code>, axa „index subpurtătoare în buffer” are indicele <code>i</code>: subpurtătoarea este <code>k = i</code> pentru <code>i ≤ 31</code> și <code>k = i − 64</code> pentru <code>i ≥ 32</code>. <span class="tag doc">documentat</span> (ordinea)</p>
+  </div></div>
+</div>
+
+<pre><code>esp_wifi_set_csi(true)        main.c:114            task main
+  └─ ieee80211_ioctl ─► coada task-ului Wi-Fi
+       └─ wifi_set_csi → ic_set_csi → hal_mac_set_csi   registrul 0x3FF7309C, bitul 23 = 1
+
+cadru OFDM ─► RF/PHY (estimarea canalului din LTF; config: 0x3FF5CD0C = 0x02 în proiect)
+           ─► MAC ─► wdev_csi_rx_process (libpp.a, task Wi-Fi, prioritatea 23)
+                       ├─ completează wifi_csi_info_t (rx_ctrl, mac, dmac, buf, len, ...)
+                       ├─ on_csi(NULL, info)                         main.c:32
+                       │    ├─ doar probe request (hdr[0] = 0x40)    main.c:36
+                       │    ├─ memcpy primii 128 B (LLTF) în pachet  main.c:42
+                       │    └─ xRingbufferSend(..., 0)               main.c:44
+                       └─ eliberează info
+udp_sender_task ─► xRingbufferReceive ─► sendto UDP 255.255.255.255:5005 ─► csi_ui.py</code></pre>
+
+<!-- ============================================================ -->
+<h2 id="registri">3. Ce fac funcțiile cu regiștrii de control</h2>
+
+<p>Răspunsul are două niveluri. Nivelul 1: <strong>parametrii din API</strong>, pe care îi documentează Espressif. Nivelul 2: <strong>regiștrii hardware</strong> în care ajung acești parametri, găsiți de noi în bibliotecile închise.</p>
+
+<h3>3.1 Tiparul comun al funcțiilor <code>esp_wifi_set_*</code></h3>
+<p>Funcțiile de configurare nu scriu direct în regiștri. Toate urmează același tipar: <span class="tag dis">dezasamblat</span></p>
+<ol>
+  <li>Verifică dacă a rulat <code>esp_wifi_init</code>. Dacă nu: <code>ESP_ERR_WIFI_NOT_INIT</code> (<code>0x3001</code>).</li>
+  <li>Verifică starea driverului. Dacă nu a pornit: <code>ESP_ERR_WIFI_NOT_STARTED</code> (<code>0x3002</code>).</li>
+  <li>Verifică argumentele. Pointer <code>NULL</code>: <code>ESP_ERR_INVALID_ARG</code> (<code>0x102</code>).</li>
+  <li>Alocă un mesaj (24 sau 32 de octeți). Fără memorie: <code>ESP_ERR_NO_MEM</code> (<code>0x101</code>).</li>
+  <li>Scrie în mesaj adresa funcției de lucru (<code>*_process</code>) și parametrii.</li>
+  <li><code>ieee80211_ioctl</code> pune mesajul în coada task-ului Wi-Fi (<code>pp_post</code>). Funcția de lucru rulează acolo.</li>
+</ol>
+<p>Excepție: <code>esp_wifi_set_csi_rx_cb</code> apelează direct <code>ic_register_csi_rx_cb</code>, fără mesaj. <span class="tag dis">dezasamblat</span></p>
+
+<h3>3.2 Funcție → lanț de apeluri → registru</h3>
+<div class="wrap"><table>
+  <tr><th>Funcția din API (nivelul 1)</th><th>Lanțul în bibliotecile închise</th><th>Unde ajunge (nivelul 2)</th></tr>
+  <tr><td><code>esp_wifi_set_csi(en)</code></td><td><code>wifi_set_csi</code> → <code>ic_set_csi</code> → <code>hal_mac_set_csi</code></td><td><code>0x3FF7309C</code>, bitul 23 = <code>en</code></td></tr>
+  <tr><td><code>esp_wifi_set_csi_config(&amp;cfg)</code></td><td><code>wifi_csi_set_config</code> → <code>ic_csi_set_config</code> → <code>phy_chan_dump_cfg</code>, <code>phy_chan_filt_set</code> (<code>libphy.a</code>)</td><td><code>0x3FF5CD0C</code>, <code>0x3FF5CC0C</code>, <code>0x3FF5CD04</code>, <code>0x3FF5CD08</code>, <code>0x3FF5C074</code>, plus bitul 29 din <code>0x3FF730F8</code> și <code>0x3FF730FC</code> (tabelul 3.3)</td></tr>
+  <tr><td><code>esp_wifi_set_csi_rx_cb(cb, ctx)</code></td><td><code>ic_register_csi_rx_cb</code> → <code>wdev_set_csi_rx_cb</code></td><td>niciun registru: variabilele <code>g_wdev_csi_rx</code>, <code>g_wdev_csi_rx_ctx</code> din RAM</td></tr>
+  <tr><td><code>esp_wifi_set_promiscuous(en)</code></td><td><code>wifi_set_promis_process</code> → <code>wdev_set_promis</code> → <code>wdev_set_promis_misc_pkt</code> → <code>hal_sniffer_rx_set_promis</code></td><td><code>0x3FF730F8</code>, <code>0x3FF730FC</code>, <code>0x3FF73104</code>, <code>0x3FF73C40</code></td></tr>
+  <tr><td><code>esp_wifi_set_promiscuous_filter(&amp;f)</code></td><td><code>wifi_set_promis_filter_process</code> → <code>ic_set_promis_filter</code> → <code>wdev_set_promis_filter</code></td><td>masca se copiază în RAM (structura <code>wDevCtrl</code>, la <code>+0x34</code>); apoi <code>wdev_set_promis_misc_pkt</code> rescrie regiștrii de mai sus</td></tr>
+  <tr><td><code>esp_wifi_set_channel(p, s)</code></td><td><code>wifi_set_channel_process</code> → <code>chm_set_home_channel</code>, <code>chm_set_current_channel</code></td><td>neurmărit până la registru (partea radio este în <code>libphy.a</code>)</td></tr>
+</table></div>
+<p>Toate rândurile: <span class="tag dis">dezasamblat</span> din <code>libnet80211.a</code>, <code>libpp.a</code> și <code>libphy.a</code> (ESP-IDF v5.1.7).</p>
+
+<h3>3.3 Câmpurile <code>wifi_csi_config_t</code> la nivel de bit</h3>
+<p><code>ic_csi_set_config</code> citește cele 8 câmpuri (câte 1 octet) și le trimite în trei locuri. Legătura octet → câmp vine din ordinea câmpurilor din <code>esp_wifi_types.h</code>. <span class="tag dis">dezasamblat</span> <span class="tag doc">documentat</span></p>
+<div class="wrap"><table>
+  <tr><th>Câmp (octetul)</th><th>Ce face, după header</th><th>Implicit</th><th>Registru și bit</th></tr>
+  <tr><td><code>lltf_en</code> (0)</td><td>păstrează datele LLTF</td><td>activ</td><td><code>0x3FF5CD0C</code> bitul 1</td></tr>
+  <tr><td><code>htltf_en</code> (1)</td><td>păstrează datele HT-LTF</td><td>activ</td><td><code>0x3FF5CD0C</code> bitul 0</td></tr>
+  <tr><td><code>stbc_htltf2_en</code> (2)</td><td>păstrează datele STBC-HT-LTF</td><td>activ</td><td><code>0x3FF5CD0C</code> bitul 2</td></tr>
+  <tr><td><code>ltf_merge_en</code> (3)</td><td>la cadrele HT, face media dintre LLTF și HT-LTF</td><td>activ</td><td><code>0x3FF5C074</code> bitul 13 = 0 când e activ, 1 când e oprit</td></tr>
+  <tr><td><code>channel_filter_en</code> (4)</td><td>netezește subpurtătoarele vecine</td><td>activ</td><td><code>0x3FF5CC0C</code> biții 21 și 22 = 0 când e activ, 1 când e oprit; la oprire, șterge și biții 0–2 din <code>0x3FF5CD04</code> și <code>0x3FF5CD08</code></td></tr>
+  <tr><td><code>manu_scale</code> (5)</td><td>scalare manuală (<code>true</code>) sau automată (<code>false</code>)</td><td>automată</td><td><code>0x3FF5CD0C</code> bitul 3</td></tr>
+  <tr><td><code>shift</code> (6)</td><td>câți biți se deplasează la stânga la scalarea manuală (0–15)</td><td>–</td><td><code>0x3FF5CD0C</code> biții 4–7</td></tr>
+  <tr><td><code>dump_ack_en</code> (7)</td><td>dă CSI și pentru cadrele ACK</td><td>oprit</td><td><code>0x3FF730F8</code> și <code>0x3FF730FC</code>, bitul 29</td></tr>
+</table></div>
+<p>Coloanele „Ce face” și „Implicit” sunt <span class="tag doc">documentat</span> (comentariile din <code>esp_wifi_types.h</code>, liniile 574–581). Coloana „Registru și bit” este <span class="tag dis">dezasamblat</span>.</p>
+
+<h3>3.4 Regiștrii găsiți</h3>
+<div class="wrap"><table>
+  <tr><th>Adresa</th><th>Scris de</th><th>Ce controlează</th></tr>
+  <tr><td><code>0x3FF7309C</code></td><td><code>hal_mac_set_csi</code></td><td>bitul 23: CSI pornit sau oprit</td></tr>
+  <tr><td><code>0x3FF730F8</code>, <code>0x3FF730FC</code></td><td><code>ic_csi_set_config</code>, <code>hal_sniffer_rx_set_promis</code></td><td>bitul 29: CSI pentru ACK; alți biți: recepția în mod promiscuu. Probabil filtrele de recepție ale MAC. <span class="tag ded">dedus</span></td></tr>
+  <tr><td><code>0x3FF73104</code>, <code>0x3FF73C40</code></td><td><code>hal_sniffer_rx_set_promis</code></td><td>recepția în mod promiscuu <span class="tag ded">dedus</span></td></tr>
+  <tr><td><code>0x3FF5CD0C</code></td><td><code>phy_chan_dump_cfg</code></td><td>ce câmpuri LTF se păstrează și scalarea CSI (biții 0–7)</td></tr>
+  <tr><td><code>0x3FF5CC0C</code>, <code>0x3FF5CD04</code>, <code>0x3FF5CD08</code></td><td><code>phy_chan_filt_set</code></td><td>filtrul de canal (netezirea subpurtătoarelor)</td></tr>
+  <tr><td><code>0x3FF5C074</code></td><td><code>phy_chan_filt_set</code></td><td>bitul 13: media LLTF + HT-LTF</td></tr>
+</table></div>
+<p>Numele funcțiilor sugerează două zone: <code>0x3FF73xxx</code> scrisă din <code>hal_mac_*</code> și <code>hal_sniffer_*</code> (MAC), <code>0x3FF5Cxxx</code> scrisă din <code>phy_*</code> (radio, PHY). <span class="tag ded">dedus</span> Espressif nu descrie acești regiștri în documentele folosite aici.</p>
+
+<div class="note"><strong>Corecție față de <code>notite_curs_main.md</code>, secțiunea 23.2.</strong> Acolo, <code>0x3FF730F8</code> și <code>0x3FF730FC</code> se numesc „regiștrii de configurare CSI”. De fapt, <code>esp_wifi_set_csi_config</code> schimbă în ei doar bitul 29 (<code>dump_ack_en</code>). Aceiași regiștri sunt scriși și de <code>hal_sniffer_rx_set_promis</code>. Câmpurile CSI propriu-zise ajung în <code>0x3FF5CD0C</code>, prin <code>libphy.a</code>.</div>
+
+<!-- ============================================================ -->
+<h2 id="receptie">4. Cum se modifică parametrii de recepție</h2>
+
+<p>Cinci lucruri decid ce CSI primești. Primele două decid <em>dacă</em> primești CSI. Ultimele trei decid <em>ce</em> conține.</p>
+
+<h3>4.1 Ce cadre dau CSI</h3>
+<ul>
+  <li>Doar cadrele cu preambul OFDM (802.11a/g/n) au câmpul LTF din care se estimează canalul. Teoria: teză, secțiunea 4.4.</li>
+  <li>Cadrele 802.11b nu au dat niciun CSI. Testul din <code>03_diagnostic_hotspot.md</code>: hotspot-ul a trimis doar cadre 11b (<code>11b=31 ofdm=0 ht=0</code>), iar <code>csi hotspot=0</code>. <span class="tag mas">măsurat</span></li>
+</ul>
+
+<h3>4.2 Câte cadre ajung la placă</h3>
+<div class="wrap"><table>
+  <tr><th>Situație (programele de test din <code>pas_cu_pas/</code>)</th><th>CSI pe secundă</th><th>Sursa</th></tr>
+  <tr><td>conectat la hotspot, fără trafic</td><td>~1 CSI la 30 s</td><td><code>05_pas2_conectare.md</code> <span class="tag mas">măsurat</span></td></tr>
+  <tr><td>conectat, ping la gateway la 20 ms</td><td>50–51</td><td><code>06_pas3_corp_intre.log</code>, <code>07_main_nou.log</code> <span class="tag mas">măsurat</span></td></tr>
+  <tr><td>mod promiscuu, filtrul implicit</td><td>0</td><td><code>03_diagnostic_hotspot.md</code>, varianta B <span class="tag mas">măsurat</span></td></tr>
+  <tr><td>mod promiscuu, <code>WIFI_PROMIS_FILTER_MASK_ALL</code></td><td>~130 (300–430 la 3 s)</td><td><code>03_diagnostic_hotspot.md</code>, varianta A <span class="tag mas">măsurat</span></td></tr>
+</table></div>
+<p>Proiectul folosește ultimul caz: mod promiscuu cu <code>MASK_ALL</code>. Rata reală de CSI a proiectului nu a fost măsurată încă.</p>
+<p>Explicația din ghid: în modul stație, placa primește doar cadrele de la AP, după conectare. Pentru mai multe date CSI, ghidul recomandă modul promiscuu (<code>esp_wifi_set_promiscuous</code>). <span class="tag doc">documentat</span></p>
+
+<h3>4.3 Canalul și lățimea de bandă</h3>
+<ul>
+  <li>În modul stație, canalul este cel al AP-ului. Jurnalul arată <code>channel 11, BW20</code>. <span class="tag mas">măsurat</span></li>
+  <li><code>esp_wifi_set_channel(primary, second)</code> se apelează după <code>esp_wifi_start()</code>. Nu se apelează cât timp stația scanează sau se conectează la un AP. <span class="tag doc">documentat</span></li>
+  <li><code>esp_wifi_set_bandwidth</code> alege HT20 sau HT40. Implicit este HT40, dar lățimea reală se negociază cu AP-ul. <span class="tag doc">documentat</span></li>
+  <li>Tipul cadrului și lățimea de bandă schimbă <code>len</code>: 128 B (non-HT, doar LLTF), 256 B (HT20), 384 B (HT20 cu STBC sau HT40), până la 612 B (HT40 cu STBC). <span class="tag doc">documentat</span></li>
+</ul>
+
+<h3>4.4 Câmpurile <code>wifi_csi_config_t</code></h3>
+<p>Câmpurile <code>lltf_en</code>, <code>htltf_en</code> și <code>stbc_htltf2_en</code> aleg ce blocuri apar în <code>buf</code>. Dacă un câmp este oprit, <code>len</code> scade față de tabelul din ghid. <span class="tag doc">documentat</span> Biții din registre sunt în tabelul 3.3.</p>
+
+<h3>4.5 Scalarea amplitudinii</h3>
+<ul>
+  <li>Implicit, <code>manu_scale = false</code>: chipul scalează automat valorile CSI. <span class="tag doc">documentat</span></li>
+  <li>Test cu persoana între hotspot și placă: RSSI a scăzut de la −47 la −60 dBm, iar <code>A_medie</code> a crescut de la 19,6 la 21,8. <span class="tag mas">măsurat</span> (<code>06_pas3_corp_intre.log</code>)</li>
+  <li>Concluzie: amplitudinea nu are unități fixe. Compară RSSI (în dBm) și <strong>forma</strong> spectrului (rapoarte între subpurtătoare), nu nivelul absolut. <span class="tag ded">dedus</span> Teoria (AGC și raportul de amplitudini): teză, secțiunea 4.6.</li>
+</ul>
+
+<h3>4.6 Cum schimbi parametrii în cod</h3>
+<pre><code>// după esp_wifi_start(): altfel funcțiile întorc ESP_ERR_WIFI_NOT_STARTED (0x3002)
+wifi_csi_config_t csi = {
+    .lltf_en           = true,
+    .htltf_en          = false,   // doar LLTF: len = 128 la orice cadru
+    .stbc_htltf2_en    = false,
+    .ltf_merge_en      = false,
+    .channel_filter_en = false,   // subpurtătoare independente, fără netezire
+    .manu_scale        = true,    // scalare fixă: amplitudini comparabile în timp
+    .shift             = 4,       // 0..15
+    .dump_ack_en       = false,
+};
+ESP_ERROR_CHECK(esp_wifi_set_csi_config(&amp;csi));
+ESP_ERROR_CHECK(esp_wifi_set_csi_rx_cb(on_csi, NULL));
+ESP_ERROR_CHECK(esp_wifi_set_csi(true));</code></pre>
+<p>Valorile de mai sus sunt un exemplu pentru un test, nu o recomandare. Efectul real al lui <code>manu_scale</code> și <code>shift</code> trebuie verificat pe placă. <span class="tag ded">dedus</span></p>
+
+<div class="note"><strong>Atenție la <code>main.c</code> din proiect.</strong> Codul trimite primii 128 de octeți și presupune că ei sunt LLTF. Dacă oprești <code>lltf_en</code>, <code>buf</code> începe cu HT-LTF, iar <code>csi_ui.py</code> îl afișează ca LLTF. Verifică <code>info-&gt;len</code> și <code>rx_ctrl.sig_mode</code> înainte de copiere.</div>
+
+<h3>4.7 Test propus (task-ul 3)</h3>
+<div class="wrap"><table>
+  <tr><th>Schimbare</th><th>Ce urmărești</th></tr>
+  <tr><td><code>htltf_en = false</code></td><td><code>len</code> rămâne 128 și la cadrele HT. Confirmat la 12 nov. (tabelul 1.4, nr. 6) <span class="tag mas">măsurat</span></td></tr>
+  <tr><td><code>channel_filter_en = false</code></td><td>proiectul îl oprește explicit (linia 111); pornește-l și compară spectrul din <code>csi_ui.py</code> între subpurtătoare vecine</td></tr>
+  <tr><td><code>manu_scale = true</code>, <code>shift</code> fix</td><td>dacă amplitudinea din <code>csi_ui.py</code> urmează acum RSSI (scade când RSSI scade)</td></tr>
+  <tr><td>mod promiscuu + <code>MASK_ALL</code></td><td>CSI pe secundă și adresele MAC sursă</td></tr>
+</table></div>
+
+<!-- ============================================================ -->
+<h2 id="biblioteca">5. Ce face biblioteca <code>esp_wifi</code></h2>
+
+<div class="wrap"><table>
+  <tr><th>Parte</th><th>Unde</th><th>Rol</th></tr>
+  <tr><td>header-e publice</td><td><code>components/esp_wifi/include/</code></td><td>contractul: funcții, structuri, coduri de eroare <span class="tag doc">documentat</span></td></tr>
+  <tr><td><code>libnet80211.a</code></td><td><code>components/esp_wifi/lib/esp32/</code></td><td>funcțiile <code>esp_wifi_*</code>, mesajele către task-ul Wi-Fi, protocolul 802.11 (stație, AP, canale) <span class="tag ded">dedus</span> din nume</td></tr>
+  <tr><td><code>libpp.a</code></td><td>același director</td><td>prelucrarea pachetelor: <code>wdev_*</code> (recepție, CSI, mod promiscuu), <code>hal_mac_*</code> (regiștrii MAC) <span class="tag ded">dedus</span> din nume</td></tr>
+  <tr><td><code>libphy.a</code></td><td><code>components/esp_phy/lib/esp32/</code></td><td>radioul: canal, filtre, configurarea CSI (<code>phy_chan_dump_cfg</code>, <code>phy_chan_filt_set</code>) <span class="tag ded">dedus</span> din nume</td></tr>
+</table></div>
+
+<h3>5.1 Ce primește aplicația: <code>wifi_csi_info_t</code></h3>
+<div class="wrap"><table>
+  <tr><th>Câmp</th><th>Conținut</th></tr>
+  <tr><td><code>rx_ctrl</code></td><td>datele radio ale cadrului: <code>rssi</code> (dBm), <code>rate</code>, <code>sig_mode</code> (0 = 11b/g, 1 = 11n), <code>mcs</code>, <code>cwb</code> (20/40 MHz), <code>stbc</code>, <code>noise_floor</code> (dBm), <code>channel</code>, <code>secondary_channel</code>, <code>timestamp</code> (µs)</td></tr>
+  <tr><td><code>mac</code>, <code>dmac</code></td><td>adresa sursei și a destinației</td></tr>
+  <tr><td><code>first_word_invalid</code></td><td>primii 4 octeți din <code>buf</code> sunt invalizi, din cauza unei limitări hardware</td></tr>
+  <tr><td><code>buf</code>, <code>len</code></td><td>valorile CSI (Q, I, Q, I, …) și numărul de octeți</td></tr>
+  <tr><td><code>hdr</code>, <code>payload</code>, <code>payload_len</code>, <code>rx_seq</code></td><td>antetul și conținutul cadrului, numărul de secvență</td></tr>
+</table></div>
+<p>Toate: <span class="tag doc">documentat</span> (<code>esp_wifi_types.h</code>, liniile 463–600). La 9 nov., <code>first_word_invalid</code> a fost 1 la toate cele 10 pachete testate. La 12 nov., a fost 1 la 963 din 963 de CSI. <span class="tag mas">măsurat</span></p>
+
+<!-- ============================================================ -->
+<h2 id="limite">6. Ce nu putem ști</h2>
+<ul>
+  <li>Algoritmul exact de estimare a canalului din hardware. Teoria dă forma cea mai simplă (teză, ecuația 4.11), dar chipul poate face altceva.</li>
+  <li>Semnificația oficială a regiștrilor. Biții din tabelul 3.3 vin din dezasamblare și din numele câmpurilor.</li>
+  <li>Cum lucrează scalarea automată și AGC-ul din chip.</li>
+  <li>De ce primii 4 octeți pot fi invalizi. Ghidul spune doar „hardware limitation”.</li>
+  <li>Tot ce este aici este valabil pentru ESP-IDF v5.1.7. O altă versiune a bibliotecilor poate avea alte adrese sau alte lanțuri de apeluri.</li>
+</ul>
+
+<!-- ============================================================ -->
+<h2 id="surse">7. Surse și comenzi de verificare</h2>
+<ul>
+  <li><code>~/esp/esp-idf/components/esp_wifi/include/esp_wifi.h</code>: <code>esp_wifi_set_csi_rx_cb</code> (l. 1117–1141), <code>esp_wifi_set_csi_config</code> (l. 1143–1154), <code>esp_wifi_set_csi</code> (l. 1157–1167), <code>esp_wifi_set_channel</code> (l. 685–702).</li>
+  <li><code>~/esp/esp-idf/components/esp_wifi/include/esp_wifi_types.h</code>: <code>wifi_pkt_rx_ctrl_t</code> (l. 463–), <code>wifi_csi_config_t</code> (l. 573–582), <code>wifi_csi_info_t</code> (l. 589–600).</li>
+  <li><code>~/esp/esp-idf/docs/en/api-guides/wifi.rst</code>, secțiunile „Wi-Fi Channel State Information” și „Wi-Fi HT20/40” (l. 2211–). Online: <a href="https://docs.espressif.com/projects/esp-idf/en/v5.1.7/esp32/api-guides/wifi.html">ESP-IDF v5.1.7, Wi-Fi Driver</a>.</li>
+  <li>Firmware-ul proiectului: <code>src/firmware/esp32_csi_node/main/main.c</code>, <code>sdkconfig.defaults</code>, <code>sdkconfig</code> (<code>CONFIG_FREERTOS_HZ=100</code>, <code>CONFIG_CSI_UDP_PORT=5005</code>).</li>
+  <li><code>esp_wifi.h</code>: <code>esp_wifi_set_ps</code> (l. 596–604), <code>esp_wifi_set_storage</code> (l. 971–982), <code>esp_wifi_80211_tx</code> (l. 1090–1114), <code>esp_wifi_config_80211_tx_rate</code> (l. 1468). <code>wifi.rst</code>, secțiunea „Wi-Fi 80211 Packet Send”.</li>
+  <li>Cod deschis: <code>components/esp_common/include/esp_attr.h</code> (l. 22–23), <code>components/esp_timer/src/esp_timer_impl_lac.c</code> (l. 46–55, 94–110), <code>components/esp_ringbuf/include/freertos/ringbuf.h</code> (l. 136–147).</li>
+  <li>Jurnalele plăcii: <code>pas_cu_pas/output/03_diagnostic_hotspot.md</code>, <code>05_pas2_conectare.md</code>, <code>06_pas3_corp_intre.log</code>, <code>07_main_nou.log</code>.</li>
+  <li>Lanțul complet pentru <code>esp_wifi_start</code>, <code>esp_wifi_set_csi</code> și <code>wdev_csi_rx_process</code>, instrucțiune cu instrucțiune: <code>notite_curs_main.md</code>, secțiunile 14–16 și 20.</li>
+</ul>
+
+<pre><code>B=$(ls -d ~/.espressif/tools/xtensa-esp32-elf/*/xtensa-esp32-elf/bin)
+L=~/esp/esp-idf/components
+$B/xtensa-esp32-elf-objdump -dr $L/esp_wifi/lib/esp32/libpp.a  | grep -A80 "section .text.ic_csi_set_config:"
+$B/xtensa-esp32-elf-objdump -dr $L/esp_phy/lib/esp32/libphy.a  | grep -A80 "section .text.phy_chan_dump_cfg:"
+$B/xtensa-esp32-elf-objdump -dr $L/esp_phy/lib/esp32/libphy.a  | grep -A120 "section .text.phy_chan_filt_set:"
+$B/xtensa-esp32-elf-objdump -dr $L/esp_wifi/lib/esp32/libpp.a  | grep -A60 "section .text.hal_sniffer_rx_set_promis:"
+$B/xtensa-esp32-elf-objdump -dr $L/esp_wifi/lib/esp32/libpp.a  | grep -A30 "section .text.wdev_set_promis_filter:"
+$B/xtensa-esp32-elf-objdump -dr $L/esp_wifi/lib/esp32/libnet80211.a | grep -A60 "section .text.esp_wifi_set_storage:"
+$B/xtensa-esp32-elf-objdump -dr $L/esp_wifi/lib/esp32/libnet80211.a | grep -A80 "section .text.esp_wifi_80211_tx:"
+$B/xtensa-esp32-elf-objdump -dr $L/esp_wifi/lib/esp32/libnet80211.a | grep -A40 "section .text.wifi_set_ps_process:"</code></pre>
+
+<footer>11–12 noiembrie 2026 · Răspunde la notele „ce fac funcțiile cu regiștrii de control”, „cum se modif. param. de recepție”, „de studiat ce face biblioteca” și „de documentat cum scoate funcția din controllerul de wireless”. Notele despre studiul bibliografic și formatul lucrării sunt rezolvate în <a href="../../../thesis/licenta.pdf">teză</a>.</footer>
+
+</main>
+</body>
+</html>
