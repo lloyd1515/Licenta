@@ -1,0 +1,2 @@
+# lualatex: diacriticele ș/ț sunt glife reale (textul din PDF se poate copia corect)
+$pdf_mode = 4;

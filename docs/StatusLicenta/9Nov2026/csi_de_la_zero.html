@@ -1,0 +1,827 @@
+<!doctype html>
+<html lang="ro">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CSI de la zero</title>
+<style>
+:root{
+  --bg:#f6f5f1; --card:#ffffff; --ink:#1c1e23; --muted:#5d6372; --line:#e2e0d8;
+  --accent:#2f6fde; --accent-soft:#e4ecfb; --ok:#1d9a60; --ok-soft:#dcf2e7;
+  --warn:#c27a12; --warn-soft:#fbeed6; --bad:#c63f3f; --bad-soft:#f8dede;
+  --q:#8a4fd6; --i:#e0742c; --gray:#a9adb7; --gray-dark:#6b707c;
+  --shadow:0 1px 2px rgba(0,0,0,.05),0 8px 24px rgba(0,0,0,.06);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#13151a; --card:#1b1e25; --ink:#e8e9ee; --muted:#a3a9b7; --line:#2c303a;
+    --accent:#6f9dff; --accent-soft:#1f2a45; --ok:#43c98b; --ok-soft:#14321f;
+    --warn:#e9a443; --warn-soft:#3a2b12; --bad:#ef6d6d; --bad-soft:#3d1c1c;
+    --q:#b98cff; --i:#ff9a57; --gray:#5d626e; --gray-dark:#3c404a;
+    --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.35);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#13151a; --card:#1b1e25; --ink:#e8e9ee; --muted:#a3a9b7; --line:#2c303a;
+  --accent:#6f9dff; --accent-soft:#1f2a45; --ok:#43c98b; --ok-soft:#14321f;
+  --warn:#e9a443; --warn-soft:#3a2b12; --bad:#ef6d6d; --bad-soft:#3d1c1c;
+  --q:#b98cff; --i:#ff9a57; --gray:#5d626e; --gray-dark:#3c404a;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.35);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.6 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+main{max-width:980px;margin:0 auto;padding:0 16px 80px}
+h1{font-size:clamp(28px,5vw,44px);line-height:1.15;margin:0 0 12px}
+h2{font-size:clamp(22px,3.4vw,30px);line-height:1.2;margin:0 0 6px}
+h3{font-size:19px;margin:26px 0 8px}
+p{margin:8px 0}
+code{font:14px/1.4 ui-monospace,SFMono-Regular,Menlo,monospace;background:var(--accent-soft);padding:1px 5px;border-radius:5px}
+pre{font:14px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace;background:var(--accent-soft);padding:12px 14px;border-radius:10px;overflow-x:auto}
+.muted{color:var(--muted)}
+.hero{padding:40px 0 10px}
+.hero svg{width:100%;height:auto;display:block;margin-top:10px}
+.toc{scrollbar-width:thin;position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--line);display:flex;gap:6px;overflow-x:auto;padding:8px 0;margin-bottom:10px}
+.toc a{flex:0 0 auto;font-size:14px;text-decoration:none;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:999px;padding:4px 12px}
+.toc a:hover{border-color:var(--accent)}
+section{background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);padding:22px 22px 26px;margin:22px 0}
+.level{display:inline-block;font-size:13px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--accent);margin-bottom:4px}
+.short{font-size:20px;line-height:1.45;border-left:4px solid var(--accent);padding:6px 0 6px 14px;margin:14px 0}
+.analogy{background:var(--warn-soft);border-radius:12px;padding:12px 16px;margin:14px 0}
+.analogy b:first-child{color:var(--warn)}
+.answer{background:var(--ok-soft);border-radius:12px;padding:12px 16px;margin:16px 0}
+.answer b:first-child{color:var(--ok)}
+details{border:1px solid var(--line);border-radius:10px;padding:8px 14px;margin:12px 0}
+details summary{cursor:pointer;font-weight:600;color:var(--muted)}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}
+.card{border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:var(--bg)}
+.card h4{margin:0 0 4px;font-size:16px}
+.tag{display:inline-block;font-size:12px;font-weight:600;border-radius:6px;padding:1px 7px;margin-right:4px}
+.t-doc{background:var(--accent-soft);color:var(--accent)}
+.t-dis{background:var(--warn-soft);color:var(--warn)}
+.t-mas{background:var(--ok-soft);color:var(--ok)}
+.t-ded{background:var(--bad-soft);color:var(--bad)}
+.btns{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
+button{font:inherit;font-size:15px;cursor:pointer;border:1px solid var(--accent);background:var(--accent);color:#fff;border-radius:10px;padding:6px 14px}
+button.ghost{background:transparent;color:var(--accent)}
+button:disabled{opacity:.45;cursor:default}
+.caption{min-height:3.4em;font-size:17px;background:var(--bg);border-radius:10px;padding:10px 14px;margin-top:8px}
+.stage{background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:10px;overflow:hidden}
+svg text{fill:var(--ink);font-family:system-ui,sans-serif}
+svg .muted{fill:var(--muted)}
+/* hero */
+.wave{fill:none;stroke:var(--accent);stroke-width:3;opacity:0;transform-origin:150px 120px;animation:wave 2.4s linear infinite}
+.wave.w2{animation-delay:.8s}.wave.w3{animation-delay:1.6s}
+@keyframes wave{0%{transform:scale(.2);opacity:.9}100%{transform:scale(3.2);opacity:0}}
+.walker{animation:walk 6s ease-in-out infinite alternate}
+@keyframes walk{from{transform:translateX(0)}to{transform:translateX(150px)}}
+/* chorus bars */
+.bars{display:flex;align-items:flex-end;gap:2px;height:120px;padding:4px}
+.bars span{flex:1;height:100%;background:var(--ok);border-radius:2px 2px 0 0;transform-origin:bottom;transition:transform .7s ease,background .4s}
+.bars span.off{background:var(--gray)}
+.sing span:not(.off){animation:sing 1.2s ease-in-out infinite alternate}
+@keyframes sing{from{transform:scaleY(.35)}to{transform:scaleY(1)}}
+.axis{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);padding:0 4px}
+/* pipeline */
+.pipe-node circle{fill:var(--card);stroke:var(--line);stroke-width:3;transition:all .3s}
+.pipe-node.active circle{fill:var(--accent-soft);stroke:var(--accent);stroke-width:4}
+.pipe-node.done circle{stroke:var(--ok)}
+.pipe-path{fill:none;stroke:var(--line);stroke-width:4;stroke-dasharray:8 6}
+.dot{fill:var(--warn)}
+/* restaurant */
+.layers{display:grid;gap:10px;position:relative}
+.layer{border:2px solid var(--line);border-radius:12px;padding:12px 14px 12px 64px;position:relative;transition:all .4s;background:var(--bg)}
+.layer .ico{position:absolute;left:14px;top:12px;font-size:30px;line-height:1}
+.layer.lit{border-color:var(--accent);background:var(--accent-soft)}
+.ticket{position:absolute;right:14px;top:10px;background:var(--warn);color:#fff;font-size:13px;font-weight:700;border-radius:6px;padding:3px 8px;opacity:0;transition:top .7s ease,opacity .3s}
+/* register */
+.reg{display:grid;grid-template-columns:repeat(32,1fr);gap:2px;margin:4px 0 2px}
+.reg div{aspect-ratio:1/1.5;border-radius:3px;background:var(--gray-dark);display:flex;align-items:center;justify-content:center;font:11px ui-monospace,monospace;color:#fff;transition:background .35s,transform .35s}
+.reg div.on{background:var(--ok)}
+.reg div.b23{outline:2px solid var(--warn);outline-offset:1px}
+.reg div.flash{transform:scale(1.25)}
+.regrow{display:grid;grid-template-columns:150px 1fr 110px;gap:10px;align-items:center;margin:4px 0}
+.regrow .hex{font:14px ui-monospace,monospace}
+.regrow.hide{opacity:.15}
+@media (max-width:640px){.regrow{grid-template-columns:1fr}.reg div{font-size:0}}
+/* config bits */
+.cfg{display:grid;grid-template-columns:repeat(8,1fr);gap:6px;margin:10px 0}
+.cfg div{border-radius:8px;background:var(--gray-dark);color:#fff;text-align:center;padding:8px 2px;font-size:13px;transition:background .3s}
+.cfg div.on{background:var(--ok)}
+.cfg small{display:block;font-size:11px;opacity:.85}
+.controls label{display:inline-flex;align-items:center;gap:6px;margin:4px 14px 4px 0}
+/* race */
+.lane{position:relative;height:56px;border:1px dashed var(--line);border-radius:10px;margin:8px 0;overflow:hidden;background:var(--bg)}
+.lane .lab{position:absolute;left:10px;top:4px;font-size:13px;color:var(--muted)}
+.lane .count{position:absolute;right:10px;top:16px;font-weight:700}
+.frame{position:absolute;top:24px;left:-70px;height:22px;width:60px;border-radius:4px;background:var(--gray);display:flex}
+.frame b{width:14px;background:var(--ok);border-radius:4px 0 0 4px}
+.frame.go{animation:fly 2.2s linear forwards}
+@keyframes fly{to{left:calc(100% - 150px)}}
+/* stepper */
+.steps{display:grid;gap:8px;counter-reset:s}
+.step{border:2px solid var(--line);border-radius:12px;padding:10px 14px 10px 50px;position:relative;transition:all .35s;opacity:.55}
+.step::before{counter-increment:s;content:counter(s);position:absolute;left:12px;top:10px;width:26px;height:26px;border-radius:50%;background:var(--gray-dark);color:#fff;font-weight:700;display:flex;align-items:center;justify-content:center;font-size:14px}
+.step.active{opacity:1;border-color:var(--accent);background:var(--accent-soft)}
+.step.active::before{background:var(--accent)}
+.step.done{opacity:.9}
+.step.done::before{background:var(--ok)}
+.envelope{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:6px;margin-top:10px}
+.envelope div{border:1px dashed var(--line);border-radius:8px;padding:6px 8px;font-size:13px;transition:all .4s}
+.envelope div.filled{border-style:solid;border-color:var(--ok);background:var(--ok-soft)}
+.envelope div.used{box-shadow:0 0 0 2px var(--warn) inset}
+.envelope.gone{opacity:.15;transform:scale(.96)}
+/* packet */
+.pkt-head{display:grid;grid-template-columns:2fr 1fr 1fr 4fr 2fr;gap:3px;margin:8px 0}
+.pkt-head div{border-radius:6px;background:var(--gray-dark);color:#fff;font-size:12px;text-align:center;padding:6px 2px;transition:background .3s}
+.pkt-head div.on{background:var(--accent)}
+.pairs{display:grid;grid-template-columns:repeat(16,1fr);gap:3px}
+.pair{display:flex;height:30px;border-radius:5px;overflow:hidden;opacity:.25;transition:opacity .25s,transform .25s;cursor:help}
+.pair i,.pair u{flex:1;text-decoration:none;font-style:normal}
+.pair i{background:var(--q)}.pair u{background:var(--i)}
+.pair.on{opacity:1}
+.pair.null i,.pair.null u{background:var(--gray)}
+.pair.guard i,.pair.guard u{background:var(--gray-dark)}
+.pair.bad i,.pair.bad u{background:var(--bad)}
+.pair.zap{transform:scale(1.3)}
+@media (max-width:640px){.pairs{grid-template-columns:repeat(8,1fr)}}
+.legend{display:flex;flex-wrap:wrap;gap:14px;font-size:14px;margin:8px 0}
+.legend span::before{content:"";display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:6px;vertical-align:-1px;background:var(--c)}
+table{border-collapse:collapse;width:100%;font-size:15px}
+th,td{text-align:left;border-bottom:1px solid var(--line);padding:7px 6px;vertical-align:top}
+th{color:var(--muted);font-weight:600}
+.star{color:var(--warn);font-weight:700}
+input[type=range]{width:100%;accent-color:var(--accent)}
+.iqwrap{display:grid;grid-template-columns:minmax(220px,320px) 1fr;gap:18px;align-items:center}
+@media (max-width:640px){.iqwrap{grid-template-columns:1fr}}
+.big{font-size:26px;font-weight:700}
+@media (prefers-reduced-motion: reduce){
+  *{animation:none!important;transition:none!important}
+  html{scroll-behavior:auto}
+}
+</style>
+</head>
+<body>
+<main>
+
+<header class="hero">
+  <div class="level">Pentru cine pornește de la zero</div>
+  <h1>CSI de la zero: de la unda radio la amplitudine</h1>
+  <p class="muted">Explicația, de sus în jos, a răspunsurilor din <code>raspunsuri_note_5nov_live.md</code>. Fiecare secțiune începe cu ideea pe scurt. Detaliile de cod sunt ascunse în casete pe care le deschizi doar dacă vrei.</p>
+  <svg viewBox="0 0 900 240" role="img" aria-label="Placa A emite unde, placa B le primește, o persoană se mișcă între ele">
+    <circle class="wave" cx="150" cy="120" r="30"/><circle class="wave w2" cx="150" cy="120" r="30"/><circle class="wave w3" cx="150" cy="120" r="30"/>
+    <rect x="110" y="95" width="80" height="50" rx="8" fill="var(--accent)"/><text x="150" y="126" text-anchor="middle" style="fill:#fff;font-weight:700">Placa A</text>
+    <text x="150" y="172" text-anchor="middle" class="muted" font-size="14">strigă o frază cunoscută</text>
+    <rect x="710" y="95" width="80" height="50" rx="8" fill="var(--ok)"/><text x="750" y="126" text-anchor="middle" style="fill:#fff;font-weight:700">Placa B</text>
+    <text x="750" y="172" text-anchor="middle" class="muted" font-size="14">ascultă și compară</text>
+    <g class="walker"><circle cx="380" cy="70" r="14" fill="var(--warn)"/><rect x="368" y="88" width="24" height="60" rx="10" fill="var(--warn)"/><text x="380" y="180" text-anchor="middle" class="muted" font-size="14">tu</text></g>
+    <text x="450" y="225" text-anchor="middle" font-size="15">Când te miști, unda ajunge altfel la placa B. CSI arată exact această diferență.</text>
+  </svg>
+</header>
+
+<nav class="toc" aria-label="Cuprins">
+  <a href="#prof">1 · Ce vrea profesorul</a><a href="#mare">2 · Imaginea mare</a><a href="#csi">3 · Ce este CSI</a>
+  <a href="#drum">4 · Drumul („!”)</a><a href="#bib">5 · Biblioteca</a><a href="#reg">6 · Regiștrii</a>
+  <a href="#param">7 · Parametrii</a><a href="#date">8 · Datele</a><a href="#functii">9 · Toate funcțiile</a><a href="#final">10 · Ce spui la prezentare</a>
+</nav>
+
+<!-- 1 -->
+<section id="prof">
+  <div class="level">Nivelul 1 · Întrebarea</div>
+  <h2>Ce vrea profesorul, în cuvinte simple</h2>
+  <p class="short">Toată tema are o singură întrebare: <b>cum devine o undă radio din cameră un număr pe ecranul tău?</b> Notele din 5 noiembrie sunt bucăți din această întrebare.</p>
+  <div class="grid2">
+    <div class="card"><h4>Nota cu „!”</h4><p>„De documentat cum scoate funcția din controllerul de wireless.”</p><p><b>Simplu:</b> drumul unei măsurători, de la antenă la codul tău. Secțiunea 4.</p></div>
+    <div class="card"><h4>„De studiat ce face biblioteca”</h4><p><b>Simplu:</b> cine face, de fapt, munca? Codul tău sau codul Espressif? Secțiunea 5.</p></div>
+    <div class="card"><h4>„Ce fac funcțiile cu regiștrii de control”</h4><p><b>Simplu:</b> cum primește cipul o comandă, de exemplu „pornește măsurarea”? Secțiunea 6.</p></div>
+    <div class="card"><h4>„Cum se modif. param. de recepție”</h4><p><b>Simplu:</b> ce alegi să măsori și din ce semnale? Secțiunea 7.</p></div>
+    <div class="card"><h4>„Primul capitol: fizică, conceptual”</h4><p><b>Simplu:</b> explică ce este CSI fără formule grele. Secțiunea 3 este schița acestui capitol.</p></div>
+    <div class="card"><h4>„Analizat datele, nu ca să dovedesc x, y”</h4><p><b>Simplu:</b> descrie ce arată datele, așa cum sunt. Nu porni de la o concluzie dorită. Secțiunea 8 arată ce date ai.</p></div>
+  </div>
+  <p class="muted">Aceasta este interpretarea mea a notelor tale. Confirm-o cu profesorul.</p>
+</section>
+
+<!-- 2 -->
+<section id="mare">
+  <div class="level">Nivelul 2 · Imaginea mare</div>
+  <h2>Tot drumul, într-o singură imagine</h2>
+  <p class="short">O placă strigă. Cealaltă ascultă și compară. Codul nostru doar mută numerele la PC. PC-ul calculează amplitudinea.</p>
+  <div class="stage"><svg id="pipe" viewBox="0 0 900 300" role="img" aria-label="Drumul unei măsurători în 10 pași"></svg></div>
+  <div class="btns"><button id="pPlay">▶ Pornește</button><button class="ghost" id="pPrev">◀ Înapoi</button><button class="ghost" id="pNext">Înainte ▶</button></div>
+  <div class="caption" id="pCap" aria-live="polite">Apasă „Pornește”. Punctul portocaliu este o singură măsurătoare.</div>
+  <div class="analogy"><b>Analogie.</b> Este ca o poștă. Placa A scrie o scrisoare cunoscută. Aerul o îndoaie și o pătează. Cipul plăcii B compară scrisoarea primită cu originalul și notează diferențele. Codul nostru pune notițele într-un plic și le trimite la PC.</div>
+</section>
+
+<!-- 3 -->
+<section id="csi">
+  <div class="level">Nivelul 3 · Fizica (schița capitolului 1)</div>
+  <h2>Ce este CSI, pas cu pas</h2>
+  <p class="short">CSI înseamnă: pentru fiecare dintre 64 de „note” ale semnalului Wi-Fi, cât de slabă și cât de rotită a ajuns nota. Fiecare notă dă o săgeată. Lungimea săgeții este amplitudinea.</p>
+
+  <h3>3.1 Semnalul Wi-Fi este un cor de 64 de voci</h3>
+  <p>Un canal Wi-Fi are 20 MHz. Placa nu trimite o singură frecvență. Ea trimite în același timp 64 de frecvențe mici, la 312,5 kHz una de alta. Le numim <b>sub-frecvențe</b>. Doar 52 „cântă” (verde). Cea din mijloc și cele de pe margini tac (gri).</p>
+  <div class="stage"><div class="bars sing" id="chorus"></div><div class="axis"><span>−32</span><span>marginea</span><span>0 (mijlocul tace)</span><span>marginea</span><span>+31</span></div></div>
+  <div class="analogy"><b>Analogie.</b> Un cor cu 64 de locuri. Fiecare cântăreț are nota lui. 52 de cântăreți cântă împreună. 12 locuri sunt goale: unul la mijloc și câteva la margini, ca să nu deranjeze vecinii de canal.</div>
+
+  <h3>3.2 La începutul fiecărui cadru, corul cântă o frază cunoscută (LLTF)</h3>
+  <p>Orice cadru Wi-Fi modern (OFDM) începe cu o frază de test. Se numește <b>LLTF</b>. Receptorul știe dinainte exact cum sună. Deci poate compara: ce a sosit, față de ce trebuia să sosească.</p>
+  <div class="grid2">
+    <div class="stage"><b>Ce trimite placa A</b> <span class="muted">(știut dinainte)</span><div class="bars" id="sent"></div></div>
+    <div class="stage"><b>Ce aude placa B</b> <span class="muted">(după cameră)</span><div class="bars" id="recv"></div></div>
+  </div>
+  <div class="btns"><button id="lltfGo">Trimite fraza prin cameră</button></div>
+  <div class="caption" id="lltfCap">Stânga: toate notele au aceeași tărie. Apasă butonul.</div>
+
+  <h3>3.3 Fiecare notă devine o săgeată: perechea (I, Q)</h3>
+  <p>Cipul nu notează doar „cât de tare”. Notează și „cât de rotită” a ajuns unda. Două numere descriu o săgeată pe o foaie cu axe: <b style="color:var(--i)">I</b> = cât merge spre dreapta, <b style="color:var(--q)">Q</b> = cât urcă. ESP32 scrie, pentru fiecare notă, întâi Q, apoi I. Trage de săgeată sau mută glisoarele.</p>
+  <div class="iqwrap">
+    <div class="stage"><svg id="iq" viewBox="0 0 320 320" role="img" aria-label="Săgeata I/Q"></svg></div>
+    <div>
+      <label>I (partea „reală”, spre dreapta): <b id="iVal"></b><input type="range" id="iS" min="-40" max="40" value="12"></label>
+      <label>Q (partea „imaginară”, în sus): <b id="qVal"></b><input type="range" id="qS" min="-40" max="40" value="5"></label>
+      <p>Amplitudinea = lungimea săgeții = √(I² + Q²)</p>
+      <p class="big" id="ampVal"></p>
+      <p class="muted" id="phVal"></p>
+      <p class="muted" id="bufVal"></p>
+      <div class="btns"><button id="rot">Rotește săgeata</button></div>
+      <p class="muted">Când săgeata se rotește, lungimea nu se schimbă. Amplitudinea ignoră rotirea (faza).</p>
+    </div>
+  </div>
+  <div class="analogy"><b>Analogie.</b> Pitagora pe o hartă: mergi 12 pași la est (I) și 5 pași la nord (Q). Distanța în linie dreaptă este √(12² + 5²) = 13 pași. Asta este amplitudinea.</div>
+
+  <h3>3.4 De ce se schimbă săgețile când te miști</h3>
+  <p>La placa B ajung mai multe copii ale undei: una directă, una de pe perete, una de pe corpul tău. Fiecare copie este o săgeată. Cipul vede doar <b>suma</b> lor (săgeata albastră). Când te miști, săgeata „corp” se rotește. Suma își schimbă lungimea. Și pentru că fiecare notă are altă lungime de undă, fiecare notă se schimbă altfel. Forma graficului se schimbă.</p>
+  <div class="grid2">
+    <div class="stage"><svg id="mp" viewBox="0 0 320 240" role="img" aria-label="Suma a trei căi pentru nota +10"></svg></div>
+    <div class="stage"><b>Amplitudinea pe toate cele 52 de note</b><div class="bars" id="mpBars"></div><div class="axis"><span>−26</span><span>0</span><span>+26</span></div></div>
+  </div>
+  <div class="btns"><button id="mpGo">Persoana se mișcă</button></div>
+  <div class="answer"><b>De reținut pentru capitolul 1.</b> CSI = pentru fiecare sub-frecvență, raportul dintre ce a sosit și ce s-a trimis. Este un număr complex H = I + jQ. Amplitudinea |H| = √(I² + Q²). Mișcarea schimbă căile undei, deci schimbă forma amplitudinii pe sub-frecvențe.</div>
+  <details><summary>Atenție: amplitudinea nu are unități fixe</summary>
+    <p>Cipul își reglează singur „volumul” (scalare automată). Pe 10 nov., cu o persoană în cale, RSSI a scăzut de la −47 la −60 dBm, dar amplitudinea medie a crescut de la 19,6 la 21,8 <span class="tag t-mas">măsurat</span>. Deci compară <b>forma</b> spectrului, nu valoarea absolută <span class="tag t-ded">dedus</span>.</p>
+  </details>
+</section>
+
+<!-- 4 -->
+<section id="drum">
+  <div class="level">Nivelul 4 · Nota cu „!”</div>
+  <h2>Drumul unei măsurători prin funcții</h2>
+  <p class="short">Codul nostru nu citește niciodată antena. El lasă un „număr de telefon” (adresa lui <code>on_csi</code>) și apasă un întrerupător. Apoi biblioteca îl sună la fiecare măsurătoare.</p>
+
+  <h3>4.1 Pregătirea: o singură dată, în app_main</h3>
+  <div class="grid2">
+    <div class="card"><h4>① Lasă numărul de telefon</h4><p><code>esp_wifi_set_csi_rx_cb(on_csi)</code> scrie adresa lui <code>on_csi</code> într-o variabilă din memorie (<code>g_wdev_csi_rx</code>). Nimic nu se schimbă în cip.</p></div>
+    <div class="card"><h4>② Spune ce vrei să păstrezi</h4><p><code>esp_wifi_set_csi_config</code>: „păstrează doar fraza LLTF”. Ajunge în registrul radio. Secțiunea 7.</p></div>
+    <div class="card"><h4>③ Apasă întrerupătorul</h4><p><code>esp_wifi_set_csi(true)</code>: un bit din cip devine 1. Din acest moment cipul calculează CSI. Secțiunea 6.</p></div>
+  </div>
+  <div class="analogy"><b>Analogie.</b> Lași numărul tău de telefon la recepția unui hotel și spui „sunați-mă când vine un colet”. Nu stai tu la ușă. Recepția (biblioteca) te sună.</div>
+
+  <h3>4.2 La fiecare cadru OFDM primit (din probe-urile vecinului: circa 90 pe secundă)</h3>
+  <div class="steps" id="steps">
+    <div class="step"><b>Cipul calculează CSI.</b> Compară fraza LLTF primită cu cea știută. Rezultat: 64 de perechi (Q, I) = 128 de numere mici. <span class="tag t-doc">documentat</span> <span class="tag t-ded">algoritmul exact nu este public</span></div>
+    <div class="step"><b>Biblioteca ia un plic gol.</b> <code>wdev_csi_rx_process</code> (în <code>libpp.a</code>) cere 64 de octeți de memorie. Plicul se numește <code>info</code>. <span class="tag t-dis">dezasamblat</span></div>
+    <div class="step"><b>Biblioteca completează plicul.</b> Pune în el: puterea semnalului (RSSI), adresa expeditorului, cele 128 de numere (<code>buf</code>), lungimea, antetul cadrului. <span class="tag t-dis">dezasamblat</span></div>
+    <div class="step"><b>Biblioteca sună la on_csi.</b> Citește numărul lăsat la pasul ①, apoi apelează <code>on_csi(ctx, info)</code>. Acum rulează codul nostru. <span class="tag t-dis">dezasamblat</span></div>
+    <div class="step"><b>on_csi copiază ce îi trebuie.</b> Verifică dacă este un cadru probe (primul octet al antetului = 0x40), copiază cei 128 de octeți într-un pachet al nostru și îl pune pe banda rulantă. Iese repede. <span class="tag t-doc">ghidul cere asta</span></div>
+    <div class="step"><b>Biblioteca aruncă plicul.</b> După ce <code>on_csi</code> iese, plicul <code>info</code> se eliberează (<code>free</code>). De aceea <code>on_csi</code> trebuie să copieze datele, nu să le păstreze. <span class="tag t-dis">dezasamblat</span></div>
+  </div>
+  <div class="stage" style="margin-top:10px"><b>Plicul info</b> <span class="muted">(galben = câmpurile pe care le folosește on_csi)</span>
+    <div class="envelope" id="env">
+      <div data-f="rx_ctrl">rx_ctrl<br><small>RSSI, rată, canal…</small></div><div data-f="mac">mac<br><small>cine a trimis</small></div>
+      <div data-f="dmac">dmac<br><small>pentru cine</small></div><div data-f="fwi">first_word_invalid<br><small>primii 4 octeți răi?</small></div>
+      <div data-f="buf">buf<br><small>cele 128 de numere</small></div><div data-f="len">len<br><small>128</small></div>
+      <div data-f="hdr">hdr<br><small>antetul cadrului</small></div><div data-f="payload">payload, rx_seq<br><small>restul</small></div>
+    </div>
+  </div>
+  <div class="btns"><button id="sPlay">▶ Arată pașii</button><button class="ghost" id="sNext">Pasul următor</button><button class="ghost" id="sReset">De la început</button></div>
+  <div class="answer"><b>Răspunsul la nota „!”.</b> Pregătirea face două scrieri: adresa lui <code>on_csi</code> în memorie și bitul 23 în registrul <code>0x3FF7309C</code>. Apoi, la fiecare cadru OFDM, cipul calculează CSI din LLTF. Funcția <code>wdev_csi_rx_process</code> din <code>libpp.a</code> completează plicul <code>info</code>, apelează <code>on_csi</code> și apoi aruncă plicul. <code>on_csi</code> copiază 128 de octeți în coadă, iar <code>udp_sender_task</code> îi trimite la PC.</div>
+  <details><summary>Unde este în cod (pentru cine vrea)</summary>
+    <p><code>main.c</code>: liniile 113 (înregistrarea), 114 (pornirea), 32–46 (<code>on_csi</code>), 49–62 (<code>udp_sender_task</code>). Header: <code>esp_wifi.h</code> liniile 1116–1141. Ghidul <code>wifi.rst</code>, linia 2273: „runs from Wi-Fi task […] do not do lengthy operations”.</p>
+  </details>
+</section>
+
+<!-- 5 -->
+<section id="bib">
+  <div class="level">Nivelul 5 · Nota „ce face biblioteca”</div>
+  <h2>Cine face munca: 3 straturi</h2>
+  <p class="short">Codul tău doar „comandă”. Biblioteca Espressif face munca. Cipul o execută.</p>
+  <div class="layers" id="layers">
+    <div class="layer" data-l="0"><span class="ico">📋</span><b>Stratul 1 · Meniul = header-ul (<code>esp_wifi.h</code>)</b><br>Spune ce poți comanda: numele funcției, ce îi dai, ce erori poate întoarce. Nu spune cum se face. <span class="tag t-doc">documentat</span></div>
+    <div class="layer" data-l="1"><span class="ico">🍳</span><b>Stratul 2 · Bucătăria închisă = bibliotecile <code>.a</code></b><br><code>libnet80211.a</code> preia comenzile (funcțiile <code>esp_wifi_*</code>). <code>libpp.a</code> lucrează cu pachetele și cu CSI. <code>libphy.a</code> reglează radioul. Espressif nu dă rețeta, doar cod mașină. <span class="tag t-dis">dezasamblat</span></div>
+    <div class="layer" data-l="2"><span class="ico">🎛️</span><b>Stratul 3 · Aragazul cu butoane = regiștrii din cip</b><br>Adrese fixe din cip. Când biblioteca schimbă un bit acolo, se întâmplă ceva fizic: de exemplu, pornește CSI. <span class="tag t-dis">dezasamblat</span></div>
+    <div class="ticket" id="ticket">comanda: esp_wifi_set_csi(true)</div>
+  </div>
+  <div class="btns"><button id="lGo">Urmărește o comandă</button></div>
+  <div class="caption" id="lCap">Apasă butonul. Biletul portocaliu este comanda ta.</div>
+  <div class="analogy"><b>Analogie.</b> Restaurant. Tu citești meniul și comanzi. Nu intri în bucătărie. Bucătarul gătește după o rețetă pe care nu o vezi. Noi am privit doar prin geamul bucătăriei (cu <code>objdump</code>): vedem mișcările bucătarului, nu rețeta scrisă.</div>
+  <div class="answer"><b>Răspunsul la nota „ce face biblioteca”.</b> Header-ele (<code>esp_wifi.h</code>, <code>esp_wifi_types.h</code>) dau numele, parametrii și erorile. Bibliotecile închise fac munca: <code>libnet80211.a</code> (funcțiile <code>esp_wifi_*</code>), <code>libpp.a</code> (pachete, CSI, <code>hal_mac_*</code>), <code>libphy.a</code> (radioul). La final, ele scriu biți în regiștrii cipului. Pentru studiul bibliografic: citezi header-ele și ghidul <code>wifi.rst</code>. Ce ai văzut cu <code>objdump</code> marchezi ca analiză proprie.</div>
+</section>
+
+<!-- 6 -->
+<section id="reg">
+  <div class="level">Nivelul 6 · Nota „regiștrii de control”</div>
+  <h2>Cum primește cipul o comandă</h2>
+  <p class="short">Un registru este un panou cu 32 de întrerupătoare. Pentru CSI, întrerupătorul numărul 23 din panoul <code>0x3FF7309C</code> înseamnă „pornit”.</p>
+  <div class="stage">
+    <div class="regrow"><b>Registrul în cip</b><div class="reg" id="rReg"></div><span class="hex" id="hReg"></span></div>
+    <div class="regrow hide" id="rowCpy"><b>Copia în procesor</b><div class="reg" id="rCpy"></div><span class="hex" id="hCpy"></span></div>
+    <div class="regrow hide" id="rowMsk"><b>Masca</b><div class="reg" id="rMsk"></div><span class="hex" id="hMsk"></span></div>
+    <div class="axis"><span>bitul 31</span><span>bitul 23 (încadrat)</span><span>bitul 0</span></div>
+  </div>
+  <div class="btns"><button id="rOn">esp_wifi_set_csi(true)</button><button class="ghost" id="rOff">esp_wifi_set_csi(false)</button></div>
+  <div class="caption" id="rCap">Ceilalți biți au valori inventate aici. Valorile lor reale nu sunt publice.</div>
+  <div class="analogy"><b>Analogie.</b> Un panou unde nu poți atinge un singur întrerupător. Poți doar să scoți tot panoul și să pui altul. Deci: fotografiezi panoul (citește), schimbi doar întrerupătorul 23 în fotografie, apoi montezi panoul nou (scrie). Ceilalți 31 rămân cum erau.</div>
+  <h3>Funcția din main.c nu atinge direct cipul</h3>
+  <p>Funcția <code>esp_wifi_set_csi</code> verifică întâi erorile. Apoi pune un <b>bilet</b> în coada task-ului Wi-Fi și iese. Task-ul Wi-Fi (un alt „angajat”) citește biletul și abia el apelează <code>hal_mac_set_csi</code>, care schimbă bitul.</p>
+  <table>
+    <thead><tr><th>Funcția din main.c</th><th>Ce atinge, la final</th><th>Analogie</th></tr></thead>
+    <tbody>
+      <tr><td><code>esp_wifi_set_csi(true)</code></td><td>registrul <code>0x3FF7309C</code>, bitul 23 = 1</td><td>întrerupătorul „pornit”</td></tr>
+      <tr><td><code>esp_wifi_set_csi_config</code></td><td>registrul radio <code>0x3FF5CD0C</code> (biții 0–7)</td><td>butoanele „ce păstrez”</td></tr>
+      <tr><td><code>esp_wifi_set_promiscuous(true)</code></td><td>4 regiștri ai filtrelor de recepție</td><td>„ascultă pe toată lumea”</td></tr>
+      <tr><td><code>esp_wifi_set_csi_rx_cb</code></td><td>doar memorie RAM (<code>g_wdev_csi_rx</code>)</td><td>numărul de telefon</td></tr>
+      <tr><td><code>esp_wifi_config_80211_tx_rate</code></td><td>doar memorie RAM (<code>g_80211_tx_rate</code>)</td><td>o notiță pentru emițător</td></tr>
+    </tbody>
+  </table>
+  <div class="answer"><b>Răspunsul la nota „regiștrii de control”.</b> Funcțiile <code>esp_wifi_set_*</code> nu scriu direct în regiștri. Ele verifică erorile și trimit un mesaj task-ului Wi-Fi. Acolo, funcțiile <code>hal_*</code> și <code>phy_*</code> citesc registrul, schimbă un bit și îl scriu înapoi. Exemplu: <code>esp_wifi_set_csi(true)</code> → <code>hal_mac_set_csi</code> → registrul <code>0x3FF7309C</code>, bitul 23 = 1. Sursa este dezasamblarea. Espressif nu descrie acești regiștri.</div>
+</section>
+
+<!-- 7 -->
+<section id="param">
+  <div class="level">Nivelul 7 · Nota „parametrii de recepție”</div>
+  <h2>Ce alegi să măsori și din ce semnale</h2>
+  <p class="short">Doi „butoni”: (1) ce bucăți din măsurătoare păstrezi; (2) ce cadre ajung la placă și au fraza LLTF.</p>
+
+  <h3>7.1 Butonul 1: ce păstrezi (registrul radio 0x3FF5CD0C)</h3>
+  <p>Structura <code>wifi_csi_config_t</code> are 8 câmpuri mici. Biblioteca pune fiecare câmp într-un bit al registrului. Bifează și vezi biții.</p>
+  <div class="controls">
+    <label><input type="checkbox" id="cL" checked> lltf_en (fraza LLTF)</label>
+    <label><input type="checkbox" id="cH"> htltf_en (fraza HT, cadre 802.11n)</label>
+    <label><input type="checkbox" id="cS"> stbc_htltf2_en (a doua frază HT)</label>
+    <label><input type="checkbox" id="cM"> manu_scale (volum fix)</label>
+    <label style="min-width:240px">shift = <b id="shV">0</b><input type="range" id="cSh" min="0" max="15" value="0"></label>
+  </div>
+  <div class="cfg" id="cfg"></div>
+  <p>Valoarea biților 0–7: <b class="big" id="cfgHex"></b> <button class="ghost" id="cfgProj">Setarea proiectului</button></p>
+  <p class="muted" id="cfgTxt"></p>
+  <div class="analogy"><b>Analogie.</b> Un reportofon cu butoane: „înregistrează fraza 1”, „înregistrează fraza 2”, „volum automat sau fix”. Proiectul păstrează doar fraza 1 (LLTF), pentru că ea există în toate cadrele OFDM și are mereu 64 de note.</div>
+
+  <h3>7.2 Butonul 2: ce cadre dau CSI</h3>
+  <p>Doar cadrele OFDM (6 Mbps sau mai mult) încep cu fraza LLTF. Cadrele vechi la 1 Mbps (DSSS) nu au această frază. Fără frază cunoscută, cipul nu are cu ce compara. Deci nu există CSI.</p>
+  <div class="lane"><span class="lab">probe la 6 Mbps (OFDM, cu LLTF verde)</span><span class="count" id="c6">0 CSI</span></div>
+  <div class="lane"><span class="lab">probe la 1 Mbps (DSSS, fără LLTF)</span><span class="count" id="c1">0 CSI</span></div>
+  <div class="btns"><button id="raceGo">Trimite probe-uri timp de 5 s</button></div>
+  <div class="caption" id="raceCap">Măsurat pe 12 nov., în 5 s: 428 de probe la 6 Mbps → 428 CSI. 470 de probe la 1 Mbps → 0 CSI.</div>
+  <div class="card"><h4>Și modul promiscuu</h4><p>Normal, placa ascultă doar ce îi trimite routerul. În modul promiscuu cu <code>MASK_ALL</code>, ascultă toate cadrele de pe canal, inclusiv probe-urile vecinului. Analogie: auzi toate conversațiile din cameră, nu doar pe cele adresate ție.</p></div>
+  <div class="answer"><b>Răspunsul la nota „parametrii de recepție”.</b> Câmpurile din <code>wifi_csi_config_t</code> ajung, prin <code>ic_csi_set_config</code> și <code>phy_chan_dump_cfg</code>, în registrul <code>0x3FF5CD0C</code>: bitul 0 = HT-LTF, bitul 1 = LLTF, bitul 2 = STBC, bitul 3 = volum fix, biții 4–7 = shift. Proiectul are <code>0x02</code> (doar LLTF). Filtrul de canal merge la <code>phy_chan_filt_set</code>. CSI vine doar din cadre OFDM, deci probe-urile pleacă la 6 Mbps. Modul promiscuu face placa să audă cadrele tuturor.</div>
+</section>
+
+<!-- 8 -->
+<section id="date">
+  <div class="level">Nivelul 8 · Datele</div>
+  <h2>Ce date luăm și cum le organizăm</h2>
+  <p class="short">Din plicul <code>info</code> luăm 4 lucruri: cele 128 de numere, RSSI, un indicator de octeți răi și primul octet al antetului. Le punem într-un pachet de 138 de octeți. PC-ul face din ele 64 de amplitudini.</p>
+
+  <h3>8.1 Pachetul nostru de 138 de octeți</h3>
+  <p>Primii 10 octeți sunt eticheta pachetului. Restul de 128 sunt 64 de perechi: <b style="color:var(--q)">Q</b>, apoi <b style="color:var(--i)">I</b>. Treci cu mouse-ul peste o pereche ca să vezi ce sub-frecvență este.</p>
+  <div class="pkt-head" id="pktHead">
+    <div>magic 0xA55A<br><small>2 octeți</small></div><div>nod<br><small>1</small></div><div>RSSI<br><small>1</small></div><div>timp (µs)<br><small>4 octeți</small></div><div>seq<br><small>2</small></div>
+  </div>
+  <div class="pairs" id="pairs"></div>
+  <div class="legend">
+    <span style="--c:var(--q)">Q (primul octet)</span><span style="--c:var(--i)">I (al doilea)</span>
+    <span style="--c:var(--gray)">k = 0, mijlocul tace</span><span style="--c:var(--bad)">k = +1, octeți răi → 0</span><span style="--c:var(--gray-dark)">margini, tac</span>
+  </div>
+  <div class="btns"><button id="pkGo">on_csi construiește pachetul</button></div>
+  <div class="caption" id="pkCap">Treci peste o pereche sau apasă butonul.</div>
+  <div class="grid2">
+    <div class="card"><h4>Ordinea ciudată</h4><p>Perechile 0–31 sunt sub-frecvențele 0…+31. Perechile 32–63 sunt −32…−1. Așa le scrie cipul <span class="tag t-doc">documentat</span>.</p></div>
+    <div class="card"><h4>Câte sunt utile</h4><p>52 cântă (±1…±26). Sub-frecvența +1 cade în primii 4 octeți răi, deci o punem 0. Rămân <b>51</b> utile <span class="tag t-mas">măsurat</span>.</p></div>
+  </div>
+
+  <h3>8.2 Pe PC: din perechi în amplitudini</h3>
+  <pre>antet = struct.unpack("&lt;HBbIH", pachet[0:10])      # magic, nod, RSSI, timp, seq
+iq    = numpy.frombuffer(pachet[10:], dtype=int8)  # 128 de numere
+ampl  = numpy.hypot(iq[0::2], iq[1::2])           # √(Q² + I²) → 64 de amplitudini</pre>
+  <p class="muted">Simplificat din <code>src/csi_ui.py</code>, funcția <code>parse_packet</code>. <code>iq[0::2]</code> = toate Q (pozițiile pare). <code>iq[1::2]</code> = toate I (pozițiile impare).</p>
+  <div class="answer"><b>Pe scurt.</b> Firmware-ul nu calculează amplitudinea. El trimite săgețile (Q, I) neschimbate. Python calculează lungimea fiecărei săgeți și desenează spectrul (o bară pe sub-frecvență) și cascada (spectrele în timp).</div>
+</section>
+
+<!-- 9 -->
+<section id="functii">
+  <div class="level">Nivelul 9 · Lista completă</div>
+  <h2>Toate funcțiile din main.c, pe roluri</h2>
+  <p class="short">Rândurile cu ★ sunt esențiale pentru CSI. Restul pregătesc placa sau mută datele.</p>
+  <table>
+    <thead><tr><th>Rol</th><th>Funcții</th><th>Pe scurt</th></tr></thead>
+    <tbody>
+      <tr><td>Pregătire generală</td><td><code>nvs_flash_init</code>, <code>esp_netif_init</code>, <code>esp_event_loop_create_default</code>, <code>esp_netif_create_default_wifi_sta</code>, <code>xRingbufferCreate</code></td><td>memorie pentru setări, rețea IP, cutia poștală pentru evenimente, banda rulantă de 16 KiB</td></tr>
+      <tr><td>Pornirea Wi-Fi</td><td><code>esp_wifi_init</code>, <code>esp_wifi_set_storage</code>, <code>esp_wifi_set_mode</code>, <code>esp_wifi_set_config</code>, <code>esp_wifi_start</code>, <code>esp_wifi_set_ps(NONE)</code></td><td>pornește radioul ca stație; radioul ascultă tot timpul (fără economie de energie)</td></tr>
+      <tr><td>Conectarea</td><td><code>esp_event_handler_register</code> ×2, <code>on_wifi_event</code> → <code>esp_wifi_connect</code></td><td>se conectează la hotspot și se reconectează după o pierdere</td></tr>
+      <tr><td><span class="star">★</span> Ascultarea</td><td><code>esp_wifi_set_promiscuous_filter</code>, <code>esp_wifi_set_promiscuous</code></td><td>aude cadrele tuturor de pe canal</td></tr>
+      <tr><td><span class="star">★</span> Măsurarea CSI</td><td><code>esp_wifi_set_csi_config</code>, <code>esp_wifi_set_csi_rx_cb</code>, <code>esp_wifi_set_csi</code></td><td>ce păstrează, pe cine sună, întrerupătorul</td></tr>
+      <tr><td><span class="star">★</span> Emisia probe-ului</td><td><code>esp_wifi_config_80211_tx_rate</code>, <code>esp_wifi_get_mac</code>, <code>probe_sender_task</code> → <code>esp_wifi_80211_tx</code></td><td>la fiecare 10 ms, un strigăt la 6 Mbps, cu adresa plăcii</td></tr>
+      <tr><td>Mutarea datelor</td><td><code>on_csi</code> (<code>esp_timer_get_time</code>, <code>memcpy</code>, <code>memset</code>, <code>xRingbufferSend</code>), <code>udp_sender_task</code> (<code>socket</code>, <code>sendto</code>, <code>xRingbufferReceive</code>, <code>vRingbufferReturnItem</code>)</td><td>din plicul <code>info</code> în pachet, pe bandă, apoi la PC</td></tr>
+      <tr><td>Task-uri</td><td><code>xTaskCreatePinnedToCore</code> ×2, <code>vTaskDelay</code></td><td>doi „angajați” noi: unul trimite probe, unul trimite la PC</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- 10 -->
+<section id="final">
+  <div class="level">Nivelul 10 · Concluzia</div>
+  <h2>Ce poți spune în 6 propoziții</h2>
+  <ol>
+    <li>Semnalul Wi-Fi are 64 de sub-frecvențe; fiecare cadru OFDM începe cu o frază cunoscută (LLTF).</li>
+    <li>Cipul ESP32 compară fraza primită cu cea știută și scrie, pentru fiecare sub-frecvență, o pereche (Q, I): asta este CSI.</li>
+    <li>Codul nostru pornește măsurarea cu trei apeluri; ele scriu o adresă în memorie și biți în regiștrii cipului.</li>
+    <li>La fiecare cadru, biblioteca închisă <code>libpp.a</code> apelează <code>on_csi</code>, care copiază cei 128 de octeți și îi trimite la PC.</li>
+    <li>Pe PC, amplitudinea fiecărei sub-frecvențe este √(Q² + I²); forma acestor 51 de amplitudini se schimbă când cineva se mișcă.</li>
+    <li>Ce scrie Espressif este documentat; ce am văzut în codul mașină este analiză proprie; algoritmul din cip nu este public.</li>
+  </ol>
+  <details><summary>Ce nu putem ști</summary>
+    <p>Algoritmul exact din cip. Numele oficiale ale regiștrilor. Cum lucrează volumul automat. De ce primii 4 octeți sunt răi („hardware limitation”, spune ghidul).</p>
+  </details>
+  <p class="muted">Surse: <code>esp_wifi.h</code>, <code>esp_wifi_types.h</code>, ghidul <code>wifi.rst</code> (ESP-IDF v5.1.7), <code>objdump -dr</code> pe <code>libnet80211.a</code>, <code>libpp.a</code>, <code>libphy.a</code>, jurnalul <code>pas_cu_pas/output/08_main_reparat_12nov.txt</code>. Detaliile complete: <code>raspunsuri_tehnice_5nov.html</code>.</p>
+</section>
+
+</main>
+<script>
+(() => {
+const $ = (s) => document.querySelector(s);
+const NS = 'http://www.w3.org/2000/svg';
+const REDUCE = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const svg = (tag, attrs, parent) => {
+  const e = document.createElementNS(NS, tag);
+  for (const k in attrs) e.setAttribute(k, attrs[k]);
+  if (parent) parent.appendChild(e);
+  return e;
+};
+const sleep = (ms) => new Promise((r) => setTimeout(r, REDUCE ? 0 : ms));
+
+/* 2 · pipeline */
+const ST = [
+  [70, 70, 'Placa A', 'probe_sender_task', 'Placa A „strigă” un cadru probe la fiecare 10 ms, la 6 Mbps. Cadrul începe cu fraza cunoscută (LLTF).'],
+  [250, 70, 'Aerul', 'unde radio', 'Unda trece prin cameră. Se reflectă de pereți, de mobilă și de corpul tău. La placa B ajung mai multe copii ale ei.'],
+  [430, 70, 'Cipul B', 'hardware', 'Cipul plăcii B compară fraza primită cu cea știută. Pentru fiecare din cele 64 de sub-frecvențe scrie 2 numere: Q și I. Asta este CSI.'],
+  [610, 70, 'libpp.a', 'wdev_csi_rx_process', 'Biblioteca Espressif pune numerele într-un plic (info) și sună la numărul lăsat de noi: on_csi.'],
+  [790, 70, 'on_csi', 'codul nostru', 'on_csi copiază cei 128 de octeți (64 × Q, I) într-un pachet de 138 de octeți, îl pune pe bandă și iese repede.'],
+  [790, 210, 'Coada', 'ring buffer', 'Banda rulantă dintre on_csi și task-ul care trimite. Pachetul așteaptă aici foarte puțin.'],
+  [610, 210, 'udp_sender', 'sendto', 'udp_sender_task ia pachetul de pe bandă și îl trimite la PC prin Wi-Fi, ca o carte poștală (UDP).'],
+  [430, 210, 'PC', 'csi_ui.py', 'Programul Python primește pachetul și citește eticheta: nodul, RSSI, numărul de ordine.'],
+  [250, 210, 'Amplitudinea', '√(Q² + I²)', 'Pentru fiecare sub-frecvență: lungimea săgeții (Q, I). Rezultatul: 64 de amplitudini.'],
+  [70, 210, 'Graficul', 'spectru', 'Graficul arată forma celor 64 de amplitudini. Când cineva se mișcă, forma se schimbă.'],
+];
+const pipe = $('#pipe');
+svg('polyline', { class: 'pipe-path', points: ST.map((s) => s[0] + ',' + s[1]).join(' ') }, pipe);
+const nodes = ST.map((s, i) => {
+  const g = svg('g', { class: 'pipe-node' }, pipe);
+  svg('circle', { cx: s[0], cy: s[1], r: 26 }, g);
+  svg('text', { x: s[0], y: s[1] + 6, 'text-anchor': 'middle', 'font-weight': 700, 'font-size': 18 }, g).textContent = i + 1;
+  svg('text', { x: s[0], y: s[1] + 48, 'text-anchor': 'middle', 'font-weight': 700, 'font-size': 15 }, g).textContent = s[2];
+  svg('text', { x: s[0], y: s[1] + 66, 'text-anchor': 'middle', 'font-size': 12, class: 'muted' }, g).textContent = s[3];
+  return g;
+});
+const dot = svg('circle', { class: 'dot', r: 10, cx: ST[0][0], cy: ST[0][1] - 34 }, pipe);
+let pi = 0, pTimer = null;
+function pShow(i, animate) {
+  const from = ST[pi], to = ST[i];
+  pi = i;
+  nodes.forEach((n, k) => { n.classList.toggle('active', k === i); n.classList.toggle('done', k < i); });
+  $('#pCap').innerHTML = '<b>' + (i + 1) + '. ' + to[2] + '.</b> ' + to[4];
+  if (!animate || REDUCE) { dot.setAttribute('cx', to[0]); dot.setAttribute('cy', to[1] - 34); return; }
+  const t0 = performance.now();
+  const step = (t) => {
+    const f = Math.min(1, (t - t0) / 600);
+    dot.setAttribute('cx', from[0] + (to[0] - from[0]) * f);
+    dot.setAttribute('cy', from[1] - 34 + (to[1] - from[1]) * f);
+    if (f < 1) requestAnimationFrame(step);
+  };
+  requestAnimationFrame(step);
+}
+function pStop() { clearInterval(pTimer); pTimer = null; $('#pPlay').textContent = '▶ Pornește'; }
+$('#pPlay').onclick = () => {
+  if (pTimer) return pStop();
+  $('#pPlay').textContent = '⏸ Pauză';
+  pShow(pi, false);
+  pTimer = setInterval(() => pShow((pi + 1) % ST.length, true), 3200);
+};
+$('#pNext').onclick = () => { pStop(); pShow(Math.min(ST.length - 1, pi + 1), true); };
+$('#pPrev').onclick = () => { pStop(); pShow(Math.max(0, pi - 1), true); };
+pShow(0, false);
+
+/* 3.1 · chorus */
+const chorus = $('#chorus');
+for (let k = -32; k < 32; k++) {
+  const s = document.createElement('span');
+  const on = k !== 0 && Math.abs(k) <= 26;
+  if (!on) { s.className = 'off'; s.style.transform = 'scaleY(.08)'; }
+  s.style.animationDelay = (Math.random() * 1.2).toFixed(2) + 's';
+  s.title = 'k = ' + k + (on ? ' (cântă)' : ' (tace)');
+  chorus.appendChild(s);
+}
+
+/* 3.2 · LLTF sent vs received */
+const recvShape = (k) => 0.55 + 0.3 * Math.sin(k * 0.23 + 1) + 0.13 * Math.cos(k * 0.71);
+const mk = (box) => {
+  const out = [];
+  for (let k = -26; k <= 26; k++) {
+    if (k === 0) continue;
+    const s = document.createElement('span');
+    s.style.transform = 'scaleY(.8)';
+    s.title = 'k = ' + k;
+    box.appendChild(s);
+    out.push([k, s]);
+  }
+  return out;
+};
+mk($('#sent'));
+const recv = mk($('#recv'));
+let lltfDone = false;
+$('#lltfGo').onclick = () => {
+  lltfDone = !lltfDone;
+  recv.forEach(([k, s], j) => {
+    s.style.transitionDelay = (j * 12) + 'ms';
+    s.style.transform = 'scaleY(' + (lltfDone ? recvShape(k) : 0.8).toFixed(3) + ')';
+  });
+  $('#lltfGo').textContent = lltfDone ? 'Repornește' : 'Trimite fraza prin cameră';
+  $('#lltfCap').innerHTML = lltfDone
+    ? 'Unele note au ajuns mai slabe, altele mai tari. <b>CSI = ce a sosit ÷ ce s-a trimis</b>, pentru fiecare notă. Forma din dreapta este „amprenta” camerei.'
+    : 'Stânga: toate notele au aceeași tărie. Apasă butonul.';
+};
+
+/* 3.3 · I/Q arrow */
+const iq = $('#iq'), C = 160, SC = 3.6;
+svg('circle', { cx: C, cy: C, r: 144, fill: 'none', stroke: 'var(--line)', 'stroke-width': 1 }, iq);
+svg('line', { x1: 10, y1: C, x2: 310, y2: C, stroke: 'var(--gray)', 'stroke-width': 1.5 }, iq);
+svg('line', { x1: C, y1: 10, x2: C, y2: 310, stroke: 'var(--gray)', 'stroke-width': 1.5 }, iq);
+svg('text', { x: 300, y: C - 8, 'text-anchor': 'end', 'font-size': 14, style: 'fill:var(--i);font-weight:700' }, iq).textContent = 'I →';
+svg('text', { x: C + 8, y: 24, 'font-size': 14, style: 'fill:var(--q);font-weight:700' }, iq).textContent = '↑ Q';
+const iLine = svg('line', { stroke: 'var(--i)', 'stroke-width': 3, 'stroke-dasharray': '5 4' }, iq);
+const qLine = svg('line', { stroke: 'var(--q)', 'stroke-width': 3, 'stroke-dasharray': '5 4' }, iq);
+const arrow = svg('line', { stroke: 'var(--accent)', 'stroke-width': 5, 'stroke-linecap': 'round' }, iq);
+const tip = svg('circle', { r: 9, fill: 'var(--accent)', style: 'cursor:grab' }, iq);
+let I = 12, Q = 5, rotT = null;
+function iqDraw() {
+  const x = C + I * SC, y = C - Q * SC;
+  iLine.setAttribute('x1', C); iLine.setAttribute('y1', C); iLine.setAttribute('x2', x); iLine.setAttribute('y2', C);
+  qLine.setAttribute('x1', x); qLine.setAttribute('y1', C); qLine.setAttribute('x2', x); qLine.setAttribute('y2', y);
+  arrow.setAttribute('x1', C); arrow.setAttribute('y1', C); arrow.setAttribute('x2', x); arrow.setAttribute('y2', y);
+  tip.setAttribute('cx', x); tip.setAttribute('cy', y);
+  const a = Math.hypot(I, Q), ph = Math.atan2(Q, I) * 180 / Math.PI;
+  $('#iS').value = Math.round(I); $('#qS').value = Math.round(Q);
+  $('#iVal').textContent = Math.round(I); $('#qVal').textContent = Math.round(Q);
+  $('#ampVal').textContent = 'Amplitudinea = √(' + Math.round(I) + '² + ' + Math.round(Q) + '²) = ' + Math.hypot(Math.round(I), Math.round(Q)).toFixed(1);
+  $('#phVal').textContent = 'Faza (unghiul săgeții) = ' + ph.toFixed(0) + '°';
+  $('#bufVal').textContent = 'În buf, perechea apare ca [Q, I] = [' + Math.round(Q) + ', ' + Math.round(I) + ']';
+}
+$('#iS').oninput = (e) => { I = +e.target.value; iqDraw(); };
+$('#qS').oninput = (e) => { Q = +e.target.value; iqDraw(); };
+let drag = false;
+const fromPointer = (ev) => {
+  const r = iq.getBoundingClientRect();
+  const x = (ev.clientX - r.left) * 320 / r.width, y = (ev.clientY - r.top) * 320 / r.height;
+  I = Math.max(-40, Math.min(40, (x - C) / SC)); Q = Math.max(-40, Math.min(40, (C - y) / SC));
+  iqDraw();
+};
+iq.addEventListener('pointerdown', (e) => { drag = true; iq.setPointerCapture(e.pointerId); fromPointer(e); });
+iq.addEventListener('pointermove', (e) => { if (drag) fromPointer(e); });
+iq.addEventListener('pointerup', () => { drag = false; });
+iq.style.touchAction = 'none';
+$('#rot').onclick = () => {
+  if (rotT) { cancelAnimationFrame(rotT); rotT = null; $('#rot').textContent = 'Rotește săgeata'; return; }
+  $('#rot').textContent = 'Oprește';
+  const a = Math.max(8, Math.hypot(I, Q));
+  let ph = Math.atan2(Q, I);
+  const spin = () => { ph += 0.02; I = a * Math.cos(ph); Q = a * Math.sin(ph); iqDraw(); rotT = requestAnimationFrame(spin); };
+  spin();
+};
+iqDraw();
+
+/* 3.4 · multipath */
+const mp = $('#mp'), MO = [30, 150], MS = 4.5, KSHOW = 10;
+const mpSeg = ['var(--muted)', 'var(--warn)', 'var(--bad)'].map((c) => svg('line', { stroke: c, 'stroke-width': 4, 'stroke-linecap': 'round' }, mp));
+const mpSum = svg('line', { stroke: 'var(--accent)', 'stroke-width': 5, 'stroke-dasharray': '7 5' }, mp);
+const mpLbl = svg('text', { x: 12, y: 22, 'font-size': 14 }, mp);
+svg('text', { x: 12, y: 40, 'font-size': 12, class: 'muted' }, mp).textContent = 'gri = directă · portocaliu = perete · roșu = corp';
+const mpBars = [];
+for (let k = -26; k <= 26; k++) {
+  if (k === 0) continue;
+  const s = document.createElement('span');
+  s.style.transition = 'none';
+  s.title = 'k = ' + k;
+  $('#mpBars').appendChild(s);
+  mpBars.push([k, s]);
+}
+const paths = (k, th) => [[30, 0], [12, -0.35 * k], [10, -(0.6 * k + th)]];
+let theta = 0, mpT = null;
+function mpDraw() {
+  let x = 0, y = 0;
+  paths(KSHOW, theta).forEach(([a, p], j) => {
+    const nx = x + a * Math.cos(p), ny = y + a * Math.sin(p);
+    const L = mpSeg[j];
+    L.setAttribute('x1', MO[0] + x * MS); L.setAttribute('y1', MO[1] - y * MS);
+    L.setAttribute('x2', MO[0] + nx * MS); L.setAttribute('y2', MO[1] - ny * MS);
+    x = nx; y = ny;
+  });
+  mpSum.setAttribute('x1', MO[0]); mpSum.setAttribute('y1', MO[1]);
+  mpSum.setAttribute('x2', MO[0] + x * MS); mpSum.setAttribute('y2', MO[1] - y * MS);
+  mpLbl.textContent = 'Nota +10: suma (albastru) = ' + Math.hypot(x, y).toFixed(1);
+  mpBars.forEach(([k, s]) => {
+    let sx = 0, sy = 0;
+    paths(k, theta).forEach(([a, p]) => { sx += a * Math.cos(p); sy += a * Math.sin(p); });
+    s.style.transform = 'scaleY(' + (Math.hypot(sx, sy) / 52).toFixed(3) + ')';
+    s.style.background = k === KSHOW ? 'var(--accent)' : '';
+  });
+}
+$('#mpGo').onclick = () => {
+  if (mpT) { cancelAnimationFrame(mpT); mpT = null; $('#mpGo').textContent = 'Persoana se mișcă'; return; }
+  $('#mpGo').textContent = 'Oprește persoana';
+  const run = () => { theta += 0.03; mpDraw(); mpT = requestAnimationFrame(run); };
+  run();
+};
+mpDraw();
+
+/* 4.2 · stepper */
+const steps = [...document.querySelectorAll('#steps .step')];
+const env = $('#env');
+const fill = (names, cls) => names.forEach((n) => env.querySelector('[data-f="' + n + '"]').classList.add(cls));
+let si = -1, sBusy = false;
+function sRender() {
+  steps.forEach((s, k) => { s.classList.toggle('active', k === si); s.classList.toggle('done', k < si); });
+  env.classList.remove('gone');
+  env.querySelectorAll('div').forEach((d) => d.classList.remove('filled', 'used'));
+  if (si >= 2) fill(['rx_ctrl', 'mac', 'dmac', 'fwi', 'buf', 'len', 'hdr', 'payload'], 'filled');
+  if (si >= 4) fill(['rx_ctrl', 'fwi', 'buf', 'len', 'hdr'], 'used');
+  if (si >= 5) env.classList.add('gone');
+}
+$('#sNext').onclick = () => { si = Math.min(steps.length - 1, si + 1); sRender(); };
+$('#sReset').onclick = () => { si = -1; sRender(); };
+$('#sPlay').onclick = async () => {
+  if (sBusy) return;
+  sBusy = true;
+  for (si = 0; si < steps.length; si++) { sRender(); await sleep(2600); }
+  si = steps.length - 1; sBusy = false;
+};
+
+/* 5 · restaurant */
+$('#lGo').onclick = async () => {
+  const t = $('#ticket'), layers = [...document.querySelectorAll('.layer')];
+  const caps = [
+    'Codul tău scrie esp_wifi_set_csi(true). Header-ul spune doar că funcția există și ce erori poate da.',
+    'Biblioteca verifică erorile și trimite un bilet task-ului Wi-Fi. Task-ul Wi-Fi coboară: libnet80211.a → libpp.a.',
+    'hal_mac_set_csi (libpp.a) schimbă bitul 23 din registrul 0x3FF7309C. Abia acum cipul începe să calculeze CSI.',
+  ];
+  t.style.opacity = 1;
+  for (let k = 0; k < layers.length; k++) {
+    layers.forEach((l, j) => l.classList.toggle('lit', j === k));
+    t.style.top = (layers[k].offsetTop + 10) + 'px';
+    $('#lCap').innerHTML = '<b>' + (k + 1) + '.</b> ' + caps[k];
+    await sleep(2800);
+  }
+};
+
+/* 6 · register */
+const START = 0x00041A02, BIT = 23;
+const mkReg = (id) => {
+  const box = $(id), cells = [];
+  for (let b = 31; b >= 0; b--) {
+    const d = document.createElement('div');
+    d.textContent = b % 4 === 0 || b === BIT ? b : '';
+    if (b === BIT) d.classList.add('b23');
+    d.title = 'bitul ' + b;
+    box.appendChild(d);
+    cells.push(d);
+  }
+  return cells;
+};
+const R = { reg: mkReg('#rReg'), cpy: mkReg('#rCpy'), msk: mkReg('#rMsk') };
+const hex = (v) => '0x' + (v >>> 0).toString(16).toUpperCase().padStart(8, '0');
+const paint = (cells, v, hexId) => {
+  cells.forEach((d, j) => d.classList.toggle('on', ((v >>> (31 - j)) & 1) === 1));
+  $(hexId).textContent = hex(v);
+};
+let regV = START, rBusy = false;
+paint(R.reg, regV, '#hReg');
+async function rRun(on) {
+  if (rBusy) return;
+  rBusy = true;
+  const cap = (s) => { $('#rCap').innerHTML = s; };
+  $('#rowCpy').classList.add('hide'); $('#rowMsk').classList.add('hide');
+  cap('<b>0.</b> Task-ul main pune un bilet în coada task-ului Wi-Fi și merge mai departe. Task-ul Wi-Fi ia biletul.');
+  await sleep(2400);
+  $('#rowCpy').classList.remove('hide'); paint(R.cpy, regV, '#hCpy');
+  R.cpy.forEach((d) => d.classList.add('flash')); await sleep(300); R.cpy.forEach((d) => d.classList.remove('flash'));
+  cap('<b>1. Citește</b> (instrucțiunea <code>l32i</code>): cei 32 de biți din registru ajung într-o copie în procesor.');
+  await sleep(2600);
+  const mask = on ? (1 << BIT) >>> 0 : (~(1 << BIT)) >>> 0;
+  $('#rowMsk').classList.remove('hide'); paint(R.msk, mask, '#hMsk');
+  cap(on ? '<b>2. Masca</b>: doar bitul 23 este 1 (<code>1 &lt;&lt; 23</code> = 0x00800000).' : '<b>2. Masca</b>: toți biții sunt 1, în afară de bitul 23 (0xFF7FFFFF).');
+  await sleep(2600);
+  const nv = on ? (regV | mask) >>> 0 : (regV & mask) >>> 0;
+  paint(R.cpy, nv, '#hCpy');
+  cap(on ? '<b>3. OR</b>: copia + masca. Bitul 23 devine 1. Ceilalți biți rămân la fel.' : '<b>3. AND</b>: copia × masca. Bitul 23 devine 0. Ceilalți biți rămân la fel.');
+  await sleep(2600);
+  regV = nv; paint(R.reg, regV, '#hReg');
+  R.reg[31 - BIT].classList.add('flash'); await sleep(400); R.reg[31 - BIT].classList.remove('flash');
+  cap(on ? '<b>4. Scrie înapoi</b> (<code>s32i</code>). Din acest moment, cipul calculează CSI la fiecare cadru OFDM.' : '<b>4. Scrie înapoi</b>. CSI este oprit.');
+  rBusy = false;
+}
+$('#rOn').onclick = () => rRun(true);
+$('#rOff').onclick = () => rRun(false);
+
+/* 7.1 · config bits */
+const cfgBox = $('#cfg');
+const CFG_LBL = ['shift', 'shift', 'shift', 'shift', 'manu_scale', 'stbc', 'lltf', 'htltf'];
+const cfgCells = CFG_LBL.map((l, j) => {
+  const d = document.createElement('div');
+  d.innerHTML = 'bit ' + (7 - j) + '<small>' + l + '</small>';
+  cfgBox.appendChild(d);
+  return d;
+});
+function cfgDraw() {
+  const sh = +$('#cSh').value;
+  const v = (+$('#cH').checked) | (+$('#cL').checked << 1) | (+$('#cS').checked << 2) | (+$('#cM').checked << 3) | (sh << 4);
+  $('#shV').textContent = sh;
+  cfgCells.forEach((d, j) => d.classList.toggle('on', ((v >> (7 - j)) & 1) === 1));
+  $('#cfgHex').textContent = '0x' + v.toString(16).toUpperCase().padStart(2, '0');
+  const parts = [];
+  if ($('#cL').checked) parts.push('LLTF (64 de note, în orice cadru OFDM)');
+  if ($('#cH').checked) parts.push('HT-LTF (doar la cadrele 802.11n)');
+  if ($('#cS').checked) parts.push('STBC-HT-LTF (doar la cadre STBC)');
+  $('#cfgTxt').textContent = 'buf va conține: ' + (parts.length ? parts.join(' + ') : 'nimic util') + '. Volum: ' + ($('#cM').checked ? 'fix, deplasat cu ' + sh + ' biți.' : 'automat.');
+}
+['#cL', '#cH', '#cS', '#cM', '#cSh'].forEach((id) => { $(id).oninput = cfgDraw; });
+$('#cfgProj').onclick = () => {
+  $('#cL').checked = true; $('#cH').checked = false; $('#cS').checked = false; $('#cM').checked = false; $('#cSh').value = 0;
+  cfgDraw();
+};
+cfgDraw();
+
+/* 7.2 · race */
+let raceBusy = false;
+$('#raceGo').onclick = async () => {
+  if (raceBusy) return;
+  raceBusy = true;
+  const lanes = document.querySelectorAll('.lane');
+  const N = 20, T0 = performance.now(), DUR = 5000;
+  const counter = setInterval(() => {
+    const f = Math.min(1, (performance.now() - T0) / DUR);
+    $('#c6').textContent = Math.round(428 * f) + ' CSI din ' + Math.round(428 * f) + ' probe';
+    $('#c1').textContent = '0 CSI din ' + Math.round(470 * f) + ' probe';
+    if (f >= 1) clearInterval(counter);
+  }, 80);
+  for (let n = 0; n < N; n++) {
+    lanes.forEach((lane, j) => {
+      const fr = document.createElement('div');
+      fr.className = 'frame go';
+      if (j === 0) fr.appendChild(document.createElement('b'));
+      lane.appendChild(fr);
+      setTimeout(() => fr.remove(), REDUCE ? 0 : 2300);
+    });
+    await sleep(DUR / N);
+  }
+  raceBusy = false;
+};
+
+/* 8 · packet */
+const pairsBox = $('#pairs');
+const kOf = (i) => (i <= 31 ? i : i - 64);
+const pairEls = [];
+for (let i = 0; i < 64; i++) {
+  const k = kOf(i);
+  const d = document.createElement('div');
+  d.className = 'pair' + (k === 0 ? ' null' : k === 1 ? ' bad' : Math.abs(k) > 26 ? ' guard' : '');
+  d.innerHTML = '<i></i><u></u>';
+  const desc = 'Perechea ' + i + ' → sub-frecvența k = ' + (k > 0 ? '+' : '') + k + '. Octeții ' + (10 + 2 * i) + ' (Q) și ' + (11 + 2 * i) + ' (I) din pachet. ' +
+    (k === 0 ? 'Mijlocul canalului: tace.' : k === 1 ? 'Primii 4 octeți din buf sunt răi: on_csi pune 0.' : Math.abs(k) > 26 ? 'Margine: tace.' : 'Utilă.');
+  d.title = desc;
+  d.onmouseenter = () => { $('#pkCap').textContent = desc; };
+  pairsBox.appendChild(d);
+  pairEls.push(d);
+}
+pairEls.forEach((p) => p.classList.add('on'));
+let pkBusy = false;
+$('#pkGo').onclick = async () => {
+  if (pkBusy) return;
+  pkBusy = true;
+  const heads = [...document.querySelectorAll('#pktHead div')];
+  heads.forEach((h) => h.classList.remove('on'));
+  pairEls.forEach((p) => p.classList.remove('on'));
+  const hc = ['magic = 0xA55A: semnătura pachetului.', 'nod = NODE_ID (3 sau 2): cine a măsurat.', 'RSSI = info->rx_ctrl.rssi: puterea semnalului, în dBm.',
+    'timp = esp_timer_get_time(): microsecunde de la pornirea plăcii.', 'seq = numărul de ordine, crește cu 1 la fiecare pachet.'];
+  for (let k = 0; k < heads.length; k++) { heads[k].classList.add('on'); $('#pkCap').textContent = hc[k]; await sleep(1500); }
+  $('#pkCap').textContent = 'memcpy: copiază cei 128 de octeți din info->buf, pereche cu pereche.';
+  for (const p of pairEls) { p.classList.add('on'); await sleep(35); }
+  await sleep(700);
+  $('#pkCap').textContent = 'first_word_invalid = 1: primii 4 octeți (perechile 0 și 1) sunt răi. memset îi face 0.';
+  for (const p of pairEls.slice(0, 2)) { p.classList.add('zap'); }
+  await sleep(900);
+  pairEls.slice(0, 2).forEach((p) => p.classList.remove('zap'));
+  $('#pkCap').textContent = 'Gata: 10 + 128 = 138 de octeți. xRingbufferSend pune pachetul pe bandă.';
+  pkBusy = false;
+};
+})();
+</script>
+</body>
+</html>

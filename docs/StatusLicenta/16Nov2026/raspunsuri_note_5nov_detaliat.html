@@ -1,0 +1,1532 @@
+<meta charset="utf-8">
+<title>Dosarul CSI ESP32</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+Condensed:wght@500;600;700&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap">
+<style>
+/* Layout: dosar de laborator. Cuprinsul stă în stânga; fiecare răspuns scurt este urmat de exponatul lui (cod, dezasamblare, jurnal). */
+:root {
+  --paper: #f5f7f8;
+  --sheet: #ffffff;
+  --ink: #151a21;
+  --ink-2: #4f5866;
+  --rule: #d8dde3;
+  --code: #eef1f4;
+  --accent: #0d6a70;
+  --accent-soft: #d9eeee;
+  --accent-ink: #ffffff;
+  --marker: #ffe45c;
+  --marker-ink: #151a21;
+  --grid: #e3e7eb;
+  --s1: #2a78d6;
+  --s2: #eb6834;
+  --doc: #1c6a3a; --doc-bg: #e0f1e5;
+  --src: #20587c; --src-bg: #dfecf6;
+  --dis: #5a3c98; --dis-bg: #ebe5f7;
+  --mas: #855300; --mas-bg: #fbeed2;
+  --ded: #982e2e; --ded-bg: #f7e1e1;
+  --f-body: "IBM Plex Sans", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --f-head: "IBM Plex Sans Condensed", "Arial Narrow", "IBM Plex Sans", sans-serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  --fs: 16px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #101317; --sheet: #171b20; --ink: #e4e8ed; --ink-2: #a1aab6; --rule: #2b3139; --code: #1e2329;
+    --accent: #5bbcc1; --accent-soft: #15302f; --accent-ink: #0d1114;
+    --marker: #6a5a0e; --marker-ink: #fff6c8; --grid: #262c33;
+    --s1: #3987e5; --s2: #d95926;
+    --doc: #8fd4a6; --doc-bg: #1b3325; --src: #9cc8e8; --src-bg: #1a2f40;
+    --dis: #c6aef2; --dis-bg: #2c2440; --mas: #f0c46a; --mas-bg: #3a2d12; --ded: #f2a2a2; --ded-bg: #3c2121;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #101317; --sheet: #171b20; --ink: #e4e8ed; --ink-2: #a1aab6; --rule: #2b3139; --code: #1e2329;
+  --accent: #5bbcc1; --accent-soft: #15302f; --accent-ink: #0d1114;
+  --marker: #6a5a0e; --marker-ink: #fff6c8; --grid: #262c33;
+  --s1: #3987e5; --s2: #d95926;
+  --doc: #8fd4a6; --doc-bg: #1b3325; --src: #9cc8e8; --src-bg: #1a2f40;
+  --dis: #c6aef2; --dis-bg: #2c2440; --mas: #f0c46a; --mas-bg: #3a2d12; --ded: #f2a2a2; --ded-bg: #3c2121;
+  color-scheme: dark;
+}
+:root.big { --fs: 19px; }
+
+* { box-sizing: border-box; }
+html { font-size: var(--fs); }
+body {
+  margin: 0; background: var(--paper); color: var(--ink);
+  font: 400 1rem/1.6 var(--f-body);
+  -webkit-text-size-adjust: 100%;
+}
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--sheet); }
+a { color: var(--accent); text-underline-offset: 2px; }
+code, kbd { font-family: var(--f-mono); font-size: .86em; background: var(--code); padding: .05em .35em; border-radius: 4px; overflow-wrap: anywhere; }
+h1, h2, h3 { font-family: var(--f-head); text-wrap: balance; line-height: 1.2; }
+h1 { font-size: 2.1rem; font-weight: 700; margin: .2rem 0 .6rem; letter-spacing: -.01em; }
+h2 { font-size: 1.55rem; font-weight: 700; margin: 0 0 .4rem; }
+h3 { font-size: 1.12rem; font-weight: 600; margin: 1.8rem 0 .5rem; }
+p, li { max-width: 70ch; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* ---------- bara de unelte ---------- */
+.bar {
+  position: sticky; top: env(safe-area-inset-top, 0px); z-index: 9;
+  background: var(--sheet); border-bottom: 1px solid var(--rule);
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 8px;
+}
+.bar-in { max-width: 1240px; margin: 0 auto; display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; }
+.bar-name { font-family: var(--f-head); font-weight: 700; font-size: .95rem; margin-right: auto; }
+.btns { display: flex; flex-wrap: wrap; gap: 6px; }
+button.tb {
+  font: 500 .82rem/1 var(--f-body); color: var(--ink); background: var(--paper);
+  border: 1px solid var(--rule); border-radius: 6px; padding: 8px 11px; cursor: pointer;
+}
+button.tb:hover { border-color: var(--accent); }
+button.tb[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.mk-hint { font-size: .8rem; color: var(--ink-2); width: 100%; }
+.mk-hint[hidden] { display: none !important; }
+
+/* ---------- pagina ---------- */
+.page {
+  max-width: 1240px; margin: 0 auto;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 28px 80px;
+  display: grid; grid-template-columns: minmax(0, 1fr); gap: 32px;
+}
+@media (min-width: 1180px) { .page { grid-template-columns: 230px minmax(0, 1fr); } }
+.toc { display: none; }
+@media (min-width: 1180px) {
+  .toc { display: block; position: sticky; top: calc(env(safe-area-inset-top, 0px) + 72px); align-self: start; max-height: calc(100vh - 100px); overflow: auto; font-size: .86rem; }
+  :root.big .toc { display: none; }
+  :root.big .page { grid-template-columns: minmax(0, 1fr); }
+}
+.toc p { font-family: var(--f-head); font-weight: 600; text-transform: uppercase; letter-spacing: .06em; font-size: .74rem; color: var(--ink-2); margin: 0 0 8px; }
+.toc ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
+.toc a { display: block; padding: 5px 8px; border-radius: 5px; color: var(--ink); text-decoration: none; }
+.toc a:hover { background: var(--sheet); }
+.toc .n { font-family: var(--f-mono); color: var(--ink-2); margin-right: 6px; }
+main { min-width: 0; max-width: 900px; }
+
+.eyebrow { font-family: var(--f-mono); font-size: .78rem; color: var(--ink-2); letter-spacing: .02em; }
+.lede { font-size: 1.08rem; max-width: 64ch; }
+.meta { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: .84rem; color: var(--ink-2); margin: 14px 0 0; padding: 0; list-style: none; }
+.meta b { color: var(--ink); font-weight: 600; }
+
+.legend { margin: 22px 0 0; padding: 14px 16px; background: var(--sheet); border: 1px solid var(--rule); border-radius: 8px; }
+.legend h2 { font-size: 1rem; margin: 0 0 8px; }
+.legend ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.legend li { max-width: none; font-size: .9rem; }
+
+.tag { display: inline-block; font: 600 .7rem/1.5 var(--f-body); letter-spacing: .03em; padding: 0 7px; border-radius: 999px; white-space: nowrap; vertical-align: .08em; }
+.tag.doc { color: var(--doc); background: var(--doc-bg); }
+.tag.src { color: var(--src); background: var(--src-bg); }
+.tag.dis { color: var(--dis); background: var(--dis-bg); }
+.tag.mas { color: var(--mas); background: var(--mas-bg); }
+.tag.ded { color: var(--ded); background: var(--ded-bg); }
+
+/* ---------- întrebările pe scurt ---------- */
+.qgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr)); gap: 10px; margin: 14px 0 0; padding: 0; list-style: none; }
+.qgrid li { max-width: none; }
+.qcard { display: grid; grid-template-rows: auto auto 1fr; gap: 6px; height: 100%; padding: 12px 14px; background: var(--sheet); border: 1px solid var(--rule); border-radius: 8px; color: var(--ink); text-decoration: none; }
+.qcard:hover { border-color: var(--accent); }
+.qcard .qn { font-family: var(--f-mono); font-size: .76rem; color: var(--accent); }
+.qcard .qt { font-family: var(--f-head); font-weight: 600; font-size: 1.02rem; line-height: 1.25; }
+.qcard .qa { font-size: .88rem; color: var(--ink-2); }
+
+/* ---------- secțiuni ---------- */
+section.q { margin-top: 56px; padding-top: 20px; border-top: 2px solid var(--ink); scroll-margin-top: 96px; }
+details.ex { scroll-margin-top: 96px; }
+.qhead { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 4px 14px; align-items: baseline; }
+.qnum { font-family: var(--f-head); font-weight: 700; font-size: 1.55rem; color: var(--accent); }
+.note-src { grid-column: 2; font-size: .86rem; color: var(--ink-2); margin: 0; }
+.note-src q { font-style: italic; }
+.answer { margin: 16px 0 6px; padding: 12px 16px; background: var(--sheet); border: 1px solid var(--rule); border-left: 4px solid var(--accent); border-radius: 6px; }
+.answer p { margin: 0 0 6px; }
+.answer p:last-child { margin-bottom: 0; }
+.answer .lbl { font-family: var(--f-head); font-weight: 600; text-transform: uppercase; letter-spacing: .06em; font-size: .72rem; color: var(--accent); display: block; margin-bottom: 4px; }
+
+.tw { overflow-x: auto; margin: 12px 0; border: 1px solid var(--rule); border-radius: 8px; background: var(--sheet); }
+table { border-collapse: collapse; width: 100%; font-size: .9rem; line-height: 1.45; }
+th, td { text-align: left; vertical-align: top; padding: 7px 10px; border-bottom: 1px solid var(--rule); }
+th { font-family: var(--f-head); font-weight: 600; background: var(--code); white-space: nowrap; }
+tr:last-child td { border-bottom: none; }
+td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+/* ---------- exponate (dovezi) ---------- */
+details.ex { margin: 14px 0; border: 1px solid var(--rule); border-radius: 8px; background: var(--sheet); }
+details.ex > summary { list-style: none; cursor: pointer; padding: 9px 12px; display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: baseline; border-bottom: 1px solid transparent; }
+details.ex[open] > summary { border-bottom-color: var(--rule); }
+details.ex > summary::-webkit-details-marker { display: none; }
+details.ex > summary::before { content: "▸"; color: var(--ink-2); font-size: .8rem; }
+details.ex[open] > summary::before { content: "▾"; }
+.ex-k { font-family: var(--f-head); font-weight: 600; text-transform: uppercase; letter-spacing: .06em; font-size: .7rem; color: var(--ink-2); }
+.ex-t { font-weight: 600; }
+.ex-s { font-family: var(--f-mono); font-size: .76rem; color: var(--ink-2); overflow-wrap: anywhere; }
+pre.code { margin: 0; padding: 10px 0; overflow-x: auto; font: 400 .8rem/1.55 var(--f-mono); background: var(--code); counter-reset: none; }
+pre.code.wrap { white-space: pre-wrap; overflow-wrap: anywhere; }
+pre.code .ln { display: block; padding: 0 12px; min-height: 1.55em; border-left: 3px solid transparent; }
+pre.code .ln.hl { background: var(--accent-soft); border-left-color: var(--accent); }
+pre.code .ln.focus { outline: 2px solid var(--accent); outline-offset: -2px; }
+.cn { display: inline-grid; place-items: center; min-width: 1.45em; height: 1.45em; padding: 0 3px; margin-left: 6px; border-radius: 999px; background: var(--accent); color: var(--accent-ink); font: 600 .72rem/1 var(--f-body); vertical-align: .05em; cursor: default; }
+ol.notes { margin: 0; padding: 10px 14px 12px 38px; font-size: .88rem; display: grid; gap: 3px; }
+ol.notes li { max-width: none; border-radius: 4px; padding: 1px 4px; }
+ol.notes li.focus { background: var(--accent-soft); }
+.ex-foot { padding: 0 14px 12px; font-size: .84rem; color: var(--ink-2); margin: 0; }
+
+/* marcatorul */
+.mk { background: var(--marker) !important; color: var(--marker-ink); box-shadow: 0 0 0 2px var(--marker); border-radius: 2px; }
+pre.code .ln.mk { border-left-color: var(--marker-ink); }
+body.marking [data-k] { cursor: cell; }
+body.marking [data-k]:hover { outline: 1px dashed var(--accent); outline-offset: 1px; }
+
+/* ---------- culoarele: aplicație / bibliotecă / hardware ---------- */
+.lanes { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; margin: 16px 0; }
+.lh { font-family: var(--f-head); font-weight: 600; font-size: .86rem; padding: 8px 10px; border-radius: 6px; background: var(--ink); color: var(--paper); }
+.lh small { display: block; font-family: var(--f-body); font-weight: 400; font-size: .74rem; opacity: .8; }
+.phase { grid-column: 1 / -1; font-family: var(--f-mono); font-size: .76rem; color: var(--ink-2); padding: 10px 2px 2px; border-bottom: 1px dashed var(--rule); }
+.cell { position: relative; min-width: 0; font-size: .86rem; line-height: 1.45; padding: 9px 10px 9px 38px; background: var(--sheet); border: 1px solid var(--rule); border-radius: 6px; }
+.cell.empty { background: transparent; border: 1px dashed var(--rule); padding: 0; min-height: 10px; }
+.cell .st { position: absolute; left: 9px; top: 9px; width: 21px; height: 21px; border-radius: 50%; background: var(--accent); color: var(--accent-ink); display: grid; place-items: center; font: 600 .72rem/1 var(--f-body); }
+.cell .st.hw { background: var(--ink); color: var(--paper); }
+.cell .lane-chip { display: none; }
+.cell a.pf { font-size: .76rem; white-space: nowrap; }
+.cell code { font-size: .8rem; }
+@media (max-width: 720px) {
+  .lanes { grid-template-columns: minmax(0, 1fr); }
+  .lh { display: none; }
+  .cell.empty { display: none; }
+  .cell .lane-chip { display: inline-block; font: 600 .66rem/1.5 var(--f-body); text-transform: uppercase; letter-spacing: .05em; color: var(--ink-2); margin-right: 6px; }
+}
+
+/* ---------- pârghii ---------- */
+.levers { display: grid; gap: 12px; margin: 16px 0; }
+.lever { background: var(--sheet); border: 1px solid var(--rule); border-radius: 8px; padding: 12px 14px; }
+.lever h3 { margin: 0 0 8px; display: flex; gap: 10px; align-items: baseline; }
+.lever h3 .ln-n { font-family: var(--f-mono); font-size: .8rem; color: var(--accent); }
+.lever dl { display: grid; grid-template-columns: minmax(0, 9.5em) minmax(0, 1fr); gap: 4px 12px; margin: 0; font-size: .9rem; }
+.lever dt { font-family: var(--f-head); font-weight: 600; color: var(--ink-2); }
+.lever dd { margin: 0; min-width: 0; }
+@media (max-width: 560px) { .lever dl { grid-template-columns: minmax(0, 1fr); } .lever dd { margin-bottom: 6px; } }
+
+/* ---------- simulatorul ---------- */
+.sim { margin: 16px 0; border: 1px solid var(--rule); border-radius: 8px; background: var(--sheet); }
+.sim-head { padding: 12px 14px; border-bottom: 1px solid var(--rule); }
+.sim-head h3 { margin: 0 0 4px; }
+.sim-head p { margin: 0; font-size: .88rem; color: var(--ink-2); }
+.sim-body { display: grid; grid-template-columns: minmax(0, 1fr); gap: 0; }
+@media (min-width: 760px) { .sim-body { grid-template-columns: minmax(0, 300px) minmax(0, 1fr); } }
+.sim-ctl { padding: 12px 14px; border-bottom: 1px solid var(--rule); display: grid; gap: 6px; align-content: start; }
+@media (min-width: 760px) { .sim-ctl { border-bottom: none; border-right: 1px solid var(--rule); } }
+.sim-ctl label { display: flex; gap: 8px; align-items: center; font-size: .88rem; }
+.sim-ctl label code { font-size: .8rem; }
+.sim-ctl select { font: inherit; font-size: .85rem; padding: 3px 6px; border-radius: 5px; border: 1px solid var(--rule); background: var(--paper); color: var(--ink); }
+.presets { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.sim-out { padding: 12px 14px; min-width: 0; display: grid; gap: 14px; align-content: start; }
+.reg-title { font-family: var(--f-mono); font-size: .82rem; margin: 0 0 6px; }
+.bits { display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); gap: 3px; }
+.bit { border: 1px solid var(--rule); border-radius: 5px; text-align: center; padding: 4px 2px; min-width: 0; }
+.bit .bn { display: block; font: 500 .66rem/1.2 var(--f-mono); color: var(--ink-2); }
+.bit .bv { display: block; font: 600 1.05rem/1.3 var(--f-mono); }
+.bit .bf { display: block; font: 400 .62rem/1.2 var(--f-body); color: var(--ink-2); overflow-wrap: anywhere; }
+.bit.on { background: var(--accent-soft); border-color: var(--accent); }
+.hexline { font-family: var(--f-mono); font-size: .86rem; margin: 6px 0 0; }
+.sim-out ul { margin: 0; padding-left: 18px; font-size: .86rem; }
+.warn { padding: 8px 12px; border-radius: 6px; background: var(--mas-bg); color: var(--ink); font-size: .86rem; }
+.warn[hidden] { display: none !important; }
+
+/* ---------- harta pachetului ---------- */
+.scmap { display: grid; grid-template-columns: repeat(64, minmax(0, 1fr)); gap: 1px; margin: 10px 0 4px; }
+.sc { height: 26px; border-radius: 2px; background: var(--s1); }
+.sc.dc { background: var(--ink-2); }
+.sc.inv { background: var(--s2); }
+.sc.guard { background: repeating-linear-gradient(135deg, var(--rule) 0 3px, transparent 3px 6px); border: 1px solid var(--rule); }
+.scax { display: grid; grid-template-columns: repeat(64, minmax(0, 1fr)); font: 500 .62rem/1.2 var(--f-mono); color: var(--ink-2); }
+.scax span { white-space: nowrap; }
+.sckey { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: .82rem; margin: 8px 0 0; padding: 0; list-style: none; }
+.sckey li { display: flex; gap: 6px; align-items: center; }
+.sw { width: 14px; height: 14px; border-radius: 3px; display: inline-block; background: var(--s1); }
+.sw.dc { background: var(--ink-2); } .sw.inv { background: var(--s2); }
+.sw.guard { background: repeating-linear-gradient(135deg, var(--rule) 0 3px, transparent 3px 6px); border: 1px solid var(--rule); }
+
+/* ---------- grafice ---------- */
+.fig { margin: 14px 0; padding: 12px 14px; background: var(--sheet); border: 1px solid var(--rule); border-radius: 8px; }
+.fig h4 { font-family: var(--f-head); font-size: 1rem; margin: 0 0 2px; }
+.fig .sub { font-size: .82rem; color: var(--ink-2); margin: 0 0 6px; }
+.chart-scroll { overflow-x: auto; }
+.chart-host { position: relative; min-width: 540px; }
+svg.chart { width: 100%; height: auto; display: block; overflow: visible; }
+svg.chart .grid line { stroke: var(--grid); stroke-width: 1; }
+svg.chart .base { stroke: var(--ink-2); stroke-width: 1; }
+svg.chart .tick { fill: var(--ink-2); font: 12px var(--f-body); font-variant-numeric: tabular-nums; }
+svg.chart .ann { fill: var(--ink); font: 600 12px var(--f-body); }
+svg.chart .axt { fill: var(--ink-2); font: 12px var(--f-body); }
+svg.chart .line { fill: none; stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+svg.chart .band { opacity: .2; }
+svg.chart .gap { fill: var(--code); }
+svg.chart .xh { stroke: var(--ink-2); stroke-width: 1; stroke-dasharray: 3 3; }
+svg.chart .dot { stroke: var(--sheet); stroke-width: 2; }
+.tip { position: absolute; pointer-events: none; background: var(--ink); color: var(--paper); font: 500 .78rem/1.4 var(--f-body); padding: 5px 8px; border-radius: 5px; white-space: nowrap; transform: translate(-50%, calc(-100% - 10px)); }
+.tip[hidden] { display: none !important; }
+.fig details { margin-top: 8px; font-size: .84rem; }
+.fig details summary { cursor: pointer; color: var(--accent); }
+.fig details .tw { max-height: 320px; overflow: auto; }
+
+.facts { margin: 10px 0; padding-left: 20px; }
+.facts li { margin: 4px 0; }
+.box-open { padding: 10px 14px; border: 1px dashed var(--rule); border-radius: 8px; font-size: .9rem; }
+
+.cmd { position: relative; }
+.cmd pre { margin: 0; padding: 10px 12px; padding-right: 74px; overflow-x: auto; font: .8rem/1.55 var(--f-mono); background: var(--code); border-radius: 6px; }
+.cmd button { position: absolute; top: 6px; right: 6px; }
+.cmd + .cmd { margin-top: 8px; }
+
+footer { margin-top: 56px; padding-top: 14px; border-top: 1px solid var(--rule); font-size: .84rem; color: var(--ink-2); }
+
+.no-ex details.ex { display: none; }
+@media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
+</style>
+
+<div class="bar" role="toolbar" aria-label="Unelte pentru citire">
+  <div class="bar-in">
+    <span class="bar-name">Dosarul CSI ESP32</span>
+    <div class="btns">
+      <button class="tb" id="b-mark" type="button" aria-pressed="false">Marcator</button>
+      <button class="tb" id="b-clear" type="button">Șterge marcajele</button>
+      <button class="tb" id="b-ex" type="button" aria-pressed="true">Dovezi afișate</button>
+      <button class="tb" id="b-big" type="button" aria-pressed="false">Text mare</button>
+    </div>
+    <p class="mk-hint" id="mk-hint" hidden>Marcatorul este pornit. Dă click pe o linie de cod, un rând de tabel sau un paragraf ca să îl marchezi. Încă un click șterge marcajul. Marcajele rămân în acest browser.</p>
+  </div>
+</div>
+
+<div class="page">
+<nav class="toc" aria-label="Cuprins">
+  <p>Cuprins</p>
+  <ol>
+    <li><a href="#drum"><span class="n">1</span>Drumul CSI</a></li>
+    <li><a href="#cine"><span class="n">2</span>Cine face munca</a></li>
+    <li><a href="#registri"><span class="n">3</span>Regiștrii de control</a></li>
+    <li><a href="#receptie"><span class="n">4</span>Parametrii de recepție</a></li>
+    <li><a href="#biblioteca"><span class="n">5</span>Biblioteca și studiul bibliografic</a></li>
+    <li><a href="#capitol"><span class="n">6</span>Capitolul de fizică</a></li>
+    <li><a href="#date"><span class="n">7</span>Analiza datelor</a></li>
+    <li><a href="#limite"><span class="n">8</span>Limite și probleme deschise</a></li>
+    <li><a href="#verificare"><span class="n">9</span>Verifică singur</a></li>
+  </ol>
+</nav>
+
+<main>
+<header>
+  <div class="eyebrow">Licență · CSI pe ESP32 · 16 noiembrie 2026</div>
+  <h1>Răspunsuri la notele din 5 noiembrie</h1>
+  <p class="lede">Fiecare notă are aici un răspuns scurt și dovada lui: linia din cod, instrucțiunile mașină ale bibliotecii sau jurnalul plăcii. Eticheta colorată de lângă fiecare afirmație spune de unde vine ea.</p>
+  <ul class="meta">
+    <li><b>Firmware:</b> <code>src/firmware/esp32_csi_node/main/main.c</code>, 119 linii</li>
+    <li><b>Platformă:</b> placa ESP32, ESP-IDF v5.1.7</li>
+    <li><b>Biblioteci închise:</b> <code>libnet80211.a</code>, <code>libpp.a</code>, <code>libphy.a</code></li>
+    <li><b>Teste:</b> 9–12 nov. 2026, una sau două plăci, hotspot pe telefon</li>
+  </ul>
+</header>
+
+<aside class="legend" aria-labelledby="leg-h">
+  <h2 id="leg-h">Cum citești etichetele</h2>
+  <ul>
+    <li><span class="tag doc">documentat</span> scris de Espressif: header-ele <code>esp_wifi.h</code>, <code>esp_wifi_types.h</code> sau ghidul <code>wifi.rst</code>.</li>
+    <li><span class="tag src">cod deschis</span> citit din fișierele <code>.c</code> și <code>.h</code>: codul proiectului sau partea deschisă a ESP-IDF.</li>
+    <li><span class="tag dis">dezasamblat</span> citit din instrucțiunile mașină ale bibliotecilor închise, cu <code>objdump -dr</code>. Analiză proprie.</li>
+    <li><span class="tag mas">măsurat</span> văzut pe placă, în jurnalele salvate.</li>
+    <li><span class="tag ded">dedus</span> interpretarea noastră. Nu este confirmată de Espressif sau de o măsurătoare.</li>
+  </ul>
+</aside>
+
+<section aria-labelledby="sum-h" style="margin-top:34px">
+  <h2 id="sum-h">Notele, pe scurt</h2>
+  <ul class="qgrid">
+    <li><a class="qcard" href="#drum"><span class="qn">1 · nota „!”</span><span class="qt">Cum scoate funcția CSI din controllerul Wi-Fi?</span><span class="qa">Aplicația pornește măsurarea și dă adresa lui <code>on_csi</code>. Hardware-ul calculează CSI. <code>libpp.a</code> copiază rezultatul și apelează <code>on_csi</code> la fiecare cadru.</span></a></li>
+    <li><a class="qcard" href="#cine"><span class="qn">2</span><span class="qt">Cine face de fapt munca?</span><span class="qa">Radioul face estimarea. Task-ul Wi-Fi al driverului (prioritatea 23) face copierea și apelul. <code>app_main</code> se termină după 0,29 s.</span></a></li>
+    <li><a class="qcard" href="#registri"><span class="qn">3</span><span class="qt">Ce fac funcțiile cu regiștrii de control?</span><span class="qa">Funcțiile <code>esp_wifi_set_*</code> trimit un mesaj task-ului Wi-Fi. Acolo, funcțiile <code>hal_*</code> și <code>phy_*</code> citesc registrul, schimbă biți și îl scriu înapoi.</span></a></li>
+    <li><a class="qcard" href="#receptie"><span class="qn">4</span><span class="qt">Cum se modifică parametrii de recepție?</span><span class="qa">Cinci pârghii: rata cadrului, filtrul promiscuu, câmpurile <code>wifi_csi_config_t</code>, canalul și scalarea. Fiecare are o măsurătoare sau o sursă.</span></a></li>
+    <li><a class="qcard" href="#biblioteca"><span class="qn">5</span><span class="qt">Ce face biblioteca? Cum o trec în studiul bibliografic?</span><span class="qa">Trei straturi: header-e publice, biblioteci închise, regiștri. Citez header-ele și ghidul. Dezasamblarea apare ca analiză proprie.</span></a></li>
+    <li><a class="qcard" href="#capitol"><span class="qn">6</span><span class="qt">Primul capitol mare: fizica și extragerea CSI</span><span class="qa">Capitolul 4 din teză: secțiunile 4.1–4.6 sunt fizica, secțiunea 4.7 este obținerea CSI pe ESP32.</span></a></li>
+    <li><a class="qcard" href="#date"><span class="qn">7</span><span class="qt">Analiza datelor, fără o ipoteză de dovedit</span><span class="qa">Ce conține un pachet, forma spectrului, RSSI și amplitudinea în timp, ratele și pierderile. Doar descriere.</span></a></li>
+    <li><a class="qcard" href="#limite"><span class="qn">8</span><span class="qt">Ce nu știm și ce este încă deschis</span><span class="qa">Algoritmul din hardware, semnificația oficială a regiștrilor, eroarea <code>ESP_ERR_NO_MEM</code>, testul fără persoană.</span></a></li>
+  </ul>
+</section>
+
+<!-- =============================================================== 1 -->
+<section class="q" id="drum" aria-labelledby="h-drum">
+  <div class="qhead">
+    <span class="qnum">1</span>
+    <h2 id="h-drum">Cum scoate funcția CSI din controllerul Wi-Fi</h2>
+    <p class="note-src">Nota cu „!”: <q>de documentat cum scoate funcția din controllerul de wireless cu biblioteca etc.</q></p>
+  </div>
+
+  <div class="answer">
+    <span class="lbl">Răspunsul scurt</span>
+    <p>Aplicația nu citește CSI din controller. Ea face trei apeluri de configurare, apoi așteaptă. <span class="tag dis">dezasamblat</span></p>
+    <p>Hardware-ul radio calculează CSI din câmpul LLTF al fiecărui cadru OFDM. Codul închis din <code>libpp.a</code> pune rezultatul într-o structură și apelează funcția noastră <code>on_csi</code>. <span class="tag dis">dezasamblat</span> <span class="tag doc">documentat</span></p>
+  </div>
+
+  <p>Diagrama arată fiecare pas, în ordinea execuției. Coloana spune cine face pasul. Linkul „dovada” duce la instrucțiunile sau la textul care confirmă pasul.</p>
+
+  <div class="lanes" aria-label="Pașii, pe trei coloane: aplicație, bibliotecă, hardware">
+    <div class="lh">main.c<small>aplicația, codul nostru</small></div>
+    <div class="lh">Biblioteca închisă<small>libnet80211.a · libpp.a · libphy.a</small></div>
+    <div class="lh">Hardware<small>regiștri, radio, MAC</small></div>
+
+    <div class="phase">O singură dată, în app_main (task-ul main)</div>
+
+    <div class="cell"><span class="st">1</span><span class="lane-chip">main.c</span><code>esp_wifi_set_csi_config(&amp;csi)</code>, linia 112. Cere doar LLTF, fără filtru de canal. <a class="pf" href="#ex-icset">dovada ↓</a></div>
+    <div class="cell"><span class="st">2</span><span class="lane-chip">bibliotecă</span><code>ic_csi_set_config</code> trimite câmpurile la <code>phy_chan_dump_cfg</code> și <code>phy_chan_filt_set</code>. <a class="pf" href="#ex-phydump">dovada ↓</a></div>
+    <div class="cell"><span class="st hw">3</span><span class="lane-chip">hardware</span>Registrul <code>0x3FF5CD0C</code>: biții 0–7 devin <code>0x02</code> (doar LLTF, scalare automată).</div>
+
+    <div class="cell"><span class="st">4</span><span class="lane-chip">main.c</span><code>esp_wifi_set_csi_rx_cb(on_csi, NULL)</code>, linia 113. <a class="pf" href="#ex-cbh">dovada ↓</a></div>
+    <div class="cell"><span class="st">5</span><span class="lane-chip">bibliotecă</span><code>wdev_set_csi_rx_cb</code> scrie adresa lui <code>on_csi</code> în variabila <code>g_wdev_csi_rx</code>. Fără mesaj, fără registru. <a class="pf" href="#ex-rxcb">dovada ↓</a></div>
+    <div class="cell empty" aria-hidden="true"></div>
+
+    <div class="cell"><span class="st">6</span><span class="lane-chip">main.c</span><code>esp_wifi_set_csi(true)</code>, linia 114. <a class="pf" href="#ex-setcsi">dovada ↓</a></div>
+    <div class="cell"><span class="st">7</span><span class="lane-chip">bibliotecă</span>Mesaj către task-ul Wi-Fi. Acolo: <code>wifi_set_csi</code> → <code>ic_set_csi</code> → <code>hal_mac_set_csi</code>.</div>
+    <div class="cell"><span class="st hw">8</span><span class="lane-chip">hardware</span>Registrul <code>0x3FF7309C</code>, bitul 23 = 1. De aici, hardware-ul calculează CSI. <a class="pf" href="#ex-hal">dovada ↓</a></div>
+
+    <div class="phase">La fiecare cadru OFDM primit (task-ul Wi-Fi, prioritatea 23)</div>
+
+    <div class="cell empty" aria-hidden="true"></div>
+    <div class="cell empty" aria-hidden="true"></div>
+    <div class="cell"><span class="st hw">9</span><span class="lane-chip">hardware</span>Cadrul ajunge la antenă. Radioul compară LLTF primit cu LLTF cunoscut. Rezultatul: o valoare (Q, I) pe fiecare subpurtătoare. <span class="tag ded">dedus</span></div>
+
+    <div class="cell empty" aria-hidden="true"></div>
+    <div class="cell"><span class="st">10</span><span class="lane-chip">bibliotecă</span><code>wdev_csi_rx_process</code> alocă 64 de octeți și completează <code>wifi_csi_info_t</code>: <code>rx_ctrl</code>, <code>mac</code>, <code>buf</code>, <code>len</code>, <code>first_word_invalid</code>. Apoi apelează <code>g_wdev_csi_rx</code>, adică <code>on_csi</code>. <a class="pf" href="#ex-rxproc">dovada ↓</a></div>
+    <div class="cell empty" aria-hidden="true"></div>
+
+    <div class="cell"><span class="st">11</span><span class="lane-chip">main.c</span><code>on_csi</code>, liniile 32–46: păstrează doar probe request (l. 36), copiază 128 B (l. 42), pune pachetul în coadă (l. 44). <a class="pf" href="#ex-oncsi">dovada ↓</a></div>
+    <div class="cell"><span class="st">12</span><span class="lane-chip">bibliotecă</span>După <code>return</code>, eliberează <code>info</code>. De aceea <code>on_csi</code> copiază datele. <a class="pf" href="#ex-cbh">dovada ↓</a></div>
+    <div class="cell empty" aria-hidden="true"></div>
+
+    <div class="cell"><span class="st">13</span><span class="lane-chip">main.c</span><code>udp_sender_task</code> (liniile 49–62) ia pachetul din coadă și îl trimite prin UDP la PC, la <code>csi_ui.py</code>.</div>
+    <div class="cell empty" aria-hidden="true"></div>
+    <div class="cell empty" aria-hidden="true"></div>
+  </div>
+
+  <h3>Dovezile pentru drum</h3>
+
+  <details class="ex" id="ex-cbh" open>
+    <summary><span class="ex-k">Exponat 1.1</span> <span class="tag doc">documentat</span> <span class="ex-t">Forma lui <code>on_csi</code> și durata lui <code>info</code></span> <span class="ex-s">~/esp/esp-idf/components/esp_wifi/include/esp_wifi.h</span></summary>
+<pre class="code wrap">1117 |   * @brief The RX callback function of Channel State Information(CSI)  data.
+1119 |   *        Each time a CSI data is received, the callback function will be called.
+1121 |   * @param ctx context argument, passed to esp_wifi_set_csi_rx_cb() when registering callback function.
+»1122 |   * @param data CSI data received. The memory that it points to will be deallocated after callback function returns. ⟦1⟧
+»1125 | typedef void (* wifi_csi_cb_t)(void *ctx, wifi_csi_info_t *data); ⟦2⟧
+1141 | esp_err_t esp_wifi_set_csi_rx_cb(wifi_csi_cb_t cb, void *ctx);</pre>
+    <ol class="notes">
+      <li data-n="1">Memoria <code>info</code> dispare după <code>return</code>. Deci <code>on_csi</code> trebuie să copieze datele (pasul 12).</li>
+      <li data-n="2">Forma obligatorie a lui <code>on_csi</code>: <code>(void *ctx, wifi_csi_info_t *info)</code>.</li>
+    </ol>
+  </details>
+
+  <details class="ex" id="ex-rxcb" open>
+    <summary><span class="ex-k">Exponat 1.2</span> <span class="tag dis">dezasamblat</span> <span class="ex-t">„Înregistrarea” = o scriere în RAM</span> <span class="ex-s">libpp.a · wdev_set_csi_rx_cb · objdump -dr</span></summary>
+<pre class="code">00000000 &lt;wdev_set_csi_rx_cb-0x8&gt;:
+»                        0: R_XTENSA_32  g_wdev_csi_rx ⟦1⟧
+                        4: R_XTENSA_32  g_wdev_csi_rx_ctx
+00000008 &lt;wdev_set_csi_rx_cb&gt;:
+   8:   004136          entry   a1, 32
+   b:   fffd81          l32r    a8, 0
+»   e:   0829            s32i.n  a2, a8, 0 ⟦2⟧
+  10:   020c            movi.n  a2, 0
+  12:   fffc81          l32r    a8, 4
+»  15:   0839            s32i.n  a3, a8, 0 ⟦3⟧
+  17:   0020c0          memw
+  1a:   f01d            retw.n</pre>
+    <ol class="notes">
+      <li data-n="1">Variabila globală care ține adresa funcției noastre.</li>
+      <li data-n="2"><code>a2</code> = primul argument = <code>on_csi</code>. Se scrie în <code>g_wdev_csi_rx</code>. Atât face înregistrarea.</li>
+      <li data-n="3"><code>a3</code> = <code>ctx</code> (<code>NULL</code>) se scrie în <code>g_wdev_csi_rx_ctx</code>. Nicio adresă de registru nu apare în funcție.</li>
+    </ol>
+    <p class="ex-foot">Lanțul: <code>esp_wifi_set_csi_rx_cb</code> (<code>libnet80211.a</code>) → <code>ic_register_csi_rx_cb</code> → <code>wdev_set_csi_rx_cb</code> (<code>libpp.a</code>). Liniile de relocare <code>R_XTENSA_SLOT0_OP</code> și comentariile din dreapta sunt scoase.</p>
+  </details>
+
+  <details class="ex" id="ex-setcsi" open>
+    <summary><span class="ex-k">Exponat 1.3</span> <span class="tag dis">dezasamblat</span> <span class="ex-t"><code>esp_wifi_set_csi</code> nu atinge hardware-ul: trimite un mesaj</span> <span class="ex-s">libnet80211.a · esp_wifi_set_csi</span></summary>
+<pre class="code">»   0:   00003001 ⟦1⟧
+   4:   00003002
+                        14: R_XTENSA_32 wifi_set_csi
+                        2b: R_XTENSA_ASM_EXPAND wifi_init_completed
+»                        4f: R_XTENSA_ASM_EXPAND config_get_wifi_csi_enable ⟦2⟧
+  66:   f27c            movi.n  a2, -1
+»  6f:   8a1c            movi.n  a10, 24 ⟦3⟧
+  73:   5e2222          l32i    a2, a2, 0x178
+  76:   0002e0          callx8  a2
+  79:   01a122          movi    a2, 0x101
+  7e:   ffe521          l32r    a2, 14
+»  81:   016a22          s32i    a2, a10, 4 ⟦4⟧
+»  89:   084a32          s8i     a3, a10, 8 ⟦5⟧
+»                        92: R_XTENSA_ASM_EXPAND ieee80211_ioctl ⟦6⟧
+  95:   0008e0          callx8  a8</pre>
+    <ol class="notes">
+      <li data-n="1">Coduri de eroare: <code>0x3001</code> = <code>ESP_ERR_WIFI_NOT_INIT</code>, <code>0x3002</code> = <code>ESP_ERR_WIFI_NOT_STARTED</code>.</li>
+      <li data-n="2">Verifică <code>CONFIG_ESP_WIFI_CSI_ENABLED</code>. Fără această opțiune, funcția întoarce −1 (<code>ESP_FAIL</code>).</li>
+      <li data-n="3">Alocă un mesaj de 24 de octeți. Fără memorie: <code>0x101</code> = <code>ESP_ERR_NO_MEM</code>.</li>
+      <li data-n="4">Scrie în mesaj adresa funcției de lucru, <code>wifi_set_csi</code>.</li>
+      <li data-n="5">Scrie în mesaj parametrul <code>en</code> (<code>true</code>).</li>
+      <li data-n="6">Trimite mesajul în coada task-ului Wi-Fi. Acolo rulează <code>wifi_set_csi</code> → <code>ic_set_csi</code> → <code>hal_mac_set_csi</code>.</li>
+    </ol>
+  </details>
+
+  <details class="ex" id="ex-hal" open>
+    <summary><span class="ex-k">Exponat 1.4</span> <span class="tag dis">dezasamblat</span> <span class="ex-t">Bitul care pornește CSI</span> <span class="ex-s">libpp.a · hal_mac_set_csi</span></summary>
+<pre class="code">»   0:   3ff7309c ⟦1⟧
+   4:   ff7fffff
+                        f: R_XTENSA_ASM_EXPAND  config_get_wifi_csi_enable
+  1c:   fff981          l32r    a8, 0 (3ff7309c)
+  1f:   939c            beqz.n  a3, 3c ⟦2⟧
+  21:   190c            movi.n  a9, 1
+»  23:   019990          slli    a9, a9, 23 ⟦3⟧
+  26:   0020c0          memw
+»  29:   0828            l32i.n  a2, a8, 0 ⟦4⟧
+»  2b:   202290          or      a2, a2, a9
+  2e:   0020c0          memw
+»  31:   0829            s32i.n  a2, a8, 0 ⟦5⟧
+  3f:   0898            l32i.n  a9, a8, 0
+  41:   fff021          l32r    a2, 4 (ff7fffff)
+  44:   109920          and     a9, a9, a2 ⟦6⟧
+  4d:   006892          s32i    a9, a8, 0</pre>
+    <ol class="notes">
+      <li data-n="1">Adresa registrului, în zona MAC Wi-Fi. Espressif nu o descrie public.</li>
+      <li data-n="2"><code>a3</code> = <code>en</code>. Dacă este 0, sare la ramura de oprire (nota 6).</li>
+      <li data-n="3"><code>a9 = 1 &lt;&lt; 23</code> = <code>0x00800000</code>.</li>
+      <li data-n="4">Citește registrul, apoi pune bitul 23 pe 1. Ceilalți biți rămân la fel.</li>
+      <li data-n="5">Scrie registrul înapoi. Din acest moment, hardware-ul calculează CSI.</li>
+      <li data-n="6">Ramura <code>false</code>: masca <code>0xFF7FFFFF</code> șterge doar bitul 23.</li>
+    </ol>
+  </details>
+
+  <details class="ex" id="ex-rxproc" open>
+    <summary><span class="ex-k">Exponat 1.5</span> <span class="tag dis">dezasamblat</span> <span class="ex-t">Cine apelează <code>on_csi</code></span> <span class="ex-s">libpp.a · wdev_csi_rx_process (extras)</span></summary>
+<pre class="code">»                        0: R_XTENSA_32  g_wdev_csi_rx ⟦1⟧
+                        c: R_XTENSA_32  g_wdev_csi_rx_ctx
+  38:   0688            l32i.n  a8, a6, 0
+»  3a:   0f6816          beqz    a8, 134 ⟦2⟧
+»  3d:   0a4c            movi.n  a10, 64 ⟦3⟧
+  4a:   0008e0          callx8  a8
+  5c:   b5ab            addi.n  a11, a5, 10 ⟦4⟧
+  82:   cc1c            movi.n  a12, 28 ⟦5⟧
+                        a8: R_XTENSA_ASM_EXPAND wDev_GetNoiseFloor
+  bd:   b629            s32i.n  a2, a6, 44 ⟦6⟧
+  c1:   185622          s16i    a2, a6, 48
+  cc:   2846b2          s8i     a11, a6, 40
+ 119:   0328            l32i.n  a2, a3, 0
+ 11e:   03a8            l32i.n  a10, a3, 0
+» 123:   0002e0          callx8  a2 ⟦7⟧
+ 12e:   2c2222          l32i    a2, a2, 176
+» 131:   0002e0          callx8  a2 ⟦8⟧</pre>
+    <ol class="notes">
+      <li data-n="1">Aceeași variabilă scrisă la pasul 5 (exponatul 1.2).</li>
+      <li data-n="2">Dacă nu există o funcție înregistrată, iese imediat.</li>
+      <li data-n="3">Alocă 64 de octeți pentru <code>wifi_csi_info_t</code>.</li>
+      <li data-n="4">Copiază adresa sursei din antetul 802.11 (poziția 10) în <code>info-&gt;mac</code>.</li>
+      <li data-n="5">Copiază 28 de octeți: tot <code>rx_ctrl</code> (RSSI, <code>sig_mode</code>, canal…).</li>
+      <li data-n="6">Scrie <code>buf</code> (octetul 44), <code>len</code> (48) și <code>first_word_invalid</code> (40). Pozițiile corespund câmpurilor din <code>esp_wifi_types.h</code>, liniile 589–600.</li>
+      <li data-n="7">Apelul <code>on_csi(ctx, info)</code>, prin pointerul din <code>g_wdev_csi_rx</code>.</li>
+      <li data-n="8">Funcția de eliberare din <code>g_osi_funcs_p</code>: <code>info</code> nu mai există după acest punct.</li>
+    </ol>
+  </details>
+
+  <details class="ex" id="ex-guide" open>
+    <summary><span class="ex-k">Exponat 1.6</span> <span class="tag doc">documentat</span> <span class="ex-t">Ghidul oficial confirmă task-ul și modul promiscuu</span> <span class="ex-s">~/esp/esp-idf/docs/en/api-guides/wifi.rst, linia 2273</span></summary>
+<pre class="code wrap">»2273 | The CSI receiving callback function runs from Wi-Fi task. So, do not do lengthy operations in the callback function. ⟦1⟧ Instead, post necessary data to a queue and handle it from a lower priority task. ⟦2⟧ Because station does not receive any packet when it is disconnected and only receives packets from AP when it is connected, it is suggested to enable sniffer mode to receive more CSI data by calling esp_wifi_set_promiscuous(). ⟦3⟧</pre>
+    <ol class="notes">
+      <li data-n="1"><code>on_csi</code> rulează în task-ul Wi-Fi, ca în exponatul 1.5.</li>
+      <li data-n="2">De aceea <code>main.c</code> folosește o coadă și un task separat pentru UDP.</li>
+      <li data-n="3">De aceea <code>main.c</code> pornește modul promiscuu (liniile 107–109).</li>
+    </ol>
+  </details>
+
+  <details class="ex" id="ex-oncsi" open>
+    <summary><span class="ex-k">Exponat 1.7</span> <span class="tag src">cod deschis</span> <span class="ex-t">Ce face <code>on_csi</code> cu datele</span> <span class="ex-s">src/firmware/esp32_csi_node/main/main.c, liniile 31–46</span></summary>
+<pre class="code">31 | // Ruleaza in task-ul Wi-Fi: doar pune pachetul in coada
+32 | static void IRAM_ATTR on_csi(void *ctx, wifi_csi_info_t *info) {
+33 |     static uint16_t next_seq;
+34 |     static unsigned dropped;
+35 |     if (!info || !info-&gt;buf || info-&gt;len == 0) return;
+»36 |     if (!info-&gt;hdr || info-&gt;hdr[0] != 0x40) return;  // doar probe request: CSI din UDP-ul altui nod ar face o bucla ⟦1⟧
+37 |     if (next_seq &lt; 10)
+38 |         ESP_LOGI(TAG, "CSI #%u len=%u first_word_invalid=%d sig_mode=%d rssi=%d",
+39 |                  next_seq, info-&gt;len, info-&gt;first_word_invalid, info-&gt;rx_ctrl.sig_mode, info-&gt;rx_ctrl.rssi);
+40 |     csi_packet_t packet = {.magic = 0xA55A, .node_id = NODE_ID, .rssi_dbm = info-&gt;rx_ctrl.rssi,
+41 |                            .timestamp_us = (uint32_t)esp_timer_get_time(), .seq = next_seq++};
+»42 |     memcpy(packet.csi_iq, info-&gt;buf, info-&gt;len &gt; CSI_BYTES ? CSI_BYTES : info-&gt;len); ⟦2⟧
+»43 |     if (info-&gt;first_word_invalid) memset(packet.csi_iq, 0, 4);  // octetii 0-3 sunt invalizi: trimitem 0 ⟦3⟧
+»44 |     if (xRingbufferSend(csi_queue, &amp;packet, sizeof(packet), 0) != pdTRUE &amp;&amp; dropped++ % 100 == 0) ⟦4⟧
+45 |         ESP_LOGW(TAG, "coada plina: %u pachete CSI pierdute", dropped);
+46 | }</pre>
+    <ol class="notes">
+      <li data-n="1">Păstrează doar CSI din cadre „probe request” (primul octet al antetului = <code>0x40</code>).</li>
+      <li data-n="2">Copiază primii 128 de octeți din <code>buf</code>: blocul LLTF, 64 de subpurtătoare × (Q, I).</li>
+      <li data-n="3">Ghidul spune că primii 4 octeți pot fi invalizi. Codul îi face 0.</li>
+      <li data-n="4">Pune pachetul de 138 de octeți în coadă, fără așteptare. Dacă nu are loc, îl numără ca pierdut.</li>
+    </ol>
+  </details>
+</section>
+
+<!-- =============================================================== 2 -->
+<section class="q" id="cine" aria-labelledby="h-cine">
+  <div class="qhead">
+    <span class="qnum">2</span>
+    <h2 id="h-cine">Cine face de fapt munca</h2>
+    <p class="note-src">Întrebarea care rezultă din nota „!”: aplicația, biblioteca sau hardware-ul?</p>
+  </div>
+
+  <div class="answer">
+    <span class="lbl">Răspunsul scurt</span>
+    <p>Hardware-ul calculează CSI. Driverul închis, în task-ul Wi-Fi, îl împachetează și apelează <code>on_csi</code>. Codul nostru doar copiază 128 de octeți și îi trimite la PC.</p>
+    <p>Dovada simplă: <code>app_main</code> se termină după 290 ms. Măsurătorile CSI continuă după aceea, cu 50 pe secundă. <span class="tag mas">măsurat</span></p>
+  </div>
+
+  <div class="tw"><table>
+    <thead><tr><th>Cine</th><th>Unde rulează</th><th>Ce face</th><th>Dovada</th></tr></thead>
+    <tbody>
+      <tr><td>Radioul și MAC-ul (hardware)</td><td>în cip</td><td>primește cadrul, estimează canalul din LLTF, scrie valorile (Q, I)</td><td>bitul 23 pornește calculul (exponatul 1.4) <span class="tag dis">dezasamblat</span>; algoritmul nu este public <span class="tag ded">dedus</span></td></tr>
+      <tr><td>Driverul închis, task-ul Wi-Fi</td><td>nucleul 0, prioritatea 23</td><td>completează <code>wifi_csi_info_t</code>, apelează <code>on_csi</code>, eliberează memoria</td><td>exponatul 1.5 <span class="tag dis">dezasamblat</span>; jurnalul de mai jos <span class="tag mas">măsurat</span></td></tr>
+      <tr><td><code>on_csi</code> (main.c)</td><td>în task-ul Wi-Fi, apelată de driver</td><td>filtrează, copiază 128 B, pune în coadă</td><td>exponatul 1.7 <span class="tag src">cod deschis</span></td></tr>
+      <tr><td><code>udp_sender_task</code> (main.c)</td><td>nucleul 1, prioritatea 10</td><td>trimite pachetele prin UDP</td><td><code>main.c</code>, liniile 49–62, 117 <span class="tag src">cod deschis</span></td></tr>
+      <tr><td><code>probe_sender_task</code> (main.c)</td><td>nucleul 0, prioritatea 5</td><td>emite un probe la 6 Mbps la fiecare 10 ms. Probe-ul dă CSI la nodul vecin</td><td><code>main.c</code>, liniile 65–77, 118 <span class="tag src">cod deschis</span></td></tr>
+      <tr><td><code>app_main</code></td><td>task-ul <code>main</code>, o singură dată</td><td>doar configurează, apoi se termină</td><td>jurnalul de mai jos <span class="tag mas">măsurat</span></td></tr>
+    </tbody>
+  </table></div>
+
+  <details class="ex" id="ex-tasks" open>
+    <summary><span class="ex-k">Exponat 2.1</span> <span class="tag mas">măsurat</span> <span class="ex-t"><code>app_main</code> se termină, CSI continuă</span> <span class="ex-s">9Nov2026/pas_cu_pas/output/07_main_nou.log</span></summary>
+<pre class="code">I (539) main_task: Calling app_main()
+»I (579) wifi:wifi driver task: 3ffbfccc, prio:23, stack:6656, core=0 ⟦1⟧
+I (819) wifi:mode : sta (fc:e8:c0:e1:1e:d0)
+»I (829) main_task: Returned from app_main() ⟦2⟧
+I (929) wifi:connected with zaqmlp, aid = 8, channel 11, BW20, bssid = f6:2b:8c:e2:21:ac
+I (1939) CSI: Conectat. IP 10.136.19.115, gateway 10.136.19.245
+»I (2959) CSI:  51 CSI/s  rssi= -55 ⟦3⟧
+I (3959) CSI:  50 CSI/s  rssi= -64
+I (4979) CSI:  51 CSI/s  rssi= -61</pre>
+    <ol class="notes">
+      <li data-n="1">Driverul creează task-ul Wi-Fi: prioritatea 23, nucleul 0. Aici rulează <code>wdev_csi_rx_process</code> și <code>on_csi</code>.</li>
+      <li data-n="2"><code>app_main</code> s-a terminat la 829 ms, după 290 ms de lucru.</li>
+      <li data-n="3">Peste 2 s, CSI vine cu 50–51 pe secundă. Nicio linie din <code>app_main</code> nu mai rulează.</li>
+    </ol>
+    <p class="ex-foot">Jurnal din programul de test <code>pas_cu_pas/main/main.c</code> (11 nov.): stație conectată, ping la telefon la 20 ms. Aceleași biblioteci și aceeași versiune ESP-IDF ca firmware-ul proiectului.</p>
+  </details>
+</section>
+
+<!-- =============================================================== 3 -->
+<section class="q" id="registri" aria-labelledby="h-reg">
+  <div class="qhead">
+    <span class="qnum">3</span>
+    <h2 id="h-reg">Ce fac funcțiile cu regiștrii de control</h2>
+    <p class="note-src">Nota: <q>ce fac funcțiile cu regiștrii de control.</q></p>
+  </div>
+
+  <div class="answer">
+    <span class="lbl">Răspunsul scurt</span>
+    <p>Răspunsul are două niveluri. Nivelul 1: parametrii din API, documentați de Espressif. Nivelul 2: regiștrii hardware în care ajung acești parametri, găsiți de noi în bibliotecile închise.</p>
+    <p>Funcțiile <code>esp_wifi_set_*</code> nu scriu direct în regiștri. Ele trimit un mesaj task-ului Wi-Fi. Funcțiile <code>hal_*</code> și <code>phy_*</code> fac scrierea: citesc registrul, schimbă câțiva biți, scriu valoarea înapoi. <span class="tag dis">dezasamblat</span></p>
+  </div>
+
+  <h3>3.1 Tiparul comun al funcțiilor <code>esp_wifi_set_*</code></h3>
+  <ol class="facts">
+    <li>Verifică dacă a rulat <code>esp_wifi_init</code>. Dacă nu: <code>ESP_ERR_WIFI_NOT_INIT</code> (<code>0x3001</code>).</li>
+    <li>Verifică dacă driverul a pornit. Dacă nu: <code>ESP_ERR_WIFI_NOT_STARTED</code> (<code>0x3002</code>).</li>
+    <li>Verifică argumentele. Pointer <code>NULL</code>: <code>ESP_ERR_INVALID_ARG</code> (<code>0x102</code>).</li>
+    <li>Alocă un mesaj de 24 sau 32 de octeți. Fără memorie: <code>ESP_ERR_NO_MEM</code> (<code>0x101</code>).</li>
+    <li>Scrie în mesaj adresa funcției de lucru (<code>*_process</code> sau <code>wifi_set_csi</code>) și parametrii.</li>
+    <li><code>ieee80211_ioctl</code> pune mesajul în coada task-ului Wi-Fi. Funcția de lucru rulează acolo.</li>
+  </ol>
+  <p>Exemplul complet este exponatul 1.3. Excepție: <code>esp_wifi_set_csi_rx_cb</code> apelează direct <code>ic_register_csi_rx_cb</code>, fără mesaj. <span class="tag dis">dezasamblat</span></p>
+
+  <h3>3.2 Funcție → lanț de apeluri → registru</h3>
+  <div class="tw"><table>
+    <thead><tr><th>Funcția din API</th><th>Lanțul în bibliotecile închise</th><th>Unde ajunge</th></tr></thead>
+    <tbody>
+      <tr><td><code>esp_wifi_set_csi(en)</code></td><td><code>wifi_set_csi</code> → <code>ic_set_csi</code> → <code>hal_mac_set_csi</code></td><td><code>0x3FF7309C</code>, bitul 23 = <code>en</code></td></tr>
+      <tr><td><code>esp_wifi_set_csi_config(&amp;cfg)</code></td><td><code>ic_csi_set_config</code> → <code>phy_chan_dump_cfg</code>, <code>phy_chan_filt_set</code></td><td><code>0x3FF5CD0C</code>, <code>0x3FF5CC0C</code>, <code>0x3FF5CD04</code>, <code>0x3FF5CD08</code>, <code>0x3FF5C074</code>; bitul 29 din <code>0x3FF730F8</code> și <code>0x3FF730FC</code></td></tr>
+      <tr><td><code>esp_wifi_set_csi_rx_cb(cb, ctx)</code></td><td><code>ic_register_csi_rx_cb</code> → <code>wdev_set_csi_rx_cb</code></td><td>niciun registru: variabilele <code>g_wdev_csi_rx</code>, <code>g_wdev_csi_rx_ctx</code></td></tr>
+      <tr><td><code>esp_wifi_set_promiscuous(en)</code></td><td><code>wifi_set_promis_process</code> → <code>wdev_set_promis</code> → <code>hal_sniffer_rx_set_promis</code></td><td><code>0x3FF730F8</code>, <code>0x3FF730FC</code>, <code>0x3FF73104</code>, <code>0x3FF73C40</code></td></tr>
+      <tr><td><code>esp_wifi_set_promiscuous_filter(&amp;f)</code></td><td><code>ic_set_promis_filter</code> → <code>wdev_set_promis_filter</code></td><td>masca în RAM (<code>wDevCtrl</code> + <code>0x34</code>); apoi <code>wdev_set_promis_misc_pkt</code> rescrie regiștrii de mai sus</td></tr>
+      <tr><td><code>esp_wifi_config_80211_tx_rate(..., 6M)</code></td><td><code>ic_set_80211_tx_rate</code> → <code>trc_set_80211_tx_rate</code></td><td>niciun registru: tabloul <code>g_80211_tx_rate</code> din RAM</td></tr>
+      <tr><td><code>esp_wifi_set_storage(WIFI_STORAGE_RAM)</code></td><td>fără mesaj</td><td>niciun registru: un octet în structura <code>g_ic</code></td></tr>
+    </tbody>
+  </table></div>
+  <p>Toate rândurile: <span class="tag dis">dezasamblat</span> din bibliotecile ESP-IDF v5.1.7. Espressif nu descrie acești regiștri în documentele folosite aici.</p>
+
+  <h3>3.3 Dovezile la nivel de bit</h3>
+
+  <details class="ex" id="ex-icset" open>
+    <summary><span class="ex-k">Exponat 3.1</span> <span class="tag dis">dezasamblat</span> <span class="ex-t">Cum se împart câmpurile <code>wifi_csi_config_t</code></span> <span class="ex-s">libpp.a · ic_csi_set_config</span></summary>
+<pre class="code">   0:   3ff730f8
+   4:   3ff730fc
+»  17:   0202e2          l8ui    a14, a2, 2 ⟦1⟧
+»  1a:   0102d2          l8ui    a13, a2, 1
+»  1d:   0002c2          l8ui    a12, a2, 0
+»  20:   0602b2          l8ui    a11, a2, 6
+»  23:   0502a2          l8ui    a10, a2, 5
+                        26: R_XTENSA_ASM_EXPAND phy_chan_dump_cfg ⟦2⟧
+  2c:   0302b2          l8ui    a11, a2, 3
+  2f:   0402a2          l8ui    a10, a2, 4
+                        32: R_XTENSA_ASM_EXPAND phy_chan_filt_set ⟦3⟧
+»  38:   070282          l8ui    a8, a2, 7 ⟦4⟧
+»  42:   018830          slli    a8, a8, 29</pre>
+    <ol class="notes">
+      <li data-n="1">Citește octeții structurii. Ordinea câmpurilor din <code>esp_wifi_types.h</code>: 0 = <code>lltf_en</code>, 1 = <code>htltf_en</code>, 2 = <code>stbc_htltf2_en</code>, 3 = <code>ltf_merge_en</code>, 4 = <code>channel_filter_en</code>, 5 = <code>manu_scale</code>, 6 = <code>shift</code>, 7 = <code>dump_ack_en</code>.</li>
+      <li data-n="2">Cinci câmpuri merg în radio, la <code>phy_chan_dump_cfg</code> (<code>libphy.a</code>), exponatul 3.2.</li>
+      <li data-n="3"><code>ltf_merge_en</code> și <code>channel_filter_en</code> merg la <code>phy_chan_filt_set</code>.</li>
+      <li data-n="4"><code>dump_ack_en</code> devine bitul 29 din <code>0x3FF730F8</code> și <code>0x3FF730FC</code>.</li>
+    </ol>
+  </details>
+
+  <details class="ex" id="ex-phydump" open>
+    <summary><span class="ex-k">Exponat 3.2</span> <span class="tag dis">dezasamblat</span> <span class="ex-t">Registrul <code>0x3FF5CD0C</code>, bit cu bit</span> <span class="ex-s">libphy.a · phy_chan_dump_cfg</span></summary>
+<pre class="code">»   0:   3ff5cd0c ⟦1⟧
+  1b:   fff971          l32r    a7, 0 (3ff5cd0c)
+                        24: R_XTENSA_ASM_EXPAND esp_dport_access_reg_read
+  2a:   787c            movi.n  a8, -9
+»  32:   1122d0          slli    a2, a2, 3 ⟦2⟧
+  3b:   07a9            s32i.n  a10, a7, 0
+  48:   0faf82          movi    a8, -241
+»  4b:   1133c0          slli    a3, a3, 4 ⟦3⟧
+  5a:   07a9            s32i.n  a10, a7, 0
+  67:   fdaf82          movi    a8, -3
+»  70:   1144f0          slli    a4, a4, 1 ⟦4⟧
+  79:   0067a2          s32i    a10, a7, 0
+  88:   e27c            movi.n  a2, -2
+»  90:   205a50          or      a5, a10, a5 ⟦5⟧
+  96:   0759            s32i.n  a5, a7, 0
+  a6:   b87c            movi.n  a8, -5
+»  a8:   1166e0          slli    a6, a6, 2 ⟦6⟧
+  b4:   07a9            s32i.n  a10, a7, 0</pre>
+    <ol class="notes">
+      <li data-n="1">Adresa registrului. Pentru fiecare câmp: citire (<code>esp_dport_access_reg_read</code>), mască, <code>or</code>, scriere.</li>
+      <li data-n="2"><code>manu_scale</code> → bitul 3 (masca −9 = ~<code>0x08</code>).</li>
+      <li data-n="3"><code>shift</code> → biții 4–7 (masca −241 = ~<code>0xF0</code>).</li>
+      <li data-n="4"><code>lltf_en</code> → bitul 1 (masca −3 = ~<code>0x02</code>).</li>
+      <li data-n="5"><code>htltf_en</code> → bitul 0 (masca −2 = ~<code>0x01</code>).</li>
+      <li data-n="6"><code>stbc_htltf2_en</code> → bitul 2 (masca −5 = ~<code>0x04</code>).</li>
+    </ol>
+    <p class="ex-foot">Argumentele: <code>ic_csi_set_config</code> pune câmpurile în <code>a10</code>–<code>a14</code>. După <code>callx8</code>, ele apar în <code>a2</code>–<code>a6</code>: <code>manu_scale</code>, <code>shift</code>, <code>lltf_en</code>, <code>htltf_en</code>, <code>stbc_htltf2_en</code>. Simulatorul din secțiunea 4 folosește această hartă.</p>
+  </details>
+
+  <details class="ex" id="ex-promis" open>
+    <summary><span class="ex-k">Exponat 3.3</span> <span class="tag dis">dezasamblat</span> <span class="ex-t">Modul promiscuu scrie patru regiștri MAC</span> <span class="ex-s">libpp.a · hal_sniffer_rx_set_promis (extras)</span></summary>
+<pre class="code">»   0:   3ff73c40 ⟦1⟧
+»   4:   3ff73104
+»   8:   3ff730f8
+»   c:   3ff730fc
+  35:   fff381          l32r    a8, 4 (3ff73104)
+  4c:   209940          or      a9, a9, a4
+  52:   0899            s32i.n  a9, a8, 0 ⟦2⟧
+  54:   ffed91          l32r    a9, 8 (3ff730f8)
+  5c:   208840          or      a8, a8, a4
+  62:   0989            s32i.n  a8, a9, 0
+  64:   ffea91          l32r    a9, c (3ff730fc)
+  72:   0989            s32i.n  a8, a9, 0</pre>
+    <ol class="notes">
+      <li data-n="1">Cele patru adrese folosite de funcție.</li>
+      <li data-n="2">Același tipar: citire, <code>or</code> cu o mască, scriere. Semnificația fiecărui bit nu este publică. Numele funcției sugerează filtrele de recepție ale MAC. <span class="tag ded">dedus</span></li>
+    </ol>
+  </details>
+
+  <h3>3.4 Regiștrii găsiți</h3>
+  <div class="tw"><table>
+    <thead><tr><th>Adresa</th><th>Scris de</th><th>Ce controlează</th></tr></thead>
+    <tbody>
+      <tr><td><code>0x3FF7309C</code></td><td><code>hal_mac_set_csi</code></td><td>bitul 23: CSI pornit sau oprit</td></tr>
+      <tr><td><code>0x3FF730F8</code>, <code>0x3FF730FC</code></td><td><code>ic_csi_set_config</code>, <code>hal_sniffer_rx_set_promis</code></td><td>bitul 29: CSI pentru ACK; alți biți: recepția în mod promiscuu <span class="tag ded">dedus</span></td></tr>
+      <tr><td><code>0x3FF73104</code>, <code>0x3FF73C40</code></td><td><code>hal_sniffer_rx_set_promis</code></td><td>recepția în mod promiscuu <span class="tag ded">dedus</span></td></tr>
+      <tr><td><code>0x3FF5CD0C</code></td><td><code>phy_chan_dump_cfg</code></td><td>biții 0–7: ce câmpuri LTF se păstrează și scalarea CSI</td></tr>
+      <tr><td><code>0x3FF5CC0C</code>, <code>0x3FF5CD04</code>, <code>0x3FF5CD08</code></td><td><code>phy_chan_filt_set</code></td><td>filtrul de canal (netezirea subpurtătoarelor vecine)</td></tr>
+      <tr><td><code>0x3FF5C074</code></td><td><code>phy_chan_filt_set</code></td><td>bitul 13: media LLTF + HT-LTF (<code>ltf_merge_en</code>)</td></tr>
+    </tbody>
+  </table></div>
+  <p>Numele funcțiilor sugerează două zone: <code>0x3FF73xxx</code> = MAC (funcțiile <code>hal_mac_*</code>, <code>hal_sniffer_*</code>) și <code>0x3FF5Cxxx</code> = radio, PHY (funcțiile <code>phy_*</code>). <span class="tag ded">dedus</span></p>
+</section>
+
+<!-- =============================================================== 4 -->
+<section class="q" id="receptie" aria-labelledby="h-rec">
+  <div class="qhead">
+    <span class="qnum">4</span>
+    <h2 id="h-rec">Cum se modifică parametrii de recepție</h2>
+    <p class="note-src">Nota: <q>cum se modif. param. de recepție.</q></p>
+  </div>
+
+  <div class="answer">
+    <span class="lbl">Răspunsul scurt</span>
+    <p>Cinci pârghii decid ce CSI primim. Primele două decid <em>dacă</em> vine CSI. Ultimele trei decid <em>ce</em> conține.</p>
+    <p>Pentru fiecare pârghie: ce schimbi în cod, ce se schimbă în date și dovada.</p>
+  </div>
+
+  <div class="levers">
+    <article class="lever" id="p1">
+      <h3><span class="ln-n">P1</span>Tipul și rata cadrului</h3>
+      <dl>
+        <dt>Ce schimbi</dt><dd><code>esp_wifi_config_80211_tx_rate(WIFI_IF_STA, WIFI_PHY_RATE_6M)</code>, <code>main.c</code> linia 103</dd>
+        <dt>Ce se schimbă</dt><dd>Doar cadrele OFDM (802.11a/g/n) au LLTF, deci doar ele dau CSI. La rata implicită, 1 Mbps (802.11b), vecinul primește probe-urile, dar nu calculează CSI.</dd>
+        <dt>Dovada</dt><dd>Fără linia 103, placa B a primit 464–475 de probe la 1 Mbps în fiecare 5 s și <strong>0 CSI</strong> din ele. Cu linia 103, fiecare probe primit la 6 Mbps a dat exact un CSI. <span class="tag mas">măsurat</span> Exponatul 4.1.</dd>
+      </dl>
+    </article>
+    <article class="lever" id="p2">
+      <h3><span class="ln-n">P2</span>Filtrul modului promiscuu</h3>
+      <dl>
+        <dt>Ce schimbi</dt><dd><code>esp_wifi_set_promiscuous_filter(&amp;filter)</code> cu <code>WIFI_PROMIS_FILTER_MASK_ALL</code> și <code>esp_wifi_set_promiscuous(true)</code>, liniile 107–109</dd>
+        <dt>Ce se schimbă</dt><dd>Câte cadre ajung la estimare. În modul stație, placa primește doar cadrele de la AP. <span class="tag doc">documentat</span> Cu <code>MASK_ALL</code>, primește cadrele tuturor de pe canal.</dd>
+        <dt>Dovada</dt><dd>Filtrul implicit: 0 CSI în 3 s. <code>MASK_ALL</code>: 314–429 CSI în 3 s. <span class="tag mas">măsurat</span> Exponatul 4.2.</dd>
+      </dl>
+    </article>
+    <article class="lever" id="p3">
+      <h3><span class="ln-n">P3</span>Câmpurile <code>wifi_csi_config_t</code></h3>
+      <dl>
+        <dt>Ce schimbi</dt><dd><code>wifi_csi_config_t csi = {.lltf_en = true, .channel_filter_en = false};</code>, linia 111</dd>
+        <dt>Ce se schimbă</dt><dd>Ce blocuri apar în <code>buf</code> (LLTF, HT-LTF, STBC-HT-LTF), deci <code>len</code>. Filtrul de canal netezește subpurtătoarele vecine. <span class="tag doc">documentat</span></dd>
+        <dt>Dovada</dt><dd>Configurarea veche (LLTF + HT-LTF + STBC): <code>lenmax=384</code>. Configurarea nouă (doar LLTF): <code>len</code> = 128 la toate CSI, și la cadrele HT. <span class="tag mas">măsurat</span> Exponatul 4.3. Încearcă simulatorul de mai jos.</dd>
+      </dl>
+    </article>
+    <article class="lever" id="p4">
+      <h3><span class="ln-n">P4</span>Canalul și lățimea de bandă</h3>
+      <dl>
+        <dt>Ce schimbi</dt><dd>În modul stație, canalul este al AP-ului. <code>esp_wifi_set_channel</code> se apelează după <code>esp_wifi_start</code>. <code>esp_wifi_set_bandwidth</code> alege HT20 sau HT40. <span class="tag doc">documentat</span></dd>
+        <dt>Ce se schimbă</dt><dd>Lățimea de bandă și tipul cadrului schimbă <code>len</code>: 128 B (non-HT), 256 B (HT20), 384 B (HT20 cu STBC sau HT40), până la 612 B. <span class="tag doc">documentat</span></dd>
+        <dt>Dovada</dt><dd>Tabelul din ghid, exponatul 4.4. Jurnalele arată <code>channel 11, BW20</code> (9 nov.) și <code>channel 1, BW20</code> (12 nov.). <span class="tag mas">măsurat</span></dd>
+      </dl>
+    </article>
+    <article class="lever" id="p5">
+      <h3><span class="ln-n">P5</span>Scalarea amplitudinii</h3>
+      <dl>
+        <dt>Ce schimbi</dt><dd><code>manu_scale</code> și <code>shift</code> din <code>wifi_csi_config_t</code>. Implicit, <code>manu_scale = false</code>: chipul scalează automat. <span class="tag doc">documentat</span></dd>
+        <dt>Ce se schimbă</dt><dd>Nivelul absolut al amplitudinii. Cu scalarea automată, amplitudinea nu are o unitate fixă. <span class="tag ded">dedus</span></dd>
+        <dt>Dovada</dt><dd>În 27 s, RSSI a scăzut de la −49 la −60 dBm. În același timp, amplitudinea medie a crescut de la 18,0 la 22,4. Corelația este −0,83. <span class="tag mas">măsurat</span> Graficul din secțiunea 7.3. Scalarea manuală nu este încă testată pe placă.</dd>
+      </dl>
+    </article>
+  </div>
+
+  <div class="sim" id="sim">
+    <div class="sim-head">
+      <h3>Simulator: schimbă un câmp, vezi regiștrii și <code>len</code></h3>
+      <p>Simulatorul aplică harta de biți din exponatele 3.1 și 3.2. Nu rulează pe placă. Eticheta de la <code>len</code> spune dacă rezultatul este documentat, măsurat sau doar dedus.</p>
+    </div>
+    <div class="sim-body">
+      <form class="sim-ctl" id="sim-form" aria-label="Câmpurile wifi_csi_config_t">
+        <label><input type="checkbox" id="f-lltf"> <code>lltf_en</code></label>
+        <label><input type="checkbox" id="f-htltf"> <code>htltf_en</code></label>
+        <label><input type="checkbox" id="f-stbc"> <code>stbc_htltf2_en</code></label>
+        <label><input type="checkbox" id="f-merge"> <code>ltf_merge_en</code></label>
+        <label><input type="checkbox" id="f-filt"> <code>channel_filter_en</code></label>
+        <label><input type="checkbox" id="f-manu"> <code>manu_scale</code></label>
+        <label><code>shift</code> <select id="f-shift" aria-label="shift, 0 până la 15"></select></label>
+        <label><input type="checkbox" id="f-ack"> <code>dump_ack_en</code></label>
+        <div class="presets">
+          <button class="tb" type="button" data-preset="proiect">Proiectul (linia 111)</button>
+          <button class="tb" type="button" data-preset="vechi">Configurarea veche</button>
+          <button class="tb" type="button" data-preset="implicit">Implicit, după header</button>
+        </div>
+      </form>
+      <div class="sim-out" aria-live="polite">
+        <div>
+          <p class="reg-title"><code>0x3FF5CD0C</code>, biții 7…0 <span class="tag dis">dezasamblat</span></p>
+          <div class="bits" id="bits"></div>
+          <p class="hexline" id="hex"></p>
+        </div>
+        <div>
+          <p class="reg-title">Ceilalți regiștri scriși de <code>esp_wifi_set_csi_config</code></p>
+          <ul id="others"></ul>
+        </div>
+        <div>
+          <p class="reg-title"><code>len</code> așteptat la 20 MHz <span id="len-tag"></span></p>
+          <div class="tw" style="margin:0"><table>
+            <thead><tr><th>Cadrul</th><th class="num">len (octeți)</th><th>Blocurile din <code>buf</code></th></tr></thead>
+            <tbody id="lens"></tbody>
+          </table></div>
+        </div>
+        <p class="warn" id="sim-warn" hidden></p>
+      </div>
+    </div>
+  </div>
+
+  <details class="ex" id="ex-rate" open>
+    <summary><span class="ex-k">Exponat 4.1</span> <span class="tag mas">măsurat</span> <span class="ex-t">Rata 1 Mbps nu dă CSI; 6 Mbps dă</span> <span class="ex-s">9Nov2026/pas_cu_pas/output/08_main_reparat_12nov.txt, rularea G</span></summary>
+<pre class="code">## G. A: fara esp_wifi_config_80211_tx_rate (rata implicita), B: codul nou, 45 s
+-- placa A (primeste probe-urile lui B, emise la 6 Mbps)
+»I (15771) DIAG: 5 s: tx ok=500 err=0 | rx probe vecin 1M=0 6M=428 alta=0 | ... | csi probe vecin=428 ... ⟦1⟧
+-- placa B (primeste probe-urile lui A, emise la rata implicita)
+»I (11072) DIAG: 5 s: tx ok=485 err=15 | rx probe vecin 1M=475 6M=0 alta=0 | ... | csi probe vecin=0 ... ⟦2⟧
+I (16082) DIAG: 5 s: tx ok=471 err=29 | rx probe vecin 1M=470 6M=0 alta=0 | ... | csi probe vecin=0 ...</pre>
+    <ol class="notes">
+      <li data-n="1">428 de probe primite la 6 Mbps, 428 de CSI din ele: un CSI pentru fiecare cadru OFDM.</li>
+      <li data-n="2">475 de probe primite la 1 Mbps, 0 CSI. Cadrul 802.11b nu are LLTF.</li>
+    </ol>
+    <p class="ex-foot">Copie de diagnostic a <code>main.c</code>, cu contoare la 5 s; două plăci la cel mult 0,5 m, canalul 1. Coloanele scurtate sunt marcate cu „...”.</p>
+  </details>
+
+  <details class="ex" id="ex-filter" open>
+    <summary><span class="ex-k">Exponat 4.2</span> <span class="tag mas">măsurat</span> <span class="ex-t">Filtrul promiscuu: 0 CSI față de ~130 CSI/s</span> <span class="ex-s">9Nov2026/pas_cu_pas/output/03_diagnostic_hotspot.md</span></summary>
+<pre class="code">Varianta A: cu filtrul WIFI_PROMIS_FILTER_MASK_ALL
+»I    3.69 s  DIAG      hotspot: 11b=31 ofdm=0 ht=0 | csi hotspot=0 csi total=393 ⟦1⟧
+I    9.69 s  DIAG      hotspot: 11b=29 ofdm=0 ht=0 | csi hotspot=0 csi total=314
+I   18.69 s  DIAG      hotspot: 11b=32 ofdm=0 ht=0 | csi hotspot=0 csi total=429
+Varianta B: filtrul implicit
+»I    3.74 s  DIAG      hotspot: 11b=29 ofdm=0 ht=0 | csi hotspot=0 csi total=0 ⟦2⟧
+I   18.74 s  DIAG      hotspot: 11b=32 ofdm=0 ht=0 | csi hotspot=0 csi total=0</pre>
+    <ol class="notes">
+      <li data-n="1">Cu <code>MASK_ALL</code>: 314–429 CSI în 3 s, de la alte dispozitive de pe canal. Hotspot-ul trimite doar cadre 802.11b (<code>11b=31 ofdm=0</code>), deci 0 CSI de la el.</li>
+      <li data-n="2">Cu filtrul implicit: 0 CSI. Bitul exact din mască care face diferența nu este încă izolat.</li>
+    </ol>
+  </details>
+
+  <details class="ex" id="ex-len" open>
+    <summary><span class="ex-k">Exponat 4.3</span> <span class="tag mas">măsurat</span> <span class="ex-t"><code>wifi_csi_config_t</code> schimbă <code>len</code></span> <span class="ex-s">08_main_reparat_12nov.txt, rulările B și C, o placă, 30 s</span></summary>
+<pre class="code">## B. configurarea CSI noua (doar LLTF)
+»I (10782) DIAG: 5 s: probe ok=500 err=0 | csi=113 ht=3 fwi=113 len!=128: 0 lenmax=128 ⟦1⟧
+I (15782) DIAG: 5 s: probe ok=500 err=0 | csi=106 ht=1 fwi=106 len!=128: 0 lenmax=128
+## C. configurarea CSI veche (LLTF + HT-LTF + STBC + merge)
+»I (5822) DIAG: 5 s: probe ok=500 err=0 | csi=96 ht=2 fwi=96 len!=128: 2 lenmax=384 ⟦2⟧
+I (10822) DIAG: 5 s: probe ok=500 err=0 | csi=132 ht=0 fwi=132 len!=128: 0 lenmax=128</pre>
+    <ol class="notes">
+      <li data-n="1">Doar LLTF: 3 cadre HT, toate cu <code>len</code> = 128.</li>
+      <li data-n="2">Configurarea veche: 2 cadre HT, ambele cu <code>len</code> ≠ 128; maximul a fost 384. După tabelul din ghid, 384 B înseamnă HT20 cu STBC sau HT40 (exponatul 4.4). <code>fwi</code> = numărul de CSI cu <code>first_word_invalid</code> = 1: toate.</li>
+    </ol>
+  </details>
+
+  <details class="ex" id="ex-lentable">
+    <summary><span class="ex-k">Exponat 4.4</span> <span class="tag doc">documentat</span> <span class="ex-t">Tabelul oficial: tipul cadrului → <code>len</code></span> <span class="ex-s">wifi.rst, liniile 2216–2232 (canalul secundar: none)</span></summary>
+<pre class="code">| channel     | secondary channel  |                   none                  |
+| packet      | signal mode        |   non HT    |            HT             |
+| information | channel bandwidth  |    20 MHz   |           20 MHz          |
+|             | STBC               |  non STBC   |  non STBC   |     STBC    |
+»| sub-carrier | LLTF               | 0~31, -32~-1| 0~31, -32~-1| 0~31, -32~-1| ⟦1⟧
+| index       | HT-LTF             |      -      | 0~31, -32~-1| 0~31, -32~-1|
+|             | STBC-HT-LTF        |      -      |      -      | 0~31, -32~-1|
+»| total bytes                      |     128     |     256     |     384     | ⟦2⟧</pre>
+    <ol class="notes">
+      <li data-n="1">Ordinea LLTF în <code>buf</code>: subpurtătoarele 0…31, apoi −32…−1.</li>
+      <li data-n="2">Cu toate câmpurile active. Coloanele pentru HT40 (canal secundar „below” / „above”) ajung la 612 B.</li>
+    </ol>
+    <p class="ex-foot">Extras: doar primele trei coloane ale tabelului (canalul secundar „none”, 20 MHz).</p>
+  </details>
+
+  <details class="ex" id="ex-cfgh">
+    <summary><span class="ex-k">Exponat 4.5</span> <span class="tag doc">documentat</span> <span class="ex-t">Ce spune header-ul despre fiecare câmp</span> <span class="ex-s">esp_wifi_types.h, liniile 574–581</span></summary>
+<pre class="code wrap">574 |     bool lltf_en;           /**&lt; enable to receive legacy long training field(lltf) data. Default enabled */
+575 |     bool htltf_en;          /**&lt; enable to receive HT long training field(htltf) data. Default enabled */
+576 |     bool stbc_htltf2_en;    /**&lt; enable to receive space time block code HT long training field(stbc-htltf2) data. Default enabled */
+577 |     bool ltf_merge_en;      /**&lt; enable to generate htlft data by averaging lltf and ht_ltf data when receiving HT packet. Otherwise, use ht_ltf data directly. Default enabled */
+»578 |     bool channel_filter_en; /**&lt; enable to turn on channel filter to smooth adjacent sub-carrier. Disable it to keep independence of adjacent sub-carrier. Default enabled */ ⟦1⟧
+»579 |     bool manu_scale;        /**&lt; manually scale the CSI data by left shifting or automatically scale the CSI data. If set true, please set the shift bits. false: automatically. true: manually. Default false */ ⟦2⟧
+580 |     uint8_t shift;          /**&lt; manually left shift bits of the scale of the CSI data. The range of the left shift bits is 0~15 */
+581 |     bool dump_ack_en;       /**&lt; enable to dump 802.11 ACK frame, default disabled */</pre>
+    <ol class="notes">
+      <li data-n="1">Motivul pentru <code>.channel_filter_en = false</code> în proiect: subpurtătoarele vecine rămân independente.</li>
+      <li data-n="2">Scalarea automată este implicită. Proiectul nu o schimbă.</li>
+    </ol>
+  </details>
+</section>
+
+<!-- =============================================================== 5 -->
+<section class="q" id="biblioteca" aria-labelledby="h-bib">
+  <div class="qhead">
+    <span class="qnum">5</span>
+    <h2 id="h-bib">Ce face biblioteca și cum o trec în studiul bibliografic</h2>
+    <p class="note-src">Notele: <q>de studiat ce face biblioteca → cum le trec în studiu bibliografic.</q></p>
+  </div>
+
+  <div class="answer">
+    <span class="lbl">Răspunsul scurt</span>
+    <p>Biblioteca <code>esp_wifi</code> are trei straturi. Doar primul este public și citabil. Al doilea și al treilea le cunoaștem din dezasamblare.</p>
+    <p>În teză, citez header-ele și ghidul ESP-IDF v5.1.7 ca surse. Dezasamblarea apare explicit ca „analiză proprie”, cu versiunea și comanda.</p>
+  </div>
+
+  <div class="tw"><table>
+    <thead><tr><th>Stratul</th><th>Fișierele</th><th>Ce face</th><th>Cum îl cunoaștem</th></tr></thead>
+    <tbody>
+      <tr><td>1. Contractul public</td><td><code>esp_wifi.h</code>, <code>esp_wifi_types.h</code>, ghidul <code>wifi.rst</code></td><td>numele funcțiilor, structurile, codurile de eroare, regulile de folosire</td><td><span class="tag doc">documentat</span></td></tr>
+      <tr><td>2. Bibliotecile închise</td><td><code>libnet80211.a</code></td><td>funcțiile <code>esp_wifi_*</code>, mesajele către task-ul Wi-Fi, protocolul 802.11</td><td><span class="tag dis">dezasamblat</span>; rolul, din nume <span class="tag ded">dedus</span></td></tr>
+      <tr><td></td><td><code>libpp.a</code></td><td>recepția pachetelor: <code>wdev_*</code> (CSI, mod promiscuu), <code>hal_mac_*</code> (regiștrii MAC)</td><td><span class="tag dis">dezasamblat</span></td></tr>
+      <tr><td></td><td><code>libphy.a</code></td><td>radioul: canalul, filtrele, configurarea CSI (<code>phy_chan_dump_cfg</code>, <code>phy_chan_filt_set</code>)</td><td><span class="tag dis">dezasamblat</span></td></tr>
+      <tr><td>3. Regiștrii din cip</td><td>adresele <code>0x3FF73xxx</code>, <code>0x3FF5Cxxx</code></td><td>pornesc CSI, aleg câmpurile LTF, scalarea, filtrele</td><td><span class="tag dis">dezasamblat</span>; semnificația biților <span class="tag ded">dedus</span></td></tr>
+    </tbody>
+  </table></div>
+
+  <details class="ex" id="ex-nm" open>
+    <summary><span class="ex-k">Exponat 5.1</span> <span class="tag dis">dezasamblat</span> <span class="ex-t">Ce bibliotecă definește fiecare funcție</span> <span class="ex-s">xtensa-esp32-elf-nm -g --defined-only</span></summary>
+<pre class="code">== libnet80211.a
+»00000028 T esp_wifi_set_csi ⟦1⟧
+0000002c T esp_wifi_set_csi_config
+0000000c T esp_wifi_set_csi_rx_cb
+00000048 T ieee80211_ioctl
+== libpp.a
+00000014 T ic_csi_set_config
+»00000024 T wdev_csi_rx_process ⟦2⟧
+00000008 T wdev_set_csi_rx_cb
+»0000000c T hal_mac_set_csi
+00000010 T hal_sniffer_rx_set_promis
+== libphy.a
+»00000018 T phy_chan_dump_cfg ⟦3⟧
+00000048 T phy_chan_filt_set</pre>
+    <ol class="notes">
+      <li data-n="1">Funcțiile din API sunt în <code>libnet80211.a</code>.</li>
+      <li data-n="2">Recepția CSI și scrierea bitului 23 sunt în <code>libpp.a</code>.</li>
+      <li data-n="3">Configurarea CSI în radio este în <code>libphy.a</code>, în <code>components/esp_phy</code>, nu în <code>esp_wifi</code>.</li>
+    </ol>
+  </details>
+
+  <h3>5.1 Cum trec fiecare tip de afirmație în teză</h3>
+  <div class="tw"><table>
+    <thead><tr><th>Tipul</th><th>Unde intră</th><th>Cum o scriu</th></tr></thead>
+    <tbody>
+      <tr><td><span class="tag doc">documentat</span></td><td>studiul bibliografic și capitolul 4</td><td>cu citare: ghidul ESP-IDF v5.1.7, „Wi-Fi Driver”, secțiunea „Wi-Fi Channel State Information”; header-ul, cu numele structurii</td></tr>
+      <tr><td><span class="tag dis">dezasamblat</span></td><td>capitolul 4.7 și proiectarea</td><td>marcat „analiză proprie”, cu versiunea ESP-IDF, biblioteca și comanda <code>objdump -dr</code></td></tr>
+      <tr><td><span class="tag mas">măsurat</span></td><td>testare și validare</td><td>cu condițiile testului: plăci, distanțe, canal, durată, jurnalul</td></tr>
+      <tr><td><span class="tag ded">dedus</span></td><td>oriunde, ca ipoteză</td><td>marcat „deducție proprie”, cu motivul</td></tr>
+    </tbody>
+  </table></div>
+
+  <details class="ex" id="ex-thesis" open>
+    <summary><span class="ex-k">Exponat 5.2</span> <span class="ex-t">Exemplul deja scris în teză</span> <span class="ex-s">thesis/analiza_fundamentare.tex, secțiunea 4.7 „Obținerea CSI pe ESP32”</span></summary>
+<pre class="code wrap">»Funcția de recepție rulează în task-ul Wi-Fi, deci nu trebuie să facă operații lungi. Datele se pun într-o coadă și se prelucrează într-un task cu prioritate mai mică~\cite{espidf517wifi}. ⟦1⟧
+Bibliotecile Wi-Fi ale ESP-IDF sunt livrate fără cod sursă.
+»Dezasamblarea lor arată următorul lanț (analiză proprie): ⟦2⟧
+  funcțiile de configurare nu scriu direct în regiștri; ele trimit un mesaj task-ului Wi-Fi, care face modificarea;
+  funcția hal_mac_set_csi pornește CSI: ea pune pe 1 bitul 23 din registrul 0x3FF7309C;
+  funcția phy_chan_dump_cfg configurează CSI: ea scrie alegerea câmpurilor LTF și scalarea valorilor în registrul 0x3FF5CD0C;
+Biblioteca nu calculează estimarea; ea predă aplicației un rezultat gata calculat (analiză proprie).
+»Deci estimarea canalului din secțiunea~\ref{sec:estimare} se face în hardware (deducție proprie). ⟦3⟧
+Algoritmul exact al estimării nu este public.</pre>
+    <ol class="notes">
+      <li data-n="1">Afirmație documentată: are citare.</li>
+      <li data-n="2">Afirmație din dezasamblare: marcată „analiză proprie”.</li>
+      <li data-n="3">Concluzie fără sursă directă: marcată „deducție proprie”.</li>
+    </ol>
+    <p class="ex-foot">Extras. Comenzile LaTeX <code>\begin{enumerate}</code>, <code>\item</code> și <code>\texttt</code> sunt scoase.</p>
+  </details>
+</section>
+
+<!-- =============================================================== 6 -->
+<section class="q" id="capitol" aria-labelledby="h-cap">
+  <div class="qhead">
+    <span class="qnum">6</span>
+    <h2 id="h-cap">Primul capitol mare: fizica și extragerea CSI</h2>
+    <p class="note-src">Nota: <q>Primul capitol mare zice de fizică, conceptual, cum scoate funcția chestiile din bibliotecă.</q></p>
+  </div>
+
+  <div class="answer">
+    <span class="lbl">Răspunsul scurt</span>
+    <p>Capitolul 4 din teză, „Analiză și fundamentare teoretică”, are această ordine. Fizica vine întâi, apoi drumul CSI pe ESP32, conceptual.</p>
+  </div>
+
+  <div class="tw"><table>
+    <thead><tr><th>Secțiunea</th><th>Conținutul</th><th>Legătura cu acest dosar</th></tr></thead>
+    <tbody>
+      <tr><td>4.1</td><td>Propagarea semnalului pe mai multe căi</td><td>de ce spectrul are văi și vârfuri (secțiunea 7.2)</td></tr>
+      <tr><td>4.2</td><td>Reprezentarea complexă. Componentele I și Q</td><td>perechile (Q, I) din <code>buf</code></td></tr>
+      <tr><td>4.3</td><td>Modulația OFDM în IEEE 802.11</td><td>subpurtătoarele active ±1…±26 și cele de gardă (secțiunea 7.1)</td></tr>
+      <tr><td>4.4</td><td>Estimarea canalului și definiția CSI</td><td>ce calculează hardware-ul la pasul 9</td></tr>
+      <tr><td>4.5</td><td>Efectul unei persoane asupra CSI</td><td>teoria; măsurătorile de aici nu o testează încă</td></tr>
+      <tr><td>4.6</td><td>Limitările măsurării pe echipamente comerciale (4.6.1 corectarea fazei)</td><td>scalarea automată (pârghia P5)</td></tr>
+      <tr><td>4.7</td><td>Obținerea CSI pe ESP32</td><td>secțiunile 1–3 din acest dosar, pe scurt și cu citări</td></tr>
+      <tr><td>4.8</td><td>Sinteză</td><td>—</td></tr>
+    </tbody>
+  </table></div>
+  <p>Detaliile la nivel de instrucțiune (exponatele din secțiunile 1 și 3) pot intra într-o anexă, ca analiză proprie. Capitolul rămâne conceptual.</p>
+</section>
+
+<!-- =============================================================== 7 -->
+<section class="q" id="date" aria-labelledby="h-date">
+  <div class="qhead">
+    <span class="qnum">7</span>
+    <h2 id="h-date">Analiza datelor: ce arată măsurătorile</h2>
+    <p class="note-src">Nota: <q>De documentat și generale, analizat datele, nu ca să dovedesc că s-a întâmplat x, y.</q></p>
+  </div>
+
+  <div class="answer">
+    <span class="lbl">Cum este făcută analiza</span>
+    <p>Descriem datele așa cum sunt: ce conțin, ce valori au, cât variază. Nu testăm o ipoteză și nu tragem concluzii despre mișcare sau despre persoane.</p>
+    <p>Pentru fiecare set de date: condițiile, valorile și ce nu putem spune din el.</p>
+  </div>
+
+  <h3>7.1 Ce conține un pachet</h3>
+  <p>Fiecare CSI ajunge la PC ca un pachet UDP de 138 de octeți: un antet de 10 octeți și 128 de octeți CSI. <span class="tag src">cod deschis</span></p>
+  <div class="tw"><table>
+    <thead><tr><th>Octeții</th><th>Câmpul</th><th>Conținutul</th></tr></thead>
+    <tbody>
+      <tr><td class="num">0–1</td><td><code>magic</code></td><td><code>0xA55A</code>; <code>csi_ui.py</code> respinge pachetele fără el</td></tr>
+      <tr><td class="num">2</td><td><code>node_id</code></td><td>nodul care a măsurat (receptorul)</td></tr>
+      <tr><td class="num">3</td><td><code>rssi_dbm</code></td><td>puterea cadrului, în dBm, cu semn</td></tr>
+      <tr><td class="num">4–7</td><td><code>timestamp_us</code></td><td>timpul plăcii, în µs; revine la 0 după circa 71,6 min</td></tr>
+      <tr><td class="num">8–9</td><td><code>seq</code></td><td>numărul pachetului; din el calculăm pachetele lipsă</td></tr>
+      <tr><td class="num">10–137</td><td><code>csi_iq</code></td><td>64 de perechi (Q, I), fiecare <code>int8_t</code>: blocul LLTF</td></tr>
+    </tbody>
+  </table></div>
+
+  <p>Cele 64 de poziții CSI nu au toate semnal. Harta arată ce poziții au fost mereu 0 în toate pachetele verificate pe PC.</p>
+  <div class="fig">
+    <h4>Cele 64 de poziții din <code>csi_iq</code></h4>
+    <p class="sub">Poziția i corespunde subpurtătoarei k = i pentru i ≤ 31 și k = i − 64 pentru i ≥ 32 <span class="tag doc">documentat</span>.</p>
+    <div class="scmap" id="scmap" role="img" aria-label="64 de poziții: 51 active, poziția 0 este DC, poziția 1 este invalidă, pozițiile 27–37 sunt de gardă"></div>
+    <div class="scax" id="scax" aria-hidden="true"></div>
+    <ul class="sckey">
+      <li><span class="sw"></span>active: 51 (k = −26…−1, +2…+26)</li>
+      <li><span class="sw inv"></span>k = +1: 0 din cauza <code>first_word_invalid</code></li>
+      <li><span class="sw dc"></span>k = 0: centrul (DC), fără semnal</li>
+      <li><span class="sw guard"></span>gardă: i = 27…37 (k = ±27…±32)</li>
+    </ul>
+  </div>
+  <details class="ex" id="ex-udp" open>
+    <summary><span class="ex-k">Exponat 7.1</span> <span class="tag mas">măsurat</span> <span class="ex-t">Verificarea pe PC, două noduri, 35 s</span> <span class="ex-s">08_main_reparat_12nov.txt, rularea M · unelte/verifica_udp.py</span></summary>
+<pre class="code">»datagrame: 6277, invalide: 0, marime asteptata 138 B ⟦1⟧
+  10.136.19.115 -> node_id 3: 3192 pachete
+  10.136.19.139 -> node_id 2: 3085 pachete
+»nod 2: 3085 pachete in 35.0 s = 88.2 pachete/s; seq lipsa: 0 (0.0%) ⟦2⟧
+  RSSI: medie -59.3 dBm, min -96, max -58
+»  k=0 si k=1 zero in 100% din pachete; indici mereu 0: [0, 1, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37] ⟦3⟧
+nod 3: 3192 pachete in 35.0 s = 91.3 pachete/s; seq lipsa: 0 (0.0%)
+  RSSI: medie -57.9 dBm, min -63, max -53
+  k=0 si k=1 zero in 100% din pachete; indici mereu 0: [0, 1, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37]</pre>
+    <ol class="notes">
+      <li data-n="1">Toate pachetele au formatul corect. În rulările J–M: 20 424 de pachete, 0 invalide.</li>
+      <li data-n="2">Cu trimitere unicast către PC: niciun pachet lipsă.</li>
+      <li data-n="3">Pozițiile mereu 0 sunt exact cele din hartă: 52 de subpurtătoare active (±1…±26), cum spune 802.11a, minus k = +1.</li>
+    </ol>
+  </details>
+
+  <h3>7.2 Forma spectrului pe subpurtătoare</h3>
+  <p>Condițiile: programul de test din <code>pas_cu_pas/</code>, 11 nov.; placa conectată la telefon pe canalul 11; un ping la 20 ms. Programul nu apelează <code>esp_wifi_set_csi_config</code>. Deci rămâne configurarea implicită: după header, toate câmpurile LTF, filtrul de canal pornit și scalarea automată. <span class="tag doc">documentat</span></p>
+  <p>Fiecare valoare este media amplitudinii √(I² + Q²) pe o secundă, adică pe 50–51 de CSI. <span class="tag mas">măsurat</span></p>
+  <div class="fig">
+    <h4>Amplitudinea medie pe subpurtătoare, 5 secunde consecutive</h4>
+    <p class="sub">Linia: media celor 5 secunde. Banda: minimul și maximul dintre secunde. Unități brute, fără scală fixă.</p>
+    <div class="chart-scroll"><div class="chart-host" id="ch-spec"></div></div>
+    <details><summary>Tabel cu valorile</summary><div class="tw" id="tb-spec"></div></details>
+  </div>
+  <ul class="facts">
+    <li>Forma are o vale adâncă în stânga (minimul 8,4 la k = −21) și un vârf aproape de centru (maximul 33,4 la k = +5).</li>
+    <li>Între cele 5 secunde, fiecare subpurtătoare a variat cu cel mult 3 unități. Forma a rămas aceeași.</li>
+    <li>În aceleași secunde, RSSI a variat între −55 și −64 dBm.</li>
+    <li>Între k = −1 (19,0) și k = +2 (29,6), valoarea sare cu 10,6 unități. Nu știm cauza: k = 0 și k = +1 lipsesc.</li>
+  </ul>
+
+  <h3 id="g-timp">7.3 RSSI și amplitudinea în timp</h3>
+  <p>Condițiile: programul de test din <code>pas_cu_pas/</code>, 10 nov.; aceleași setări ca în 7.2; o persoană a stat între telefon și placă; 27 de secunde valide (prima secundă, cu un singur CSI, este scoasă). <span class="tag mas">măsurat</span></p>
+  <div class="fig">
+    <h4>RSSI (dBm), pe secundă</h4>
+    <p class="sub">Media RSSI a celor 50–51 de CSI din fiecare secundă.</p>
+    <div class="chart-scroll"><div class="chart-host" id="ch-rssi"></div></div>
+  </div>
+  <div class="fig">
+    <h4>Amplitudinea medie <code>A_medie</code>, pe secundă</h4>
+    <p class="sub">Media amplitudinii pe cele 51 de subpurtătoare active. Unități brute.</p>
+    <div class="chart-scroll"><div class="chart-host" id="ch-am"></div></div>
+    <details><summary>Tabel cu valorile</summary><div class="tw" id="tb-time"></div></details>
+  </div>
+  <ul class="facts">
+    <li>RSSI a scăzut de la −49 dBm (secunda 3) la −60 dBm (secundele 21–22), apoi a urcat la −55…−58 dBm.</li>
+    <li><code>A_medie</code> a crescut de la 18,0 la 22,4. Coeficientul de variație: 6,1 %.</li>
+    <li>Corelația Pearson între RSSI și <code>A_medie</code>, pe 27 de secunde: −0,83. Când puterea scade, amplitudinea raportată crește.</li>
+    <li>Coeficientul de variație al raportului A[−7] / A[+7]: 3,0 %. Al raportului A[−20] / A[+20]: 14,1 %. Deci forma nu este la fel de stabilă pe toate subpurtătoarele.</li>
+  </ul>
+  <p>Explicația probabilă a corelației negative: scalarea automată și amplificarea automată (AGC) din chip. <span class="tag ded">dedus</span> Testul de comparație fără persoană nu este făcut. Deci aceste date nu spun nimic despre efectul persoanei.</p>
+
+  <h3>7.4 Ratele și pierderile, cu două noduri</h3>
+  <p>Condițiile: firmware-ul proiectului (sau copia lui de diagnostic), 12 nov.; două plăci și telefonul la cel mult 0,5 m; canalul 1; PC-ul conectat la hotspot. Valorile vin de la PC, din câmpul <code>seq</code>. <span class="tag mas">măsurat</span></p>
+  <div class="tw"><table>
+    <thead><tr><th>Rularea</th><th>Trimiterea UDP</th><th class="num">Durata</th><th>Nodul</th><th class="num">Pachete/s</th><th class="num">Lipsă</th><th class="num">RSSI mediu</th></tr></thead>
+    <tbody>
+      <tr><td>J</td><td>broadcast</td><td class="num">15 s</td><td>2 · 3</td><td class="num">71,8 · 85,6</td><td class="num">3,8 % · 0,1 %</td><td class="num">−60,9 · −54,4 dBm</td></tr>
+      <tr><td>J2</td><td>broadcast</td><td class="num">15 s</td><td>2 · 3</td><td class="num">36,0 · 60,4</td><td class="num">55,2 % · 0,2 %</td><td class="num">−59,7 · −53,0 dBm</td></tr>
+      <tr><td>K</td><td>broadcast</td><td class="num">35 s</td><td>2 · 3</td><td class="num">66,0 · 72,4</td><td class="num">24,0 % · 9,2 %</td><td class="num">−57,6 · −54,5 dBm</td></tr>
+      <tr><td>L</td><td>broadcast</td><td class="num">35 s</td><td>2 · 3</td><td class="num">78,3 · 79,0</td><td class="num">5,1 % · 5,1 %</td><td class="num">−59,9 · −58,0 dBm</td></tr>
+      <tr><td>M</td><td>unicast</td><td class="num">35 s</td><td>2 · 3</td><td class="num">88,2 · 91,3</td><td class="num">0,0 % · 0,0 %</td><td class="num">−59,3 · −57,9 dBm</td></tr>
+      <tr><td>N</td><td>unicast</td><td class="num">120 s</td><td>2 · 3</td><td class="num">90,1 · 90,9</td><td class="num">0,0 % · 0,0 %</td><td class="num">—</td></tr>
+      <tr><td>O</td><td>broadcast</td><td class="num">120 s</td><td>2 · 3</td><td class="num">79,6 · 78,8</td><td class="num">3,8 % · 3,7 %</td><td class="num">—</td></tr>
+    </tbody>
+  </table></div>
+  <ul class="facts">
+    <li>Unicast către PC: 88–91 de pachete/s pe nod, 0–1 pachete lipsă în 120 s.</li>
+    <li>Broadcast: 36–86 de pachete/s pe nod, 0,1–55,2 % lipsă. AP-ul retransmite fiecare cadru broadcast la rate 802.11b, circa 160–170 de cadre/s.</li>
+    <li>Fiecare nod emite 100 de probe/s. Nodul vecin a primit 340–470 dintre ele în fiecare 5 s (rulările F–M, după primele 5 s).</li>
+  </ul>
+
+  <h3>7.5 Ce nu spun aceste date</h3>
+  <ul class="facts">
+    <li>Nu spun dacă o persoană a fost sau nu în cameră: nu există încă un set de comparație.</li>
+    <li>Nu dau o amplitudine în unități fizice: scalarea este automată.</li>
+    <li>Nu spun ce nod a emis un probe când sunt trei noduri: pachetul UDP nu are acest câmp.</li>
+    <li>Nu conțin faza: <code>csi_ui.py</code> afișează doar amplitudinea.</li>
+  </ul>
+</section>
+
+<!-- =============================================================== 8 -->
+<section class="q" id="limite" aria-labelledby="h-lim">
+  <div class="qhead">
+    <span class="qnum">8</span>
+    <h2 id="h-lim">Limite și probleme deschise</h2>
+    <p class="note-src">Ce nu se poate ști din surse și ce nu este încă rezolvat.</p>
+  </div>
+
+  <h3>8.1 Ce nu putem ști</h3>
+  <ul class="facts">
+    <li>Algoritmul exact de estimare a canalului din hardware. Teoria dă forma cea mai simplă (teză, secțiunea 4.4). Cipul poate face altceva.</li>
+    <li>Semnificația oficială a regiștrilor. Biții din secțiunea 3 vin din dezasamblare și din numele câmpurilor.</li>
+    <li>Cum lucrează scalarea automată și AGC-ul din cip.</li>
+    <li>De ce primii 4 octeți CSI pot fi invalizi. Ghidul spune doar „hardware limitation”.</li>
+    <li>Totul este valabil pentru ESP-IDF v5.1.7. O altă versiune poate avea alte adrese sau alte lanțuri de apeluri.</li>
+  </ul>
+
+  <h3>8.2 Probleme deschise</h3>
+  <div class="tw"><table>
+    <thead><tr><th>Problema</th><th>Ce știm</th><th>Starea</th></tr></thead>
+    <tbody>
+      <tr><td><code>esp_wifi_80211_tx</code> întoarce uneori <code>ESP_ERR_NO_MEM</code></td><td>apare în rafale, în unele rulări: 74–136 de probe-uri eșuate din 500 în 5 s; în rulările de 2 min (N, O, P): 0 eșecuri <span class="tag mas">măsurat</span></td><td>cauza nu este cunoscută; ipoteză: memoria de transmisie Wi-Fi se umple <span class="tag ded">dedus</span></td></tr>
+      <tr><td>Pachetul nu spune ce nod a emis probe-ul</td><td>cu două plăci nu contează; cu trei, da <span class="tag ded">dedus</span></td><td>nereparat: cere un câmp nou în pachet și în <code>csi_ui.py</code></td></tr>
+      <tr><td>O panică în <code>udp_sender_task</code></td><td>o dată în circa 25 de rulări; <code>xRingbufferReceive</code> a întors <code>NULL</code> <span class="tag mas">măsurat</span></td><td>linia 58 tratează cazul; nu am putut repeta panica</td></tr>
+      <tr><td>Testul fără persoană în cale</td><td>există doar setul cu persoană (secțiunea 7.3)</td><td>de făcut, înainte de orice comparație</td></tr>
+      <tr><td>Efectul lui <code>manu_scale</code> și <code>shift</code></td><td>harta de biți este cunoscută (exponatul 3.2)</td><td>de măsurat pe placă</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<!-- =============================================================== 9 -->
+<section class="q" id="verificare" aria-labelledby="h-ver">
+  <div class="qhead">
+    <span class="qnum">9</span>
+    <h2 id="h-ver">Verifică singur</h2>
+    <p class="note-src">Comenzile care produc exponatele. Rulează-le pe un calculator cu ESP-IDF v5.1.7.</p>
+  </div>
+
+  <div class="cmd"><pre id="c1">B=$(ls -d ~/.espressif/tools/xtensa-esp32-elf/*/xtensa-esp32-elf/bin)
+W=~/esp/esp-idf/components/esp_wifi/lib/esp32
+P=~/esp/esp-idf/components/esp_phy/lib/esp32</pre><button class="tb" type="button" data-copy="c1">Copiază</button></div>
+  <div class="cmd"><pre id="c2">$B/xtensa-esp32-elf-objdump -dr $W/libpp.a | grep -A45 "section .text.hal_mac_set_csi:"
+$B/xtensa-esp32-elf-objdump -dr $W/libpp.a | grep -A20 "section .text.wdev_set_csi_rx_cb:"
+$B/xtensa-esp32-elf-objdump -dr $W/libpp.a | grep -A80 "section .text.ic_csi_set_config:"
+$B/xtensa-esp32-elf-objdump -dr $W/libpp.a | grep -A120 "section .text.wdev_csi_rx_process:"
+$B/xtensa-esp32-elf-objdump -dr $W/libpp.a | grep -A70 "section .text.hal_sniffer_rx_set_promis:"
+$B/xtensa-esp32-elf-objdump -dr $P/libphy.a | grep -A90 "section .text.phy_chan_dump_cfg:"
+$B/xtensa-esp32-elf-objdump -dr $W/libnet80211.a | grep -A80 "section .text.esp_wifi_set_csi:"</pre><button class="tb" type="button" data-copy="c2">Copiază</button></div>
+  <div class="cmd"><pre id="c3">for f in $W/libnet80211.a $W/libpp.a $P/libphy.a; do echo "== $f"
+  $B/xtensa-esp32-elf-nm -g --defined-only $f | grep -E "T (esp_wifi_set_csi|hal_mac_set_csi|wdev_csi_rx_process|phy_chan_dump_cfg)$"
+done</pre><button class="tb" type="button" data-copy="c3">Copiază</button></div>
+  <div class="cmd"><pre id="c4">grep -n "runs from Wi-Fi task" ~/esp/esp-idf/docs/en/api-guides/wifi.rst
+sed -n 574,600p ~/esp/esp-idf/components/esp_wifi/include/esp_wifi_types.h
+sed -n 1117,1167p ~/esp/esp-idf/components/esp_wifi/include/esp_wifi.h</pre><button class="tb" type="button" data-copy="c4">Copiază</button></div>
+
+  <p style="margin-top:16px">Jurnalele plăcii sunt în repository, în <code>docs/StatusLicenta/9Nov2026/pas_cu_pas/output/</code>: <code>03_diagnostic_hotspot.md</code>, <code>06_pas3_corp_intre.log</code>, <code>07_main_nou.log</code>, <code>08_main_reparat_12nov.txt</code>.</p>
+</section>
+
+<footer>
+  16 noiembrie 2026 · Răspunde la toate notele din <code>docs/StatusLicenta/5Nov2026/Status_5Nov_2026_final.md</code>, secțiunea „Notes”. Detaliile complete, apel cu apel, sunt în <code>docs/StatusLicenta/9Nov2026/raspunsuri_tehnice_5nov.html</code>.
+</footer>
+</main>
+</div>
+
+<script>
+(function () {
+  "use strict";
+  var STORE = "dosarCsi.marks.v1";
+  var root = document.documentElement;
+
+  function load(key) { try { return localStorage.getItem(key); } catch (e) { return null; } }
+  function save(key, val) { try { localStorage.setItem(key, val); } catch (e) { /* storage blocked */ } }
+
+  /* ---------- 1. liniile de cod: evidențieri și numere ---------- */
+  document.querySelectorAll("pre.code").forEach(function (pre) {
+    var lines = pre.innerHTML.replace(/\n$/, "").split("\n");
+    pre.innerHTML = lines.map(function (line) {
+      var hl = false;
+      if (line.charAt(0) === "»") { hl = true; line = line.slice(1); }
+      line = line.replace(/\s*⟦(\d+)⟧/g, function (_, n) { return '<span class="cn" data-n="' + n + '">' + n + "</span>"; });
+      return '<span class="ln' + (hl ? " hl" : "") + '">' + (line || " ") + "</span>";
+    }).join("");
+  });
+
+  /* legătura dintre numărul din cod și nota de sub cod */
+  document.querySelectorAll("details.ex").forEach(function (ex) {
+    function focus(n, on) {
+      ex.querySelectorAll('.cn[data-n="' + n + '"]').forEach(function (c) { c.parentElement.classList.toggle("focus", on); });
+      ex.querySelectorAll('ol.notes li[data-n="' + n + '"]').forEach(function (li) { li.classList.toggle("focus", on); });
+    }
+    ex.addEventListener("mouseover", function (e) { var t = e.target.closest("[data-n]"); if (t) focus(t.getAttribute("data-n"), true); });
+    ex.addEventListener("mouseout", function (e) { var t = e.target.closest("[data-n]"); if (t) focus(t.getAttribute("data-n"), false); });
+  });
+
+  /* ---------- 2. marcatorul ---------- */
+  var markables = document.querySelectorAll("main p, main li, main tbody tr, main .ln, main .cell:not(.empty), main .lever dd");
+  markables.forEach(function (el, i) { el.setAttribute("data-k", String(i)); });
+  var marks = {};
+  try { (JSON.parse(load(STORE) || "[]") || []).forEach(function (k) { marks[k] = true; }); } catch (e) { marks = {}; }
+  function paintMarks() {
+    markables.forEach(function (el) { el.classList.toggle("mk", !!marks[el.getAttribute("data-k")]); });
+  }
+  function storeMarks() { save(STORE, JSON.stringify(Object.keys(marks))); }
+  paintMarks();
+
+  var bMark = document.getElementById("b-mark");
+  var hint = document.getElementById("mk-hint");
+  bMark.addEventListener("click", function () {
+    var on = bMark.getAttribute("aria-pressed") !== "true";
+    bMark.setAttribute("aria-pressed", String(on));
+    document.body.classList.toggle("marking", on);
+    hint.hidden = !on;
+  });
+  document.addEventListener("click", function (e) {
+    if (!document.body.classList.contains("marking")) return;
+    if (e.target.closest(".bar, button, input, select, label, summary")) return;
+    var el = e.target.closest("[data-k]");
+    if (!el) return;
+    e.preventDefault();
+    var k = el.getAttribute("data-k");
+    if (marks[k]) { delete marks[k]; } else { marks[k] = true; }
+    el.classList.toggle("mk", !!marks[k]);
+    storeMarks();
+  });
+  document.getElementById("b-clear").addEventListener("click", function () {
+    marks = {}; paintMarks(); storeMarks();
+  });
+
+  /* ---------- 3. dovezi și text mare ---------- */
+  var bEx = document.getElementById("b-ex");
+  bEx.addEventListener("click", function () {
+    var show = bEx.getAttribute("aria-pressed") !== "true";
+    bEx.setAttribute("aria-pressed", String(show));
+    bEx.textContent = show ? "Dovezi afișate" : "Dovezi ascunse";
+    document.body.classList.toggle("no-ex", !show);
+  });
+  var bBig = document.getElementById("b-big");
+  function setBig(on) { root.classList.toggle("big", on); bBig.setAttribute("aria-pressed", String(on)); save("dosarCsi.big", on ? "1" : "0"); }
+  bBig.addEventListener("click", function () { setBig(!root.classList.contains("big")); });
+  if (load("dosarCsi.big") === "1") setBig(true);
+
+  /* ---------- 4. copiere ---------- */
+  document.querySelectorAll("[data-copy]").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      var pre = document.getElementById(btn.getAttribute("data-copy"));
+      var text = pre.textContent;
+      function selectIt() { var r = document.createRange(); r.selectNodeContents(pre); var s = getSelection(); s.removeAllRanges(); s.addRange(r); btn.textContent = "Selectat"; }
+      try {
+        navigator.clipboard.writeText(text).then(function () { btn.textContent = "Copiat"; setTimeout(function () { btn.textContent = "Copiază"; }, 1500); }, selectIt);
+      } catch (e) { selectIt(); }
+    });
+  });
+
+  /* ---------- 5. simulatorul ---------- */
+  var F = {
+    lltf: document.getElementById("f-lltf"), htltf: document.getElementById("f-htltf"), stbc: document.getElementById("f-stbc"),
+    merge: document.getElementById("f-merge"), filt: document.getElementById("f-filt"), manu: document.getElementById("f-manu"),
+    shift: document.getElementById("f-shift"), ack: document.getElementById("f-ack")
+  };
+  for (var s = 0; s < 16; s++) { var o = document.createElement("option"); o.value = String(s); o.textContent = String(s); F.shift.appendChild(o); }
+  var PRESETS = {
+    proiect: { lltf: 1, htltf: 0, stbc: 0, merge: 0, filt: 0, manu: 0, shift: 0, ack: 0 },
+    vechi: { lltf: 1, htltf: 1, stbc: 1, merge: 1, filt: 0, manu: 0, shift: 0, ack: 0 },
+    implicit: { lltf: 1, htltf: 1, stbc: 1, merge: 1, filt: 1, manu: 0, shift: 0, ack: 0 }
+  };
+  function applyPreset(p) {
+    ["lltf", "htltf", "stbc", "merge", "filt", "manu", "ack"].forEach(function (k) { F[k].checked = !!p[k]; });
+    F.shift.value = String(p.shift);
+    renderSim();
+  }
+  function tag(cls, txt) { return '<span class="tag ' + cls + '">' + txt + "</span>"; }
+  function renderSim() {
+    var v = { lltf: F.lltf.checked, htltf: F.htltf.checked, stbc: F.stbc.checked, merge: F.merge.checked, filt: F.filt.checked, manu: F.manu.checked, shift: parseInt(F.shift.value, 10) || 0, ack: F.ack.checked };
+    var byte = (v.htltf ? 1 : 0) | (v.lltf ? 2 : 0) | (v.stbc ? 4 : 0) | (v.manu ? 8 : 0) | ((v.shift & 15) << 4);
+    var names = ["htltf_en", "lltf_en", "stbc_htltf2_en", "manu_scale", "shift[0]", "shift[1]", "shift[2]", "shift[3]"];
+    var html = "";
+    for (var b = 7; b >= 0; b--) {
+      var on = (byte >> b) & 1;
+      html += '<div class="bit' + (on ? " on" : "") + '"><span class="bn">b' + b + '</span><span class="bv">' + on + '</span><span class="bf">' + names[b] + "</span></div>";
+    }
+    document.getElementById("bits").innerHTML = html;
+    document.getElementById("hex").textContent = "biții 0–7 = 0x" + byte.toString(16).toUpperCase().padStart(2, "0") + (byte === 0x02 ? " (valoarea din proiect)" : "");
+    document.getElementById("others").innerHTML = [
+      "<li><code>0x3FF5CC0C</code>, biții 21–22 = " + (v.filt ? "0 (filtrul de canal pornit)" : "1 (filtrul de canal oprit)") + "</li>",
+      "<li><code>0x3FF5CD04</code>, <code>0x3FF5CD08</code>, biții 0–2: " + (v.filt ? "nu se șterg" : "se șterg") + "</li>",
+      "<li><code>0x3FF5C074</code>, bitul 13 = " + (v.merge ? "0 (media LLTF + HT-LTF la cadrele HT)" : "1 (HT-LTF folosit direct)") + "</li>",
+      "<li><code>0x3FF730F8</code>, <code>0x3FF730FC</code>, bitul 29 = " + (v.ack ? "1 (CSI și pentru ACK)" : "0 (fără CSI pentru ACK)") + "</li>"
+    ].join("");
+    var L = v.lltf ? 128 : 0, H = v.htltf ? 128 : 0, S = v.stbc ? 128 : 0;
+    function blocks(list) { var out = list.filter(Boolean); return out.length ? out.join(" + ") : "niciun bloc"; }
+    var rows = [
+      ["non-HT (802.11a/g)", L, blocks([v.lltf && "LLTF"])],
+      ["HT20, fără STBC", L + H, blocks([v.lltf && "LLTF", v.htltf && "HT-LTF"])],
+      ["HT20, cu STBC", L + H + S, blocks([v.lltf && "LLTF", v.htltf && "HT-LTF", v.stbc && "STBC-HT-LTF"])]
+    ];
+    document.getElementById("lens").innerHTML = rows.map(function (r) {
+      return "<tr><td>" + r[0] + '</td><td class="num">' + r[1] + "</td><td>" + r[2] + "</td></tr>";
+    }).join("");
+    var lt;
+    if (v.lltf && v.htltf && v.stbc) lt = tag("doc", "documentat") + " " + tag("mas", "măsurat: 384 în rularea C");
+    else if (v.lltf && !v.htltf && !v.stbc) lt = tag("mas", "măsurat: 128 în rularea B");
+    else lt = tag("ded", "dedus: fiecare bloc are 128 B");
+    document.getElementById("len-tag").innerHTML = lt;
+    var w = document.getElementById("sim-warn");
+    if (!v.lltf && !v.htltf && !v.stbc) { w.hidden = false; w.textContent = "Niciun câmp LTF activ. Efectul pe placă nu este măsurat."; }
+    else if (!v.lltf) { w.hidden = false; w.textContent = "Atenție: main.c copiază primii 128 B și îi consideră LLTF. Fără LLTF, primul bloc ar fi HT-LTF, iar csi_ui.py l-ar afișa greșit (dedus)."; }
+    else { w.hidden = true; w.textContent = ""; }
+  }
+  document.getElementById("sim-form").addEventListener("change", renderSim);
+  document.getElementById("sim-form").addEventListener("submit", function (e) { e.preventDefault(); });
+  document.querySelectorAll("[data-preset]").forEach(function (btn) {
+    btn.addEventListener("click", function () { applyPreset(PRESETS[btn.getAttribute("data-preset")]); });
+  });
+  applyPreset(PRESETS.proiect);
+
+  /* ---------- 6. harta celor 64 de poziții ---------- */
+  var map = document.getElementById("scmap"), ax = document.getElementById("scax");
+  var mh = "", ah = "";
+  for (var i = 0; i < 64; i++) {
+    var k = i <= 31 ? i : i - 64;
+    var cls = i === 0 ? "dc" : i === 1 ? "inv" : (i >= 27 && i <= 37) ? "guard" : "";
+    mh += '<div class="sc ' + cls + '" title="i = ' + i + ", k = " + k + '"></div>';
+    var lab = [0, 26, 32, 38, 63].indexOf(i) >= 0 ? (i === 0 ? "i 0" : String(i)) : "";
+    ah += "<span>" + lab + "</span>";
+  }
+  map.innerHTML = mh; ax.innerHTML = ah;
+
+  /* ---------- 7. grafice ---------- */
+  var NS = "http://www.w3.org/2000/svg";
+  function el(tagName, attrs, parent) {
+    var e = document.createElementNS(NS, tagName);
+    Object.keys(attrs).forEach(function (a) { e.setAttribute(a, attrs[a]); });
+    if (parent) parent.appendChild(e);
+    return e;
+  }
+  function ro(v, d) { return v.toFixed(d === undefined ? 1 : d).replace(".", ",").replace("-", "−"); }
+
+  function chart(host, cfg) {
+    var W = 720, H = cfg.h || 250, m = { t: 16, r: 20, b: 40, l: 52 };
+    var iw = W - m.l - m.r, ih = H - m.t - m.b;
+    function sx(v) { return m.l + (v - cfg.x[0]) / (cfg.x[1] - cfg.x[0]) * iw; }
+    function sy(v) { return m.t + (1 - (v - cfg.y[0]) / (cfg.y[1] - cfg.y[0])) * ih; }
+    var svg = el("svg", { viewBox: "0 0 " + W + " " + H, class: "chart", role: "img", "aria-label": cfg.label });
+    var grid = el("g", { class: "grid" }, svg);
+    cfg.yTicks.forEach(function (t) {
+      el("line", { x1: m.l, x2: W - m.r, y1: sy(t), y2: sy(t) }, grid);
+      el("text", { x: m.l - 8, y: sy(t) + 4, "text-anchor": "end", class: "tick" }, svg).textContent = cfg.yFmt(t);
+    });
+    (cfg.gaps || []).forEach(function (g) {
+      el("rect", { x: sx(g[0]), y: m.t, width: sx(g[1]) - sx(g[0]), height: ih, class: "gap" }, svg);
+    });
+    el("line", { x1: m.l, x2: W - m.r, y1: H - m.b, y2: H - m.b, class: "base" }, svg);
+    cfg.xTicks.forEach(function (t) {
+      el("text", { x: sx(t), y: H - m.b + 18, "text-anchor": "middle", class: "tick" }, svg).textContent = cfg.xFmt(t);
+    });
+    if (cfg.xTitle) el("text", { x: W - m.r, y: H - 4, "text-anchor": "end", class: "axt" }, svg).textContent = cfg.xTitle;
+    var pts = [];
+    cfg.segments.forEach(function (seg) {
+      if (seg[0].lo !== undefined) {
+        var top = seg.map(function (p) { return sx(p.x) + "," + sy(p.hi); });
+        var bot = seg.slice().reverse().map(function (p) { return sx(p.x) + "," + sy(p.lo); });
+        el("polygon", { points: top.concat(bot).join(" "), class: "band", style: "fill:" + cfg.color }, svg);
+      }
+      el("path", { d: seg.map(function (p, j) { return (j ? "L" : "M") + sx(p.x).toFixed(1) + "," + sy(p.y).toFixed(1); }).join(""), class: "line", style: "stroke:" + cfg.color }, svg);
+      pts = pts.concat(seg);
+    });
+    var last = pts[pts.length - 1];
+    el("circle", { cx: sx(last.x), cy: sy(last.y), r: 4.5, class: "dot", style: "fill:" + cfg.color }, svg);
+    (cfg.notes || []).forEach(function (n) {
+      el("circle", { cx: sx(n.x), cy: sy(n.y), r: 4.5, class: "dot", style: "fill:" + cfg.color }, svg);
+      el("text", { x: sx(n.x) + (n.dx || 0), y: sy(n.y) + (n.dy || 0), "text-anchor": n.anchor || "middle", class: "ann" }, svg).textContent = n.text;
+    });
+    var xh = el("line", { y1: m.t, y2: H - m.b, class: "xh", visibility: "hidden" }, svg);
+    var hd = el("circle", { r: 5, class: "dot", visibility: "hidden", style: "fill:" + cfg.color }, svg);
+    var hit = el("rect", { x: m.l, y: m.t, width: iw, height: ih, style: "fill:transparent" }, svg);
+    host.appendChild(svg);
+    var tip = document.createElement("div"); tip.className = "tip"; tip.hidden = true; host.appendChild(tip);
+    function show(idx, withTip) {
+      var p = pts[idx];
+      xh.setAttribute("x1", sx(p.x)); xh.setAttribute("x2", sx(p.x)); xh.setAttribute("visibility", "visible");
+      hd.setAttribute("cx", sx(p.x)); hd.setAttribute("cy", sy(p.y)); hd.setAttribute("visibility", "visible");
+      if (withTip) {
+        tip.innerHTML = cfg.tip(p, idx); tip.hidden = false;
+        var fx = sx(p.x) / W;
+        tip.style.left = (fx * 100) + "%"; tip.style.top = (sy(p.y) / H * 100) + "%";
+        tip.style.transform = fx > 0.75 ? "translate(-100%, calc(-100% - 10px))" : fx < 0.2 ? "translate(0, calc(-100% - 10px))" : "translate(-50%, calc(-100% - 10px))";
+      } else { tip.hidden = true; }
+    }
+    function hide() { xh.setAttribute("visibility", "hidden"); hd.setAttribute("visibility", "hidden"); tip.hidden = true; }
+    function nearest(evt) {
+      var r = svg.getBoundingClientRect(); var px = (evt.clientX - r.left) / r.width * W;
+      var best = 0, bd = Infinity;
+      pts.forEach(function (p, j) { var d = Math.abs(sx(p.x) - px); if (d < bd) { bd = d; best = j; } });
+      return best;
+    }
+    var api = { show: show, hide: hide, onIndex: null, onLeave: null };
+    hit.addEventListener("pointermove", function (evt) { var i2 = nearest(evt); show(i2, true); if (api.onIndex) api.onIndex(i2); });
+    hit.addEventListener("pointerleave", function () { hide(); if (api.onLeave) api.onLeave(); });
+    return api;
+  }
+
+  /* 7.2 spectrul: 07_main_nou.log, liniile SPEC cu 50–51 CSI/s */
+  var SPEC = [
+    [16,15,13,11,9,8,8,9,12,15,17,20,22,24,25,26,25,24,23,21,19,16,15,15,16,18,28,30,31,32,31,30,28,26,24,22,21,20,20,21,23,25,26,28,28,28,28,27,26,24,24],
+    [17,16,14,12,10,9,9,10,12,15,17,20,22,24,26,26,26,25,24,22,20,18,16,16,18,19,29,31,32,32,32,31,29,28,25,23,22,21,21,22,23,25,27,28,28,29,28,27,26,25,24],
+    [18,17,14,12,10,8,8,10,13,16,19,22,25,27,28,28,28,27,25,23,20,17,15,15,17,19,31,33,34,35,34,33,31,28,26,23,22,21,21,22,24,26,28,30,30,30,30,29,27,26,25],
+    [18,17,15,12,10,8,8,9,12,15,19,22,24,26,27,28,28,27,25,23,20,17,15,15,17,19,30,32,34,34,34,32,31,28,26,23,21,21,21,22,24,26,28,29,30,30,29,28,27,25,24],
+    [18,17,15,13,11,9,9,10,13,16,19,22,24,26,27,28,28,27,25,23,20,18,17,17,18,20,30,32,34,34,34,32,31,28,26,24,22,22,22,23,24,26,28,29,30,30,29,29,27,26,25]
+  ];
+  var SPEC_T = ["2,96 s", "3,96 s", "4,98 s", "6,01 s", "7,02 s"];
+  var KS = []; for (var a = -26; a <= -1; a++) KS.push(a); for (var b2 = 2; b2 <= 26; b2++) KS.push(b2);
+  var specPts = KS.map(function (kk, j) {
+    var col = SPEC.map(function (row) { return row[j]; });
+    var mean = col.reduce(function (x, y) { return x + y; }, 0) / col.length;
+    return { x: kk, y: mean, lo: Math.min.apply(null, col), hi: Math.max.apply(null, col), col: col };
+  });
+  chart(document.getElementById("ch-spec"), {
+    label: "Amplitudinea medie pe 51 de subpurtătoare. Minimul 8,4 la k = −21, maximul 33,4 la k = +5.",
+    x: [-27, 27], y: [0, 40], h: 270,
+    xTicks: [-26, -20, -10, 0, 10, 20, 26], yTicks: [0, 10, 20, 30, 40],
+    xFmt: function (t) { return t > 0 ? "+" + t : String(t).replace("-", "−"); }, yFmt: function (t) { return String(t); },
+    xTitle: "subpurtătoarea k", color: "var(--s1)",
+    gaps: [[-1, 2]],
+    segments: [specPts.slice(0, 26), specPts.slice(26)],
+    notes: [
+      { x: -21, y: 8.4, text: "min 8,4 · k = −21", dy: 20 },
+      { x: 5, y: 33.4, text: "max 33,4 · k = +5", dy: -12 }
+    ],
+    tip: function (p) { return "k = " + (p.x > 0 ? "+" : "") + String(p.x).replace("-", "−") + "<br>medie " + ro(p.y) + " · min " + p.lo + " · max " + p.hi; }
+  });
+  (function () {
+    var h = '<table><thead><tr><th class="num">k</th>' + SPEC_T.map(function (t) { return '<th class="num">' + t + "</th>"; }).join("") + '<th class="num">medie</th></tr></thead><tbody>';
+    specPts.forEach(function (p) { h += '<tr><td class="num">' + (p.x > 0 ? "+" : "") + String(p.x).replace("-", "−") + "</td>" + p.col.map(function (c) { return '<td class="num">' + c + "</td>"; }).join("") + '<td class="num">' + ro(p.y) + "</td></tr>"; });
+    document.getElementById("tb-spec").innerHTML = h + "</tbody></table>";
+  })();
+
+  /* 7.3 timpul: 06_pas3_corp_intre.log, secundele cu 50–51 CSI */
+  var T = [2.98,3.98,4.98,6.01,7.02,8.02,9.02,10.04,11.04,12.06,13.07,14.08,15.10,16.10,17.12,18.15,19.16,20.18,21.18,22.20,23.20,24.22,25.22,26.24,27.24,28.26,29.26];
+  var RSSI = [-49,-50,-51,-52,-54,-54,-52,-52,-54,-54,-54,-54,-55,-56,-57,-57,-58,-59,-60,-60,-59,-55,-55,-55,-56,-57,-58];
+  var AM = [18.0,18.8,19.7,18.9,19.4,21.6,19.7,19.3,19.9,21.8,20.7,21.8,21.5,21.3,22.4,22.0,21.8,22.4,21.8,21.9,22.3,21.8,22.0,22.1,21.8,21.6,22.3];
+  function both(i3) { return ro(T[i3], 1) + " s<br>RSSI " + ro(RSSI[i3], 0) + " dBm · A_medie " + ro(AM[i3]); }
+  var cR = chart(document.getElementById("ch-rssi"), {
+    label: "RSSI pe secundă: de la −49 la −60 dBm, apoi −55…−58 dBm.",
+    x: [2, 30], y: [-62, -46], h: 210,
+    xTicks: [5, 10, 15, 20, 25, 30], yTicks: [-60, -55, -50],
+    xFmt: function (t) { return t + " s"; }, yFmt: function (t) { return String(t).replace("-", "−"); },
+    color: "var(--s2)",
+    segments: [T.map(function (t, j) { return { x: t, y: RSSI[j] }; })],
+    notes: [{ x: 21.18, y: -60, text: "−60 dBm", dy: 18 }],
+    tip: function (p, i3) { return both(i3); }
+  });
+  var cA = chart(document.getElementById("ch-am"), {
+    label: "Amplitudinea medie pe secundă: de la 18,0 la 22,4.",
+    x: [2, 30], y: [16, 24], h: 210,
+    xTicks: [5, 10, 15, 20, 25, 30], yTicks: [16, 18, 20, 22, 24],
+    xFmt: function (t) { return t + " s"; }, yFmt: function (t) { return String(t); },
+    color: "var(--s1)", xTitle: "timpul de la pornire",
+    segments: [T.map(function (t, j) { return { x: t, y: AM[j] }; })],
+    notes: [{ x: 2.98, y: 18.0, text: "18,0", dy: 18, anchor: "start" }],
+    tip: function (p, i3) { return both(i3); }
+  });
+  cR.onIndex = function (i3) { cA.show(i3, false); }; cR.onLeave = function () { cA.hide(); };
+  cA.onIndex = function (i3) { cR.show(i3, false); }; cA.onLeave = function () { cR.hide(); };
+  (function () {
+    var h = '<table><thead><tr><th class="num">Timpul</th><th class="num">RSSI (dBm)</th><th class="num">A_medie</th></tr></thead><tbody>';
+    T.forEach(function (t, j) { h += '<tr><td class="num">' + ro(t, 2) + ' s</td><td class="num">' + ro(RSSI[j], 0) + '</td><td class="num">' + ro(AM[j]) + "</td></tr>"; });
+    document.getElementById("tb-time").innerHTML = h + "</tbody></table>";
+  })();
+})();
+</script>

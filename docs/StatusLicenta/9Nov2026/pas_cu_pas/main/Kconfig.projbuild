@@ -1,0 +1,8 @@
+menu "Pas cu pas"
+    config CSI_WIFI_SSID
+        string "Wi-Fi SSID"
+        default ""
+    config CSI_WIFI_PASSWORD
+        string "Wi-Fi password"
+        default ""
+endmenu

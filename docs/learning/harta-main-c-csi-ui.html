@@ -1,0 +1,1100 @@
+<!doctype html>
+<html lang="ro">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Harta main.c și csi_ui.py</title>
+<style>
+:root{
+  --bg:#f6f7f9; --card:#ffffff; --ink:#1b1f24; --muted:#5b6672; --line:#d9dee4;
+  --c:#b45309; --c-bg:#fff4e5;      /* partea C (ESP32) */
+  --n:#475569; --n-bg:#eef1f5;      /* rețea */
+  --p:#1d4ed8; --p-bg:#e8efff;      /* partea Python */
+  --ok:#15803d; --ok-bg:#e6f6ec; --bad:#b91c1c; --bad-bg:#fdeaea; --warn:#a16207; --warn-bg:#fff7d6;
+  --accent:#0f766e;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#0f1318; --card:#171d24; --ink:#e7ebf0; --muted:#98a3b0; --line:#2b343e;
+    --c:#fdba74; --c-bg:#3a2813; --n:#b6c0cc; --n-bg:#222a33; --p:#93b4ff; --p-bg:#1a2a4d;
+    --ok:#6ee7a0; --ok-bg:#12301f; --bad:#fca5a5; --bad-bg:#3b1717; --warn:#fcd34d; --warn-bg:#3a3010;
+    --accent:#5eead4;
+  }
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+header{padding:28px 16px 8px;max-width:1040px;margin:0 auto}
+h1{margin:0 0 6px;font-size:1.7rem}
+h2{margin:0 0 10px;font-size:1.3rem}
+h3{margin:22px 0 8px;font-size:1.05rem}
+p{margin:8px 0}
+.lead{color:var(--muted);max-width:70ch}
+nav{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--line)}
+nav .in{max-width:1040px;margin:0 auto;padding:8px 16px;display:flex;gap:6px;flex-wrap:wrap}
+nav button{border:1px solid var(--line);background:var(--card);color:var(--ink);padding:7px 12px;border-radius:999px;cursor:pointer;font:inherit;font-size:.9rem}
+nav button[aria-selected="true"]{background:var(--accent);color:#fff;border-color:var(--accent)}
+main{max-width:1040px;margin:0 auto;padding:16px}
+section{display:none}
+section.on{display:block}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;margin:14px 0}
+code{background:var(--n-bg);padding:1px 6px;border-radius:5px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.88em}
+.tag{display:inline-block;font-size:.75rem;padding:2px 9px;border-radius:999px;border:1px solid var(--line);margin-right:4px;vertical-align:middle}
+.tag.c{color:var(--c);background:var(--c-bg)} .tag.n{color:var(--n);background:var(--n-bg)} .tag.p{color:var(--p);background:var(--p-bg)}
+.tag.ok{color:var(--ok);background:var(--ok-bg)} .tag.bad{color:var(--bad);background:var(--bad-bg)} .tag.warn{color:var(--warn);background:var(--warn-bg)}
+.legend{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
+.hint{color:var(--muted);font-size:.9rem}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+@media (max-width:760px){.grid2,.grid3{grid-template-columns:1fr}}
+
+/* flow */
+.flow{display:flex;flex-direction:column;align-items:stretch;gap:0}
+.frow{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.node{flex:1 1 260px;text-align:left;border:2px solid var(--line);background:var(--card);color:var(--ink);padding:9px 12px;border-radius:10px;cursor:pointer;font:inherit;font-size:.93rem}
+.node:hover{border-color:var(--accent)}
+.node[aria-expanded="true"]{border-color:var(--accent)}
+.node.c{border-color:var(--c);background:var(--c-bg)}
+.node.p{border-color:var(--p);background:var(--p-bg)}
+.node.n{border-color:var(--n);background:var(--n-bg)}
+.node.decide{border-style:dashed;border-radius:22px}
+.node.end{border-color:var(--ok);background:var(--ok-bg)}
+.node .num{display:inline-block;min-width:1.6em;font-weight:700;color:var(--muted)}
+.side{display:flex;align-items:center;gap:6px;flex:0 1 270px;font-size:.84rem}
+.side b{color:var(--bad)}
+.sidebox{border:1px solid var(--bad);background:var(--bad-bg);color:var(--bad);padding:6px 9px;border-radius:8px}
+.arrow{text-align:left;padding-left:22px;color:var(--muted);line-height:1.1;font-size:1.1rem;height:22px}
+.detail{display:none;margin:6px 0 4px 8px;padding:10px 14px;border-left:4px solid var(--accent);background:var(--card);border-radius:0 8px 8px 0;font-size:.93rem}
+.detail.open{display:block}
+.detail p{margin:4px 0}
+
+/* function cards */
+details.fn{border:1px solid var(--line);border-radius:12px;background:var(--card);margin:12px 0;overflow:hidden}
+details.fn>summary{cursor:pointer;padding:12px 16px;font-weight:600;list-style:none;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+details.fn>summary::-webkit-details-marker{display:none}
+details.fn>summary::before{content:"▸";color:var(--muted)}
+details.fn[open]>summary::before{content:"▾"}
+details.fn .body{padding:0 16px 14px}
+table{border-collapse:collapse;width:100%;font-size:.92rem}
+th,td{border:1px solid var(--line);padding:6px 9px;text-align:left;vertical-align:top}
+th{background:var(--n-bg);width:28%}
+.tbl-wrap{overflow-x:auto}
+
+/* stages */
+.stages{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0}
+.stage{padding:7px 10px;border:2px solid var(--line);border-radius:9px;font-size:.84rem;background:var(--card);opacity:.55}
+.stage.c{border-color:var(--c)} .stage.n{border-color:var(--n)} .stage.p{border-color:var(--p)}
+.stage.on{opacity:1;box-shadow:0 0 0 3px var(--accent);font-weight:600}
+.stepbox{border:1px solid var(--line);border-radius:12px;background:var(--card);padding:14px 16px;min-height:150px}
+.ctrl{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
+.btn{border:1px solid var(--line);background:var(--card);color:var(--ink);padding:7px 14px;border-radius:8px;cursor:pointer;font:inherit}
+.btn.pri{background:var(--accent);color:#fff;border-color:var(--accent)}
+.btn[disabled]{opacity:.4;cursor:default}
+
+/* bytes */
+.bytes{display:flex;flex-wrap:wrap;gap:2px;margin:10px 0}
+.b{width:21px;height:21px;border-radius:3px;font-size:9px;display:flex;align-items:center;justify-content:center;color:#111;cursor:pointer;border:1px solid transparent}
+.b.f0{background:#fcd34d}.b.f1{background:#fdba74}.b.f2{background:#fca5a5}.b.f3{background:#a5b4fc}.b.f4{background:#86efac}.b.f5{background:#7dd3fc}
+.b.sel{border-color:var(--ink);outline:2px solid var(--ink)}
+.bytes-info{min-height:54px;border:1px solid var(--line);border-radius:8px;padding:8px 12px;background:var(--card);font-size:.92rem}
+
+/* situations */
+.filters{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0}
+.filters button{border:1px solid var(--line);background:var(--card);color:var(--ink);padding:5px 12px;border-radius:999px;cursor:pointer;font:inherit;font-size:.88rem}
+.filters button.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+
+/* quiz */
+.q{border:1px solid var(--line);border-radius:12px;background:var(--card);padding:14px 16px;margin:12px 0}
+.q h4{margin:0 0 8px;font-size:1rem}
+.opt{display:block;width:100%;text-align:left;border:1px solid var(--line);background:var(--bg);color:var(--ink);padding:8px 12px;border-radius:8px;margin:6px 0;cursor:pointer;font:inherit;font-size:.93rem}
+.opt:hover:not([disabled]){border-color:var(--accent)}
+.opt.right{background:var(--ok-bg);border-color:var(--ok)}
+.opt.wrong{background:var(--bad-bg);border-color:var(--bad)}
+.expl{display:none;margin-top:8px;padding:8px 12px;border-left:4px solid var(--accent);font-size:.9rem;background:var(--n-bg);border-radius:0 8px 8px 0}
+.expl.on{display:block}
+.score{position:sticky;bottom:0;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 16px;margin-top:16px;display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+dl.gl dt{font-weight:700;margin-top:10px}
+dl.gl dd{margin:2px 0 0 0;color:var(--muted)}
+footer{max-width:1040px;margin:0 auto;padding:10px 16px 40px;color:var(--muted);font-size:.85rem}
+
+/* ===== caiet ===== */
+.notebook{--ink:#1a2a6c;--red:#c0392b;--paper:#fffdf5;font-family:"Caveat","Bradley Hand","Segoe Print","Comic Sans MS",cursive;color:var(--ink)}
+.notebook .page{position:relative;background-color:var(--paper);
+  background-image:repeating-linear-gradient(transparent 0 31px,#bcd5ef 31px 32px);
+  border:1px solid #d8d2bd;border-left:3px double #e58b8b;border-radius:4px 10px 10px 4px;
+  padding:14px 22px 20px 58px;margin:26px 0;font-size:1.4rem;line-height:32px;
+  box-shadow:0 3px 10px rgba(0,0,0,.18);color:#1a2a6c}
+.notebook .page:nth-of-type(odd){transform:rotate(-.25deg)}
+.notebook .page:nth-of-type(even){transform:rotate(.2deg)}
+.notebook .page::before{content:"";position:absolute;left:14px;top:40px;bottom:40px;width:14px;
+  background:radial-gradient(circle at 7px 7px,#8a8a8a 0 5px,transparent 6px) 0 0/14px 96px repeat-y;opacity:.55}
+.notebook h3.nt{font-size:1.9rem;margin:0 0 4px;line-height:40px;color:#1a2a6c;font-weight:700;display:inline-block;
+  border-bottom:3px solid var(--red);padding-bottom:0}
+.notebook .pg{position:absolute;right:16px;top:8px;font-size:1.1rem;color:#7a7a99}
+.notebook p,.notebook li{margin:0}
+.notebook ul{margin:0;padding-left:26px;list-style:none}
+.notebook li::before{content:"➤ ";color:var(--red);margin-left:-24px;display:inline-block;width:24px}
+.notebook .hl{background:linear-gradient(transparent 12%,rgba(255,226,60,.65) 12% 92%,transparent 92%);padding:0 3px}
+.notebook .circ{border:2.5px solid var(--red);border-radius:55% 45% 50% 50%/50% 55% 45% 50%;padding:0 9px;display:inline-block;line-height:28px}
+.notebook .red{color:var(--red)}
+.notebook .ul{text-decoration:underline wavy var(--red);text-underline-offset:5px}
+.notebook .cd{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:1rem;background:rgba(26,42,108,.08);padding:0 5px;border-radius:3px}
+.notebook .note{display:inline-block;background:#fff59a;box-shadow:2px 3px 6px rgba(0,0,0,.25);padding:6px 12px;line-height:26px;transform:rotate(-1.8deg);margin:6px 0;max-width:34em;font-size:1.25rem}
+.notebook .note.pink{background:#ffc9d6;transform:rotate(1.5deg)}
+.notebook svg{width:100%;height:auto;display:block;margin:6px 0;overflow:visible}
+.notebook svg text{fill:#1a2a6c;font-family:inherit;font-size:21px}
+.notebook svg text.sm{font-size:17px}
+.notebook svg text.rd{fill:#c0392b}
+.notebook svg .s{stroke:#1a2a6c;stroke-width:2.4;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.notebook svg .r{stroke:#c0392b;stroke-width:2.4;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.notebook svg .d{stroke-dasharray:7 6}
+.notebook svg .yb{fill:rgba(255,226,60,.55);stroke:none}
+.notebook svg .pb{fill:rgba(255,160,180,.45);stroke:none}
+.notebook svg .bb{fill:rgba(120,170,255,.35);stroke:none}
+.notebook svg .gb{fill:rgba(130,220,160,.45);stroke:none}
+.notebook table.hw{border-collapse:collapse;width:100%;font-size:1.25rem;line-height:30px;background:transparent}
+.notebook table.hw th,.notebook table.hw td{border:2px solid #1a2a6c;border-radius:6px;padding:0 10px;background:transparent;width:auto}
+.notebook table.hw th{color:var(--red);font-weight:700}
+.nbhint{margin:6px 0 0}
+</style>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+<header>
+  <h1>Harta codului: main.c și csi_ui.py</h1>
+  <p class="lead">Acest document explică ce face fiecare funcție. Apoi arată drumul unui pachet de la placa ESP32 până pe ecranul PC-ului. Apasă pe casete ca să vezi detaliile. La final ai un quiz cu 15 întrebări.</p>
+  <div class="legend">
+    <span class="tag c">Partea C (ESP32)</span>
+    <span class="tag n">Rețea</span>
+    <span class="tag p">Partea Python (PC)</span>
+  </div>
+</header>
+
+<nav><div class="in" id="tabs" role="tablist"></div></nav>
+
+<main>
+
+<!-- ============ 1. IMAGINEA MARE ============ -->
+<section id="s-mare">
+  <h2>1. Imaginea mare</h2>
+  <div class="card">
+    <p>Sistemul măsoară cum se schimbă semnalul Wi-Fi într-o cameră. Mișcarea unei persoane schimbă semnalul. Placa ESP32 măsoară această schimbare. Programul Python o desenează.</p>
+    <p>Măsurătoarea se numește CSI (Channel State Information). CSI descrie, pentru fiecare subpurtătoare radio, cât de mult a schimbat canalul semnalul. Codul tău folosește 64 de subpurtătoare.</p>
+    <p><b>Regula de bază:</b> un nod nu măsoară propriul semnal. Un nod măsoară semnalul primit de la alt nod. De aceea ai nevoie de cel puțin două plăci.</p>
+  </div>
+
+  <h3>Cele trei părți</h3>
+  <div class="grid3">
+    <div class="card"><span class="tag c">C</span><h3 style="margin-top:6px">main.c</h3>
+      <p>Rulează pe ESP32. Trimite probe radio. Primește probe de la alte noduri. Măsoară CSI. Trimite rezultatul prin UDP.</p></div>
+    <div class="card"><span class="tag n">Rețea</span><h3 style="margin-top:6px">Wi-Fi + UDP</h3>
+      <p>Poartă pachetele de la placă la PC. Nu are cod în repo. Fișierele C și Python nu se citesc între ele.</p></div>
+    <div class="card"><span class="tag p">Python</span><h3 style="margin-top:6px">csi_ui.py</h3>
+      <p>Rulează pe PC. Ascultă pe un port UDP. Verifică fiecare pachet. Desenează spectrul și cascada.</p></div>
+  </div>
+
+  <h3>Harta generală (apasă pe casete)</h3>
+  <div id="flow-mare" class="flow"></div>
+
+  <h3>Ideea cea mai importantă</h3>
+  <div class="card">
+    <p>C și Python nu partajează cod. Ele partajează un <b>contract</b>: un pachet de exact 138 de octeți, cu un format fix.</p>
+    <p>Partea C scrie pachetul în acest format. Partea Python îl citește în același format. Dacă un format se schimbă, trebuie să schimbi și celălalt.</p>
+    <p>Contractul are un tabel în secțiunea „4. Drumul datelor”.</p>
+  </div>
+</section>
+
+<!-- ============ 2. main.c ============ -->
+<section id="s-c">
+  <h2>2. main.c: ce face fiecare funcție</h2>
+  <p class="hint">Fișierul are 119 de linii și 4 funcții proprii, un tip de date și un tablou.</p>
+
+  <h3>Cum lucrează cele trei fire de execuție</h3>
+  <div class="card">
+    <p>După pornire, trei lucruri rulează în paralel. Fiecare are o sarcină simplă.</p>
+    <div class="grid3">
+      <div>
+        <span class="tag c">Task Wi-Fi (al sistemului)</span>
+        <p>Primește cadre radio. Apelează <code>on_csi</code> pentru fiecare măsurătoare. <code>on_csi</code> trebuie să fie rapidă.</p>
+      </div>
+      <div>
+        <span class="tag c">probe_sender (core 0, prioritate 5)</span>
+        <p>Trimite un probe la fiecare 10 ms. Nu așteaptă niciun răspuns.</p>
+      </div>
+      <div>
+        <span class="tag c">udp_sender (core 1, prioritate 10)</span>
+        <p>Așteaptă în coadă. Când apare un pachet, îl trimite prin UDP.</p>
+      </div>
+    </div>
+    <p>Coada (ring buffer, 16 KB) leagă <code>on_csi</code> de <code>udp_sender_task</code>. <code>on_csi</code> scrie în coadă. <code>udp_sender_task</code> citește din coadă. Astfel măsurarea nu așteaptă rețeaua.</p>
+    <p>Un al patrulea element, <code>on_wifi_event</code>, rulează în bucla de evenimente a sistemului. Se apelează când Wi-Fi pornește, se deconectează sau primește IP.</p>
+  </div>
+
+  <h3>Pornirea: app_main pas cu pas</h3>
+  <div id="flow-boot" class="flow"></div>
+
+  <h3>Ce decide on_csi la fiecare cadru</h3>
+  <div id="flow-oncsi" class="flow"></div>
+
+  <h3>Fișa fiecărei funcții</h3>
+  <div id="cards-c"></div>
+</section>
+
+<!-- ============ 3. csi_ui.py ============ -->
+<section id="s-py">
+  <h2>3. csi_ui.py: ce face fiecare funcție</h2>
+  <p class="hint">Fișierul are 127 de linii. Are o clasă de date, două clase de interfață și două funcții.</p>
+
+  <h3>Pornirea programului: main()</h3>
+  <div id="flow-pymain" class="flow"></div>
+
+  <h3>Bucla care se repetă la fiecare 50 ms: refresh()</h3>
+  <div id="flow-refresh" class="flow"></div>
+
+  <h3>Validarea unui pachet: parse_packet()</h3>
+  <div id="flow-parse" class="flow"></div>
+
+  <h3>Fișa fiecărei funcții</h3>
+  <div id="cards-py"></div>
+</section>
+
+<!-- ============ 4. DRUMUL DATELOR ============ -->
+<section id="s-drum">
+  <h2>4. Drumul datelor: cum ajunge CSI din C în Python</h2>
+  <div class="card">
+    <p><b>Răspunsul scurt:</b> Python nu citește fișierul C. Python nu vorbește direct cu placa. Placa trimite pachete UDP prin Wi-Fi. Sistemul de operare al PC-ului le pune într-o coadă a portului 5005. Python citește din această coadă.</p>
+  </div>
+
+  <h3>Parcurge drumul pas cu pas</h3>
+  <div class="stages" id="stages"></div>
+  <div class="stepbox" id="stepbox"></div>
+  <div class="ctrl">
+    <button class="btn" id="prev">← Înapoi</button>
+    <button class="btn pri" id="next">Înainte →</button>
+    <button class="btn" id="play">▶ Pornește automat</button>
+    <span class="hint" id="stepcount"></span>
+  </div>
+
+  <h3>Contractul: pachetul de 138 de octeți</h3>
+  <p>Apasă pe un octet ca să vezi ce câmp este. Aceeași structură există în C (<code>csi_packet_t</code>) și în Python (<code>HEADER</code>).</p>
+  <div class="bytes" id="bytes"></div>
+  <div class="bytes-info" id="bytesinfo">Apasă pe un octet.</div>
+
+  <div class="tbl-wrap" style="margin-top:12px">
+  <table>
+    <thead><tr><th>Octeți</th><th>Câmp în C</th><th>În Python</th><th>Ce înseamnă</th></tr></thead>
+    <tbody>
+      <tr><td>0–1</td><td><code>uint16_t magic</code></td><td><code>H</code> → <code>magic</code></td><td>Valoarea fixă <code>0xA55A</code>. Python respinge pachetul dacă valoarea este alta.</td></tr>
+      <tr><td>2</td><td><code>uint8_t node_id</code></td><td><code>B</code> → <code>node_id</code></td><td>Numărul plăcii (de la <code>NODE_ID</code>). Python alege coloana după el.</td></tr>
+      <tr><td>3</td><td><code>int8_t rssi_dbm</code></td><td><code>b</code> → <code>rssi_dbm</code></td><td>Puterea semnalului în dBm. Python o arată în titlu.</td></tr>
+      <tr><td>4–7</td><td><code>uint32_t timestamp_us</code></td><td><code>I</code> → ignorat (<code>_</code>)</td><td>Ora plăcii în microsecunde. Python nu o folosește acum.</td></tr>
+      <tr><td>8–9</td><td><code>uint16_t seq</code></td><td><code>H</code> → <code>seq</code></td><td>Număr de ordine. Python îl arată în titlu. Python nu verifică lipsa de numere.</td></tr>
+      <tr><td>10–137</td><td><code>int8_t csi_iq[128]</code></td><td><code>np.frombuffer(..., int8)</code></td><td>64 de perechi (Q, I). Python calculează amplitudinea din fiecare pereche.</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p class="hint">Semnul <code>&lt;</code> din <code>"&lt;HBbIH"</code> înseamnă „little-endian, fără umplutură”. ESP32 este little-endian. Structura C este <code>packed</code>. De aceea cele două părți au aceleași poziții.</p>
+
+  <h3>Cum devine o pereche (Q, I) un punct pe grafic</h3>
+  <div class="card">
+    <p>Fiecare subpurtătoare are doi octeți: Q și I. Aceștia sunt partea imaginară și partea reală a unui număr complex.</p>
+    <p>Python calculează <code>hypot(Q, I)</code>. Rezultatul este amplitudinea: lungimea numărului complex. Ordinea Q/I nu contează pentru amplitudine.</p>
+    <p>Python nu calculează faza. Faza ar cere ordinea corectă Q/I.</p>
+    <p>Axa X a graficului este „indexul în buffer”. Ordinea din buffer este k = 0…31, apoi k = −32…−1. Graficul nu arată frecvențele în ordine crescătoare. Subpurtătoarele inactive apar cu valori mici.</p>
+  </div>
+
+  <h3>Cât de multe pachete trec</h3>
+  <div class="card">
+    <p>Fiecare nod trimite aproximativ 100 de probe pe secundă. Un nod primește probe de la fiecare alt nod. Cu două noduri, fiecare nod măsoară cel mult 100 de CSI pe secundă. Cu trei noduri, fiecare nod măsoară cel mult 200.</p>
+    <p>Python se redesenează de 20 de ori pe secundă. La fiecare redesenare, Python citește toate pachetele sosite în ultimele 50 ms.</p>
+  </div>
+</section>
+
+<!-- ============ 5. SITUAȚII ============ -->
+<section id="s-sit">
+  <h2>5. Situații posibile</h2>
+  <p>Fiecare situație arată ce face partea C, ce face partea Python și ce vezi tu. Filtrează după tip.</p>
+  <div class="filters" id="filters"></div>
+  <div id="sits"></div>
+</section>
+
+<!-- ============ 6. CUVINTE ============ -->
+<section id="s-gl">
+  <h2>6. Cuvinte importante</h2>
+  <dl class="gl" id="glossary"></dl>
+</section>
+
+<!-- ============ 7. QUIZ ============ -->
+<section id="s-quiz">
+  <h2>7. Quiz: 15 întrebări</h2>
+  <p>Alege un răspuns. Vezi rezultatul imediat și o explicație. Ai o singură încercare pentru fiecare întrebare. Apasă „Reia quizul” ca să începi din nou.</p>
+  <div id="quiz"></div>
+  <div class="score"><span id="scoretxt">Scor: 0 / 15 (0 întrebări răspunse)</span><button class="btn" id="reset">Reia quizul</button></div>
+</section>
+
+
+<!-- ============ 8. CAIET ============ -->
+<section id="s-caiet">
+  <h2>8. Caiet: notițele mele</h2>
+  <p class="hint nbhint">Notițe în stil de curs, scrise de mână, cu scheme. Sunt aceleași idei ca în filele de mai sus, dar condensate ca la un curs.</p>
+
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+      <filter id="wob" x="-5%" y="-5%" width="110%" height="110%">
+        <feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="2" seed="7" result="n"/>
+        <feDisplacementMap in="SourceGraphic" in2="n" scale="3.2"/>
+      </filter>
+      <marker id="ah" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+        <path d="M1 1 L9 5 L1 9" fill="none" stroke="#1a2a6c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </marker>
+      <marker id="ahr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+        <path d="M1 1 L9 5 L1 9" fill="none" stroke="#c0392b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </marker>
+    </defs>
+  </svg>
+
+  <div class="notebook">
+
+  <!-- PAGINA 1 -->
+  <div class="page">
+    <span class="pg">pag. 1</span>
+    <h3 class="nt">Ce măsurăm? CSI</h3>
+    <ul>
+      <li><span class="hl">CSI</span> = cât <b>schimbă camera</b> semnalul Wi-Fi, pentru fiecare subpurtătoare (64).</li>
+      <li>Om care se mișcă → reflexii diferite → CSI diferit. <span class="red">Asta detectăm.</span></li>
+      <li>O placă nu își aude propria transmisie ⇒ <span class="circ">minim 2 noduri</span></li>
+      <li>Nodul A <b>trimite</b> probe. Nodul B <b>măsoară</b>. (Și invers, amândouă fac ambele.)</li>
+    </ul>
+    <svg viewBox="0 0 720 250" filter="url(#wob)" role="img" aria-label="Schema generală: nod A, cameră, nod B, AP, PC">
+      <rect class="bb" x="10" y="92" width="95" height="62" rx="6"/>
+      <rect class="s" x="10" y="92" width="95" height="62" rx="6"/>
+      <text x="22" y="130">ESP32 A</text>
+      <path class="s" d="M118 105 q14 22 0 44"/><path class="s" d="M132 98 q18 29 0 58"/><path class="s" d="M146 91 q22 36 0 72"/>
+      <text class="sm rd" x="40" y="70">probe la 10 ms, 6 Mbps</text>
+      <circle class="s" cx="225" cy="105" r="13"/>
+      <path class="s" d="M225 118 v42 M225 128 l-20 16 M225 128 l20 16 M225 160 l-14 28 M225 160 l14 28"/>
+      <text class="sm" x="168" y="215">om / perete</text>
+      <path class="s d" d="M262 125 h 28" marker-end="url(#ah)"/>
+      <rect class="gb" x="300" y="92" width="95" height="62" rx="6"/>
+      <rect class="s" x="300" y="92" width="95" height="62" rx="6"/>
+      <text x="312" y="130">ESP32 B</text>
+      <text class="sm rd" x="296" y="178">măsoară CSI (LLTF)</text>
+      <path class="s" d="M398 123 h 40" marker-end="url(#ah)"/>
+      <text class="sm" x="392" y="108">UDP 138 B</text>
+      <rect class="s" x="442" y="95" width="62" height="56" rx="6"/><text x="458" y="130">AP</text>
+      <path class="s" d="M508 123 h 40" marker-end="url(#ah)"/>
+      <rect class="yb" x="552" y="92" width="150" height="62" rx="6"/>
+      <rect class="s" x="552" y="92" width="150" height="62" rx="6"/>
+      <text x="566" y="120">PC</text><text class="sm" x="566" y="144">port UDP 5005</text>
+      <path class="s" d="M627 157 v 36" marker-end="url(#ah)"/>
+      <text x="570" y="222">csi_ui.py → grafic</text>
+    </svg>
+    <p><span class="red">!!</span> C și Python <b>nu</b> își citesc fișierele. Singura legătură = <span class="hl">formatul pachetului</span> (138 B).</p>
+  </div>
+
+  <!-- PAGINA 2 -->
+  <div class="page">
+    <span class="pg">pag. 2</span>
+    <h3 class="nt">main.c: cine rulează unde</h3>
+    <ul>
+      <li><span class="cd">app_main</span> rulează <b>o dată</b>, pornește tot, apoi iese.</li>
+      <li>După el: 3 lucruri în paralel. Coada le leagă.</li>
+    </ul>
+    <svg viewBox="0 0 740 300" filter="url(#wob)" role="img" aria-label="Task-uri și coada">
+      <rect class="s" x="8" y="20" width="150" height="54" rx="6"/><text class="sm" x="18" y="42">task Wi-Fi</text><text class="sm" x="18" y="64">(al sistemului)</text>
+      <path class="s" d="M160 47 h 40" marker-end="url(#ah)"/>
+      <rect class="bb" x="206" y="20" width="120" height="54" rx="6"/><rect class="s" x="206" y="20" width="120" height="54" rx="6"/><text x="228" y="55">on_csi()</text>
+      <text class="sm rd" x="214" y="100">RAPIDĂ! doar scrie</text>
+      <path class="s" d="M328 47 h 44" marker-end="url(#ah)"/>
+      <rect class="yb" x="378" y="20" width="136" height="54" rx="4"/><rect class="s" x="378" y="20" width="136" height="54" rx="4"/>
+      <path class="s" d="M412 20 v54 M446 20 v54 M480 20 v54"/><text class="sm" x="388" y="100">coadă 16 KB</text>
+      <path class="s" d="M516 47 h 36" marker-end="url(#ah)"/>
+      <rect class="bb" x="558" y="20" width="172" height="54" rx="6"/><rect class="s" x="558" y="20" width="172" height="54" rx="6"/>
+      <text class="sm" x="568" y="42">udp_sender_task</text><text class="sm" x="568" y="64">core 1, prio 10</text>
+      <path class="s" d="M644 76 v 52" marker-end="url(#ah)"/><text class="sm" x="560" y="152">sendto → PC (UDP)</text>
+
+      <rect class="s" x="8" y="200" width="190" height="54" rx="6"/><text class="sm" x="18" y="222">probe_sender_task</text><text class="sm" x="18" y="244">core 0, prio 5</text>
+      <path class="s" d="M200 227 h 36" marker-end="url(#ah)"/>
+      <rect class="s" x="242" y="200" width="200" height="54" rx="6"/><text class="sm" x="252" y="222">esp_wifi_80211_tx</text><text class="sm" x="252" y="244">la fiecare 10 ms</text>
+      <text x="456" y="236">))) aer</text>
+      <rect class="pb" x="530" y="186" width="205" height="86" rx="6"/><rect class="r" x="530" y="186" width="205" height="86" rx="6"/>
+      <text class="sm rd" x="540" y="210">on_wifi_event</text>
+      <text class="sm" x="540" y="232">START / DISCONNECTED</text><text class="sm" x="540" y="254">→ esp_wifi_connect()</text>
+    </svg>
+    <ul>
+      <li>De ce coadă? <span class="hl">Nu blochez task-ul Wi-Fi</span> cu rețeaua.</li>
+      <li>Timeout 0 la scriere → coada plină = pachet <span class="red">pierdut</span> (+ log).</li>
+    </ul>
+    <div class="note">pornire: NVS → netif → event loop → coadă → wifi init → handlere → STA + parolă → <b>6 Mbps</b> → start → ps NONE → promiscuu → CSI on → MAC în probe → task-uri</div>
+  </div>
+
+  <!-- PAGINA 3 -->
+  <div class="page">
+    <span class="pg">pag. 3</span>
+    <h3 class="nt">on_csi: ce decide</h3>
+    <svg viewBox="0 0 740 485" filter="url(#wob)" role="img" aria-label="Arborele de decizie on_csi">
+      <rect class="s" x="30" y="10" width="300" height="46" rx="23"/><text x="48" y="40">date CSI valide? (buf, len)</text>
+      <path class="r" d="M332 33 h 56" marker-end="url(#ahr)"/><text class="sm rd" x="394" y="39">nu → return</text>
+      <path class="s" d="M180 58 v 28" marker-end="url(#ah)"/>
+      <rect class="s" x="30" y="90" width="300" height="46" rx="23"/><text x="48" y="120">hdr[0] == 0x40 ? (probe)</text>
+      <path class="r" d="M332 113 h 56" marker-end="url(#ahr)"/><text class="sm rd" x="394" y="108">nu → ignor</text><text class="sm rd" x="394" y="130">(anti-buclă UDP→CSI→UDP)</text>
+      <path class="s" d="M180 138 v 28" marker-end="url(#ah)"/>
+      <rect class="bb" x="30" y="170" width="300" height="46" rx="6"/><rect class="s" x="30" y="170" width="300" height="46" rx="6"/><text x="48" y="200">fac csi_packet_t: magic, id, rssi, timp, seq++</text>
+      <path class="s" d="M180 218 v 28" marker-end="url(#ah)"/>
+      <rect class="s" x="30" y="250" width="300" height="46" rx="6"/><text x="48" y="280">memcpy max 128 B de CSI</text>
+      <path class="s" d="M180 298 v 20" marker-end="url(#ah)"/>
+      <rect class="s" x="30" y="322" width="300" height="46" rx="23"/><text x="46" y="352">first_word_invalid ?</text>
+      <path class="s" d="M332 345 h 56" marker-end="url(#ah)"/><text class="sm" x="394" y="340">da → primii 4 B = 0</text><text class="sm" x="394" y="362">(k=0 și k=1)</text>
+      <path class="s" d="M180 370 v 26" marker-end="url(#ah)"/>
+      <rect class="gb" x="30" y="400" width="300" height="46" rx="23"/><rect class="s" x="30" y="400" width="300" height="46" rx="23"/><text x="48" y="430">coada plină? xRingbufferSend</text>
+      <path class="r" d="M332 423 h 56" marker-end="url(#ahr)"/><text class="sm rd" x="394" y="418">da → pierd pachetul</text><text class="sm rd" x="394" y="440">+ log la 1 și la fiecare al 100-lea</text>
+      <text class="sm" x="60" y="472">nu → în coadă ✓ (udp_sender îl preia)</text>
+    </svg>
+    <ul>
+      <li><span class="red">0x40</span> = probe request. Placa e în mod promiscuu, vede <b>tot</b> → filtrez.</li>
+      <li>Verific <b>doar tipul</b>, nu sursa ⇒ un telefon cu probe OFDM ar intra și el.</li>
+    </ul>
+  </div>
+
+  <!-- PAGINA 4 -->
+  <div class="page">
+    <span class="pg">pag. 4</span>
+    <h3 class="nt">Contractul: 138 B</h3>
+    <svg viewBox="0 0 720 300" filter="url(#wob)" role="img" aria-label="Structura pachetului">
+      <rect class="yb" x="10" y="70" width="48" height="50"/><rect class="pb" x="58" y="70" width="24" height="50"/><rect class="bb" x="82" y="70" width="24" height="50"/>
+      <rect class="gb" x="106" y="70" width="96" height="50"/><rect class="yb" x="202" y="70" width="48" height="50"/><rect class="bb" x="250" y="70" width="440" height="50"/>
+      <rect class="s" x="10" y="70" width="680" height="50"/>
+      <path class="s" d="M58 70 v50 M82 70 v50 M106 70 v50 M202 70 v50 M250 70 v50"/>
+      <text class="sm" x="12" y="60">magic</text><text class="sm" x="52" y="42">id</text><text class="sm" x="76" y="60">rssi</text><text class="sm" x="132" y="60">timp</text><text class="sm" x="208" y="60">seq</text>
+      <text class="sm" x="24" y="100">2</text><text class="sm" x="64" y="100">1</text><text class="sm" x="88" y="100">1</text><text class="sm" x="148" y="100">4</text><text class="sm" x="220" y="100">2</text>
+      <text x="400" y="102">128 B = 64 × (Q, I)</text>
+      <path class="s" d="M10 134 q 120 20 240 0"/><text x="82" y="170">antet 10 B</text>
+      <path class="s" d="M250 134 q 220 20 440 0"/><text x="400" y="170">CSI</text>
+      <text class="sm rd" x="10" y="205">Python: struct "&lt;HBbIH"</text><path class="r" d="M70 190 v -52" marker-end="url(#ahr)"/>
+      <text class="sm rd" x="330" y="205">np.frombuffer(int8, offset=10)</text><path class="r" d="M470 190 v -52" marker-end="url(#ahr)"/>
+      <rect class="yb" x="150" y="228" width="400" height="50" rx="6"/><rect class="r" x="150" y="228" width="400" height="50" rx="6"/>
+      <text x="166" y="262">amplitudine = √(Q² + I²) = hypot</text>
+    </svg>
+    <ul>
+      <li>Ordinea subpurtătoarelor în buffer: <span class="hl">k = 0…31, apoi −32…−1</span> (nu e în ordine de frecvență).</li>
+      <li>Python verifică: <span class="circ">len = 138</span> și <span class="circ">magic = 0xA55A</span>, altfel <b>aruncă tăcut</b>.</li>
+      <li>Python ignoră <span class="cd">timp</span>, nu calculează faza.</li>
+      <li>Doar 52 din 64 subpurtătoare sunt active → restul ≈ 0 (normal).</li>
+    </ul>
+  </div>
+
+  <!-- PAGINA 5 -->
+  <div class="page">
+    <span class="pg">pag. 5</span>
+    <h3 class="nt">csi_ui.py: bucla de 50 ms</h3>
+    <ul>
+      <li>Socket UDP <b>non-blocant</b> → fereastra nu îngheață.</li>
+      <li><span class="cd">QTimer</span> 50 ms ⇒ <span class="hl">20 desenări/s</span>, indiferent de câte pachete vin.</li>
+    </ul>
+    <svg viewBox="0 0 740 290" filter="url(#wob)" role="img" aria-label="Bucla refresh">
+      <rect class="bb" x="8" y="30" width="122" height="54" rx="6"/><rect class="s" x="8" y="30" width="122" height="54" rx="6"/><text x="22" y="64">Timer 50ms</text>
+      <path class="s" d="M132 57 h 20" marker-end="url(#ah)"/>
+      <rect class="s" x="156" y="30" width="122" height="54" rx="6"/><text x="172" y="64">receive()</text>
+      <path class="s" d="M280 57 h 20" marker-end="url(#ah)"/>
+      <rect class="s" x="304" y="30" width="122" height="54" rx="6"/><text x="312" y="64">parse_packet</text>
+      <path class="s" d="M428 57 h 20" marker-end="url(#ah)"/>
+      <rect class="s" x="452" y="30" width="122" height="54" rx="6"/><text x="462" y="56" class="sm">node_id nou?</text><text x="462" y="76" class="sm">→ coloană</text>
+      <path class="s" d="M576 57 h 20" marker-end="url(#ah)"/>
+      <rect class="gb" x="600" y="30" width="130" height="54" rx="6"/><rect class="s" x="600" y="30" width="130" height="54" rx="6"/><text x="622" y="64">show()</text>
+      <text class="sm" x="150" y="112">recv(2048) până la</text><text class="sm" x="150" y="132">BlockingIOError</text>
+      <text class="sm" x="296" y="112">138 B? magic?</text><text class="sm" x="296" y="132">nu → None</text>
+      <text class="sm" x="590" y="112">istoric 300×64,</text><text class="sm" x="590" y="132">spectru + cascadă</text>
+      <path class="r" d="M665 142 v 70 H 70 V 90" marker-end="url(#ahr)" />
+      <text class="rd" x="260" y="240">repetă la fiecare 50 ms</text>
+      <text class="sm" x="260" y="266">+ actualizez „UDP 5005 | N pachete | M pachete/s”</text>
+    </svg>
+    <ul>
+      <li>Coloana: <b>sus</b> = ultimul pachet, <b>jos</b> = cascada ultimelor 300 (nou = sus).</li>
+      <li>Coloane noi în ordinea sosirii primului pachet.</li>
+      <li><span class="red">Atenție:</span> <span class="cd">show</span> se apelează doar când vin pachete noi.</li>
+    </ul>
+  </div>
+
+  <!-- PAGINA 6 -->
+  <div class="page">
+    <span class="pg">pag. 6</span>
+    <h3 class="nt">Ce se poate strica</h3>
+    <table class="hw">
+      <thead><tr><th>ce văd</th><th>cauze posibile</th></tr></thead>
+      <tbody>
+        <tr><td>„astept pachete…”</td><td>placa fără IP · parolă greșită · firewall pe 5005 · un singur nod</td></tr>
+        <tr><td>coloană înghețată</td><td>nod oprit / AP căzut (nu există „nod pierdut”)</td></tr>
+        <tr><td>seq sare</td><td>pachete pierdute · repornire (seq=0) · overflow la 65 535</td></tr>
+        <tr><td>două noduri într-o coloană</td><td>același <span class="cd">NODE_ID</span> pe două plăci</td></tr>
+        <tr><td>2 puncte la 0, stânga</td><td>first_word_invalid → normal</td></tr>
+        <tr><td>rata mică</td><td>broadcast (până la 24% pierdut) · coadă plină</td></tr>
+        <tr><td>programul iese: „Nu pot asculta…”</td><td>portul ocupat</td></tr>
+      </tbody>
+    </table>
+    <div class="note pink"><b>Atenție:</b> UDP nu confirmă nimic. Placa „crede” că a trimis chiar dacă PC-ul n-a primit. Singurele indicii: <b>jurnalul serial</b> al plăcii și <b>seq</b>.</div>
+    <ul>
+      <li>Pe placă erorile se văd <span class="ul">doar</span> în log serial.</li>
+      <li>Soluție pierderi: <span class="hl">unicast</span> (IP-ul PC-ului), nu 255.255.255.255.</li>
+    </ul>
+  </div>
+
+  <!-- PAGINA 7 -->
+  <div class="page">
+    <span class="pg">pag. 7</span>
+    <h3 class="nt">Recapitulare în 6 rânduri</h3>
+    <ul>
+      <li>A trimite probe OFDM la 6 Mbps → B primește → hardware estimează canalul din <span class="hl">LLTF</span>.</li>
+      <li><span class="cd">on_csi</span> (rapidă) → pachet 138 B → <b>coadă</b>.</li>
+      <li><span class="cd">udp_sender_task</span> → <span class="cd">sendto</span> → AP → PC, port 5005.</li>
+      <li>Nucleul păstrează datagramele în coada socket-ului.</li>
+      <li><span class="cd">refresh</span> la 50 ms golește socket-ul, validează (138 B + magic), calculează amplitudinea.</li>
+      <li>O coloană/nod: spectru sus, cascada de 300 jos.</li>
+    </ul>
+    <div class="note">Întrebare de examen: „Cum află Python datele din C?” → <b>prin contract</b> (138 B) <b>peste UDP</b>, nu prin fișier.</div>
+  </div>
+
+  </div>
+</section>
+
+</main>
+<footer>Document de învățare pentru codul din <code>src/firmware/esp32_csi_node/main/main.c</code> și <code>src/csi_ui.py</code>. Numerele de linii se referă la versiunea de la 17 noiembrie 2026.</footer>
+
+<script>
+"use strict";
+
+/* ---------- utilitare ---------- */
+const $ = (s, r = document) => r.querySelector(s);
+
+/* ---------- navigare ---------- */
+const TABS = [
+  ["s-mare", "1. Imaginea mare"], ["s-c", "2. main.c"], ["s-py", "3. csi_ui.py"],
+  ["s-drum", "4. Drumul datelor"], ["s-sit", "5. Situații"], ["s-gl", "6. Cuvinte"], ["s-quiz", "7. Quiz"], ["s-caiet", "8. Caiet"]
+];
+function showTab(id) {
+  document.querySelectorAll("main > section").forEach(s => s.classList.toggle("on", s.id === id));
+  document.querySelectorAll("#tabs button").forEach(b => b.setAttribute("aria-selected", b.dataset.id === id));
+  try { history.replaceState(null, "", "#" + id); } catch (e) {}
+  window.scrollTo({ top: 0 });
+}
+TABS.forEach(([id, label]) => {
+  const b = document.createElement("button");
+  b.textContent = label; b.dataset.id = id; b.setAttribute("role", "tab");
+  b.onclick = () => showTab(id);
+  $("#tabs").appendChild(b);
+});
+
+/* ---------- desenator de flow ---------- */
+function renderFlow(el, items) {
+  el.innerHTML = "";
+  items.forEach((it, i) => {
+    const row = document.createElement("div"); row.className = "frow";
+    const btn = document.createElement("button");
+    btn.className = "node " + (it.side_color || "") + " " + (it.kind || "");
+    btn.setAttribute("aria-expanded", "false");
+    btn.innerHTML = '<span class="num">' + (it.kind === "decide" ? "?" : (i + 1)) + '</span>' + it.title;
+    row.appendChild(btn);
+    if (it.no) {
+      const s = document.createElement("div"); s.className = "side";
+      s.innerHTML = '<b>Nu →</b><span class="sidebox">' + it.no + '</span>';
+      row.appendChild(s);
+    }
+    el.appendChild(row);
+    const d = document.createElement("div"); d.className = "detail"; d.innerHTML = it.detail || "";
+    el.appendChild(d);
+    btn.onclick = () => {
+      const open = d.classList.toggle("open");
+      btn.setAttribute("aria-expanded", open);
+    };
+    if (i < items.length - 1) {
+      const a = document.createElement("div"); a.className = "arrow"; a.textContent = "↓";
+      el.appendChild(a);
+    }
+  });
+}
+
+/* ---------- 1. harta mare ---------- */
+renderFlow($("#flow-mare"), [
+  { side_color: "c", title: "<b>Nodul A</b> (ESP32) trimite un probe radio la fiecare 10 ms", detail:
+    "<p>Funcția: <code>probe_sender_task</code>. Probe-ul este un cadru mic (64 de octeți), trimis la toți (broadcast), la 6 Mbps.</p><p>Viteza de 6 Mbps folosește modulația OFDM. Cadrul OFDM conține câmpul de antrenare LLTF. LLTF este materia primă pentru CSI.</p>" },
+  { side_color: "n", title: "Semnalul radio trece prin cameră", detail:
+    "<p>Semnalul se reflectă pe pereți și pe obiecte. Un om care se mișcă schimbă aceste reflexii. Schimbarea apare în CSI.</p>" },
+  { side_color: "c", title: "<b>Nodul B</b> (ESP32) primește probe-ul și măsoară CSI", detail:
+    "<p>Radioul este în mod promiscuu: primește toate cadrele, nu doar pe cele pentru el. Hardware-ul estimează canalul din LLTF. Driverul apelează <code>on_csi</code> cu rezultatul.</p>" },
+  { side_color: "c", title: "<code>on_csi</code> construiește pachetul de 138 de octeți și îl pune în coadă", detail:
+    "<p>Funcția verifică cadrul, copiază cei 128 de octeți CSI și adaugă antetul (magic, node_id, rssi, timp, seq). Apoi scrie în coadă. Nu trimite nimic prin rețea.</p>" },
+  { side_color: "c", title: "<code>udp_sender_task</code> scoate pachetul din coadă și îl trimite prin UDP", detail:
+    "<p>Destinația vine din <code>menuconfig</code>: <code>CSI_UDP_HOST</code> și <code>CSI_UDP_PORT</code> (implicit 5005).</p>" },
+  { side_color: "n", title: "Wi-Fi → punctul de acces (AP) → PC", detail:
+    "<p>Pachetul călătorește prin rețeaua Wi-Fi. UDP nu confirmă livrarea. Dacă pachetul se pierde, nimeni nu știe.</p><p>Testul din 12 noiembrie 2026 (din README): cu broadcast, PC-ul a pierdut până la 24% din pachete. Cu unicast, PC-ul a pierdut 0%.</p>" },
+  { side_color: "n", title: "Nucleul Linux pune datagrama în coada portului 5005", detail:
+    "<p>Nucleul păstrează datagramele până când un program le citește. Dacă programul întârzie mult, coada se umple și nucleul aruncă pachete, fără să anunțe.</p>" },
+  { side_color: "p", title: "<code>csi_ui.py</code> citește coada la fiecare 50 ms și validează pachetele", detail:
+    "<p>Funcțiile: <code>refresh</code> → <code>receive</code> → <code>parse_packet</code>.</p>" },
+  { side_color: "p", kind: "end", title: "<code>NodeColumn.show</code> desenează spectrul și cascada pe ecran", detail:
+    "<p>Fiecare nod are o coloană: sus spectrul ultimului pachet, jos cascada ultimelor 300 de pachete.</p>" }
+]);
+
+/* ---------- 2. main.c ---------- */
+renderFlow($("#flow-boot"), [
+  { side_color: "c", title: "<code>nvs_flash_init</code>: pornește memoria flash non-volatilă", detail: "<p>Driverul Wi-Fi are nevoie de ea. Dacă pasul eșuează, <code>ESP_ERROR_CHECK</code> oprește programul și placa repornește.</p>" },
+  { side_color: "c", title: "<code>esp_netif_init</code> și <code>esp_event_loop_create_default</code>", detail: "<p>Pornesc stiva TCP/IP și bucla de evenimente. Evenimentele Wi-Fi ajung în această buclă.</p>" },
+  { side_color: "c", title: "<code>xRingbufferCreate(16 KB)</code>: creează coada", detail: "<p>Tipul <code>NOSPLIT</code> înseamnă că un pachet nu se rupe în două bucăți. 16 KB încap aproximativ 110 pachete de 138 de octeți, plus antetul intern al cozii.</p>" },
+  { side_color: "c", title: "<code>esp_netif_create_default_wifi_sta</code> + <code>esp_wifi_init</code>", detail: "<p>Creează interfața de tip stație (client Wi-Fi) și inițializează driverul.</p>" },
+  { side_color: "c", title: "Înregistrează <code>on_wifi_event</code> pentru evenimentele Wi-Fi și pentru „am primit IP”", detail: "<p>Fără acest pas, nimeni nu apelează <code>esp_wifi_connect</code> și placa nu se conectează.</p>" },
+  { side_color: "c", title: "Setează modul stație, SSID și parola din <code>menuconfig</code>", detail: "<p>Valorile vin din <code>CONFIG_CSI_WIFI_SSID</code> și <code>CONFIG_CSI_WIFI_PASSWORD</code> (fișierul <code>Kconfig.projbuild</code>). Implicit SSID este <code>csi-lab</code>.</p>" },
+  { side_color: "c", title: "<code>esp_wifi_config_80211_tx_rate(6M)</code>: probe-urile ies la 6 Mbps", detail: "<p>Viteza implicită este 1 Mbps. La 1 Mbps cadrul nu conține LLTF. Fără LLTF, celelalte noduri nu pot măsura CSI.</p>" },
+  { side_color: "c", title: "<code>esp_wifi_start</code>", detail: "<p>Pornește radioul. Sistemul trimite evenimentul <code>WIFI_EVENT_STA_START</code>. <code>on_wifi_event</code> îl primește și apelează <code>esp_wifi_connect</code>.</p>" },
+  { side_color: "c", title: "<code>esp_wifi_set_ps(NONE)</code>: radioul rămâne mereu pornit", detail: "<p>Fără acest pas, placa ar adormi radioul între cadre. Ar pierde probe-uri.</p>" },
+  { side_color: "c", title: "Mod promiscuu cu filtru „toate cadrele”", detail: "<p>Placa primește orice cadru de pe canal. Filtrarea reală se face în <code>on_csi</code>.</p>" },
+  { side_color: "c", title: "Configurează CSI (doar LLTF) și înregistrează <code>on_csi</code>, apoi pornește CSI", detail: "<p><code>channel_filter_en = false</code> înseamnă că subpurtătoarele vecine nu se netezesc între ele. Rămân independente.</p>" },
+  { side_color: "c", title: "Citește adresa MAC proprie și o scrie în probe, la poziția 10", detail: "<p>Probe-ul pornește cu adresa sursă zero. Acest pas pune adresa reală a plăcii. Pasul vine înainte de pornirea task-urilor.</p>" },
+  { side_color: "c", kind: "end", title: "Pornește cele două task-uri: <code>udp_sender</code> și <code>probe_sender</code>", detail: "<p><code>udp_sender</code>: core 1, prioritate 10, stivă 4096. <code>probe_sender</code>: core 0, prioritate 5, stivă 2048. După acest pas <code>app_main</code> se termină. Restul lucrului îl fac task-urile și driverul.</p>" }
+]);
+
+renderFlow($("#flow-oncsi"), [
+  { side_color: "c", kind: "decide", title: "Cadrul are date CSI valide? (<code>info</code>, <code>buf</code>, <code>len</code>)", no: "iese, nu se face nimic", detail: "<p>Prima apărare. Dacă pointerii sunt nuli sau lungimea este 0, funcția iese imediat.</p>" },
+  { side_color: "c", kind: "decide", title: "Este un probe request? (primul octet al antetului = <code>0x40</code>)", no: "iese, cadrul este ignorat", detail: "<p>Placa primește toate cadrele, inclusiv UDP-ul altor noduri. Dacă ar măsura CSI și din acestea, ar apărea o buclă: UDP → CSI → UDP → CSI. Filtrul oprește bucla.</p><p>Codul verifică doar tipul cadrului. Codul nu verifică cine l-a trimis.</p>" },
+  { side_color: "c", title: "Primele 10 pachete: scrie un rând în jurnal", detail: "<p>Rândul arată lungimea, <code>first_word_invalid</code>, <code>sig_mode</code> și RSSI. Ajută la depanare prin portul serial.</p>" },
+  { side_color: "c", title: "Construiește <code>csi_packet_t</code>: magic, node_id, rssi, timp, seq", detail: "<p>Numărul <code>seq</code> crește cu 1 pentru fiecare pachet acceptat. Are 16 biți, deci revine la 0 după 65 536 de pachete.</p><p>Câmpurile care nu sunt completate rămân zero.</p>" },
+  { side_color: "c", title: "Copiază cel mult 128 de octeți CSI în pachet", detail: "<p>Dacă driverul dă mai puțin de 128 de octeți, restul pachetului rămâne zero.</p>" },
+  { side_color: "c", kind: "decide", title: "<code>first_word_invalid</code> este adevărat?", no: "păstrează octeții cum sunt", detail: "<p>Primii 4 octeți (subpurtătoarele k = 0 și k = 1) sunt nevalizi. Codul îi pune pe 0. Astfel PC-ul nu desenează valori false.</p>" },
+  { side_color: "c", kind: "decide", title: "Încape pachetul în coadă? (<code>xRingbufferSend</code> cu timeout 0)", no: "pachetul se pierde; jurnalul avertizează la prima pierdere și apoi la fiecare a 100-a", detail: "<p>Timeout 0 înseamnă „nu aștepta”. <code>on_csi</code> nu are voie să blocheze task-ul Wi-Fi.</p>" },
+  { side_color: "c", kind: "end", title: "Pachetul este în coadă. <code>udp_sender_task</code> îl preia", detail: "<p>Aici se termină rolul lui <code>on_csi</code>.</p>" }
+]);
+
+const C_FUNCS = [
+  { name: "csi_packet_t (structura)", tag: "date", short: "Forma pachetului trimis prin UDP. Are 138 de octeți.", rows: [
+    ["Rol", "Definește câmpurile pachetului: <code>magic</code>, <code>node_id</code>, <code>rssi_dbm</code>, <code>timestamp_us</code>, <code>seq</code>, <code>csi_iq[128]</code>."],
+    ["De ce <code>packed</code>", "Compilatorul nu adaugă octeți de umplutură. Poziția fiecărui câmp rămâne fixă. Python depinde de aceste poziții."],
+    ["Protecție", "<code>_Static_assert</code> oprește compilarea dacă dimensiunea nu este 138."],
+    ["Se potrivește cu", "<code>HEADER</code> și <code>PACKET_BYTES</code> din <code>csi_ui.py</code>."]
+  ]},
+  { name: "probe[] (tabloul)", tag: "date", short: "Cadrul radio pe care nodul îl trimite la fiecare 10 ms.", rows: [
+    ["Rol", "64 de octeți: tip cadru (<code>0x40</code> = probe request), destinație toți (<code>FF:FF:...</code>), sursă (MAC-ul plăcii), BSSID toți."],
+    ["Cine îl completează", "Adresa sursă (poziția 10) se scrie în <code>app_main</code>."],
+    ["De ce contează", "Primul octet <code>0x40</code> este exact ce caută <code>on_csi</code> la celelalte noduri."]
+  ]},
+  { name: "on_csi", tag: "callback", short: "Se apelează la fiecare măsurătoare CSI. Construiește pachetul și îl pune în coadă.", rows: [
+    ["Când rulează", "În task-ul Wi-Fi al sistemului, la fiecare cadru primit cu LLTF."],
+    ["Primește", "<code>wifi_csi_info_t</code>: datele CSI (<code>buf</code>, <code>len</code>), RSSI, antetul cadrului, <code>first_word_invalid</code>."],
+    ["Produce", "Un <code>csi_packet_t</code> în coadă. Nu returnează nimic."],
+    ["Regulă de aur", "Trebuie să fie rapidă. De aceea nu trimite UDP direct."],
+    ["Dacă ceva nu merge", "Date invalide: iese. Cadru care nu este probe: iese. Coadă plină: pierde pachetul și scrie în jurnal."],
+    ["Variabile statice", "<code>next_seq</code> și <code>dropped</code> își păstrează valoarea între apeluri."]
+  ]},
+  { name: "udp_sender_task", tag: "task", short: "Scoate pachetele din coadă și le trimite prin UDP.", rows: [
+    ["Când rulează", "Tot timpul, pe core 1, prioritate 10. Stă în așteptare când coada este goală."],
+    ["Pași", "1) Creează socket UDP. 2) Activează broadcast. 3) Calculează destinația. 4) Buclă infinită: primește din coadă, <code>sendto</code>, eliberează elementul."],
+    ["Primește", "Pachete din coadă (așteaptă fără limită de timp)."],
+    ["Produce", "Datagrame UDP către <code>CONFIG_CSI_UDP_HOST:CONFIG_CSI_UDP_PORT</code>."],
+    ["Dacă ceva nu merge", "Fără IP, <code>sendto</code> eșuează. Codul nu verifică rezultatul. Pachetul se pierde fără mesaj. Dacă socket-ul nu se creează, codul scrie o eroare, dar continuă."],
+    ["Detaliu important", "Dacă <code>xRingbufferReceive</code> dă NULL, codul sare peste pas. Fără această verificare, <code>sendto</code> ar citi de la adresa 0 și placa ar intra în panică."]
+  ]},
+  { name: "probe_sender_task", tag: "task", short: "Trimite un probe la fiecare tick de 10 ms.", rows: [
+    ["Când rulează", "Tot timpul, pe core 0, prioritate 5."],
+    ["Pași", "Trimite probe-ul cu <code>esp_wifi_80211_tx</code>. Numără erorile. Așteaptă 1 tick (10 ms)."],
+    ["Primește / produce", "Nu primește nimic. Produce cadre radio. Driverul pune numărul de secvență."],
+    ["Dacă ceva nu merge", "Contorizează eșecurile. La fiecare 500 de trimiteri (5 secunde) scrie în jurnal câte au eșuat, dacă au eșuat."],
+    ["Observație", "Task-ul nu verifică dacă placa este conectată la AP. Trimite oricum."]
+  ]},
+  { name: "on_wifi_event", tag: "eveniment", short: "Reconectează Wi-Fi și anunță când placa primește IP.", rows: [
+    ["Când rulează", "În bucla de evenimente, la <code>STA_START</code>, <code>STA_DISCONNECTED</code> și <code>GOT_IP</code>."],
+    ["La pornire și la deconectare", "Apelează <code>esp_wifi_connect</code>. Rezultatul este o reconectare automată, la infinit."],
+    ["La IP primit", "Scrie în jurnal IP-ul și destinația UDP."],
+    ["Dacă ceva nu merge", "Parolă greșită sau AP oprit: ciclul deconectare → conectare se repetă. Nu există pauză între încercări și nu există limită."]
+  ]},
+  { name: "app_main", tag: "start", short: "Pornește tot. Se execută o singură dată.", rows: [
+    ["Când rulează", "O dată, la pornirea plăcii."],
+    ["Rol", "Pornește Wi-Fi, activează CSI, creează coada și pornește cele două task-uri. Vezi harta de mai sus."],
+    ["Dacă ceva nu merge", "Fiecare pas este înfășurat în <code>ESP_ERROR_CHECK</code>. La eroare, placa se oprește și repornește. Dacă eroarea se repetă, placa intră într-un ciclu de repornire."],
+    ["După terminare", "<code>app_main</code> iese. Programul continuă să ruleze prin task-uri și prin driver."]
+  ]}
+];
+
+function renderCards(el, list) {
+  el.innerHTML = "";
+  list.forEach((f, i) => {
+    const d = document.createElement("details"); d.className = "fn"; if (i === 0) d.open = true;
+    const col = el.id === "cards-c" ? "c" : "p";
+    d.innerHTML = '<summary><span class="tag ' + col + '">' + f.tag + '</span><code>' + f.name + '</code></summary>' +
+      '<div class="body"><p><b>Pe scurt:</b> ' + f.short + '</p><div class="tbl-wrap"><table>' +
+      f.rows.map(r => '<tr><th>' + r[0] + '</th><td>' + r[1] + '</td></tr>').join("") + '</table></div></div>';
+    el.appendChild(d);
+  });
+}
+renderCards($("#cards-c"), C_FUNCS);
+
+/* ---------- 3. csi_ui.py ---------- */
+renderFlow($("#flow-pymain"), [
+  { side_color: "p", title: "Citește argumentele: <code>--port</code> (implicit 5005) și <code>--node</code> (opțional)", detail: "<p>Exemplu: <code>.venv/bin/python src/csi_ui.py --port 5005</code>. Cu <code>--node 3</code>, programul arată doar nodul 3.</p>" },
+  { side_color: "p", kind: "decide", title: "Portul este între 1 și 65535?", no: "afișează o eroare și iese", detail: "<p>Verificarea folosește <code>parser.error</code>.</p>" },
+  { side_color: "p", title: "Creează un socket UDP și activează <code>SO_REUSEADDR</code>", detail: "<p>Opțiunea ajută la repornirea rapidă a programului pe același port.</p>" },
+  { side_color: "p", kind: "decide", title: "<code>bind</code> pe portul ales reușește?", no: "afișează „Nu pot asculta pe UDP …” și iese", detail: "<p>Eșecul apare, de exemplu, când alt program folosește deja portul.</p>" },
+  { side_color: "p", title: "Pune socket-ul în mod non-blocant", detail: "<p>Un <code>recv</code> pe un socket gol nu așteaptă. Aruncă <code>BlockingIOError</code>. Astfel fereastra nu îngheață.</p>" },
+  { side_color: "p", title: "<code>Ctrl+C</code> închide programul (<code>SIGINT</code> implicit)", detail: "<p>Qt ignoră în mod normal Ctrl+C. Linia cu <code>signal.signal</code> restaurează comportamentul obișnuit.</p>" },
+  { side_color: "p", title: "Creează aplicația Qt și <code>CsiView</code>, apoi arată fereastra (1400×700)", detail: "<p><code>CsiView</code> pornește un cronometru de 50 ms.</p>" },
+  { side_color: "p", kind: "end", title: "<code>app.exec()</code>: bucla Qt rulează până închizi fereastra", detail: "<p>De aici, tot ce se întâmplă pornește din cronometru: <code>refresh</code> la fiecare 50 ms.</p>" }
+]);
+
+renderFlow($("#flow-refresh"), [
+  { side_color: "p", title: "Cronometrul de 50 ms apelează <code>refresh</code>", detail: "<p>Aceasta înseamnă 20 de redesenări pe secundă, indiferent câte pachete sosesc.</p>" },
+  { side_color: "p", title: "<code>receive()</code>: golește socket-ul într-o buclă", detail: "<p>Apelează <code>sock.recv(2048)</code> până apare <code>BlockingIOError</code>. Fiecare datagramă trece prin <code>parse_packet</code>. Pachetele valide rămân. Dacă ai pus <code>--node</code>, rămân doar pachetele acelui nod.</p>" },
+  { side_color: "p", title: "Actualizează contorul total și lista de sosiri", detail: "<p>Lista <code>arrivals</code> păstrează momentul fiecărui pachet. Pachetele mai vechi de 1 secundă se scot. Lungimea listei este numărul „pachete/s”.</p>" },
+  { side_color: "p", kind: "decide", title: "Pentru fiecare nod din lot: există deja o coloană?", no: "creează <code>NodeColumn</code> noua, la dreapta", detail: "<p>Coloanele apar în ordinea primului pachet primit. Nodul care vorbește primul stă în stânga.</p>" },
+  { side_color: "p", title: "<code>NodeColumn.show(pachete)</code> actualizează coloana nodului", detail: "<p>1) Adaugă rândurile noi în istoric și păstrează ultimele 300. 2) Desenează amplitudinile ultimului pachet. 3) Redesenează cascada. 4) Scrie în titlu RSSI și seq.</p>" },
+  { side_color: "p", kind: "end", title: "Actualizează textul de sus: „UDP 5005 | N pachete | M pachete/s”", detail: "<p>Dacă nu sosește nimic, textul rămâne „astept pachete...” până la primul pachet valid.</p>" }
+]);
+
+renderFlow($("#flow-parse"), [
+  { side_color: "p", kind: "decide", title: "Datagrama are exact 138 de octeți?", no: "întoarce <code>None</code>; pachetul se ignoră fără mesaj", detail: "<p><code>PACKET_BYTES</code> = 10 (antet) + 128 (CSI) = 138.</p>" },
+  { side_color: "p", title: "Despachetează antetul: magic, node_id, rssi, (timp), seq", detail: "<p>Folosește <code>struct.Struct(\"&lt;HBbIH\")</code>. Timpul este ignorat.</p>" },
+  { side_color: "p", kind: "decide", title: "<code>magic</code> este <code>0xA55A</code>?", no: "întoarce <code>None</code>; pachetul se ignoră fără mesaj", detail: "<p>Protejează de pachete străine care întâmplător au 138 de octeți.</p>" },
+  { side_color: "p", title: "Citește cei 128 de octeți ca numere cu semn, apoi ca zecimale", detail: "<p><code>np.frombuffer(..., dtype=np.int8)</code> citește octeții ca numere între −128 și 127.</p>" },
+  { side_color: "p", title: "Calculează amplitudinea: <code>hypot(iq[0::2], iq[1::2])</code>", detail: "<p>Octeții pe poziții pare sunt Q. Octeții pe poziții impare sunt I. Rezultatul are 64 de valori, câte una pentru fiecare subpurtătoare.</p>" },
+  { side_color: "p", kind: "end", title: "Întoarce <code>Packet(node_id, rssi_dbm, seq, amplitude)</code>", detail: "<p>Tipul <code>Packet</code> este un <code>NamedTuple</code>: un grup fix de patru valori cu nume.</p>" }
+]);
+
+const PY_FUNCS = [
+  { name: "parse_packet(data)", tag: "funcție", short: "Verifică o datagramă și o transformă în <code>Packet</code>.", rows: [
+    ["Primește", "Octeții unei datagrame."],
+    ["Întoarce", "Un <code>Packet</code>, sau <code>None</code> dacă formatul nu se potrivește."],
+    ["Verificări", "Lungime 138. Magic <code>0xA55A</code>."],
+    ["Este singurul loc", "…în care Python „înțelege” contractul cu partea C."],
+    ["Dacă ceva nu merge", "Nu aruncă excepție. Întoarce <code>None</code> și pachetul dispare în tăcere."]
+  ]},
+  { name: "Packet (NamedTuple)", tag: "date", short: "Un pachet validat: nod, RSSI, seq și 64 de amplitudini.", rows: [
+    ["Câmpuri", "<code>node_id</code>, <code>rssi_dbm</code>, <code>seq</code>, <code>amplitude</code> (tablou NumPy cu 64 de valori)."],
+    ["Ce lipsește", "Timpul și faza. Programul nu le păstrează."]
+  ]},
+  { name: "NodeColumn.__init__", tag: "clasă", short: "Construiește cele două grafice ale unui nod.", rows: [
+    ["Când rulează", "O singură dată pentru fiecare nod, la primul lui pachet."],
+    ["Creează", "Un istoric gol (300 × 64). Un grafic de spectru (rândul 1). Un grafic de cascadă cu culori viridis (rândul 2). Axele X sunt legate: zoom pe unul mută și pe celălalt."],
+    ["Poziția", "Coloana este numărul de coloane existente. Nodul nou apare în dreapta."]
+  ]},
+  { name: "NodeColumn.show(packets)", tag: "clasă", short: "Actualizează coloana cu pachetele noi.", rows: [
+    ["Primește", "Lista pachetelor noi ale nodului, din ultimele 50 ms."],
+    ["Istoric", "Adaugă amplitudinile noi și păstrează ultimele 300 de rânduri. Cel mai nou rând este sus."],
+    ["Spectru", "Desenează doar ultimul pachet."],
+    ["Cascadă", "Redesenează tot istoricul. Scala de culoare merge de la 0 la maximul din istoric (cel puțin 1)."],
+    ["Titlu", "„nod N | RSSI … dBm | seq …”."],
+    ["Observație", "Dacă nu sosesc pachete noi, <code>show</code> nu se apelează. Coloana rămâne neschimbată."]
+  ]},
+  { name: "CsiView.__init__", tag: "clasă", short: "Fereastra principală. Pornește cronometrul.", rows: [
+    ["Păstrează", "Socket-ul, portul, filtrul de nod, dicționarul de coloane, lista de sosiri, contorul total."],
+    ["Pornește", "<code>QTimer</code> la 50 ms, legat de <code>refresh</code>."],
+    ["Afișează", "Textul „astept pachete...” sus, pe trei coloane."]
+  ]},
+  { name: "CsiView.receive", tag: "clasă", short: "Citește toate datagramele care așteaptă în socket.", rows: [
+    ["Cum", "Buclă cu <code>recv(2048)</code>. Iese la <code>BlockingIOError</code>, adică atunci când socket-ul este gol."],
+    ["Întoarce", "Lista pachetelor valide, filtrate după <code>--node</code>."],
+    ["Dacă ceva nu merge", "Pachetele respinse de <code>parse_packet</code> nu apar nicăieri."]
+  ]},
+  { name: "CsiView.refresh", tag: "clasă", short: "Corpul principal: citește, numără, desenează.", rows: [
+    ["Când rulează", "La fiecare 50 ms."],
+    ["Pași", "Citește pachetele. Actualizează numărătorile. Creează coloane noi. Apelează <code>show</code> pentru fiecare nod. Actualizează textul de stare."],
+    ["Pachete/s", "Numără pachetele din ultima secundă."]
+  ]},
+  { name: "main()", tag: "start", short: "Pornește programul.", rows: [
+    ["Pași", "Argumente → verificare port → socket → <code>bind</code> → fereastră → buclă Qt. Vezi harta de mai sus."],
+    ["Dacă ceva nu merge", "Port invalid sau port ocupat: mesaj și ieșire."]
+  ]}
+];
+renderCards($("#cards-py"), PY_FUNCS);
+
+/* ---------- 4. drumul datelor ---------- */
+const STAGES = [
+  ["c", "Nod A: probe_sender_task"], ["n", "Aer"], ["c", "Nod B: radio + driver"], ["c", "on_csi"],
+  ["c", "Coada"], ["c", "udp_sender_task"], ["n", "AP / rețea"], ["n", "Nucleul PC"], ["p", "csi_ui.py"]
+];
+const STEPS = [
+  { s: 0, t: "Nodul A trimite un probe", d: "<code>probe_sender_task</code> apelează <code>esp_wifi_80211_tx</code> la fiecare 10 ms. Cadrul este un probe request broadcast, la 6 Mbps OFDM." },
+  { s: 1, t: "Semnalul trece prin cameră", d: "Undele radio se reflectă pe pereți, mobilă și oameni. Receptorul primește suma tuturor reflexiilor. Aceasta este informația pe care o măsoară CSI." },
+  { s: 2, t: "Nodul B primește cadrul", d: "Radioul lui B este în mod promiscuu. Hardware-ul estimează canalul din câmpul LLTF al cadrului. Driverul pregătește un <code>wifi_csi_info_t</code>." },
+  { s: 3, t: "Driverul apelează on_csi", d: "Apelul are loc în task-ul Wi-Fi. <code>on_csi</code> verifică datele, verifică tipul cadrului (<code>0x40</code>), construiește <code>csi_packet_t</code> și anulează primii 4 octeți dacă <code>first_word_invalid</code> este adevărat." },
+  { s: 4, t: "Pachetul intră în coadă", d: "<code>xRingbufferSend</code> cu timeout 0. Dacă nu este loc, pachetul se pierde și jurnalul scrie un avertisment. Altfel <code>on_csi</code> se termină." },
+  { s: 5, t: "udp_sender_task scoate pachetul", d: "Task-ul stătea în <code>xRingbufferReceive</code>. Primește un pointer la pachet, apelează <code>sendto</code> și apoi eliberează elementul din coadă." },
+  { s: 6, t: "Pachetul pleacă prin Wi-Fi", d: "Placa trimite datagrama la punctul de acces. Punctul de acces o duce la PC. Cu IP unicast, ruta este directă. Cu broadcast, AP-ul retransmite la viteză mică și pachete se pot pierde." },
+  { s: 7, t: "Nucleul PC-ului primește datagrama", d: "Placa de rețea a PC-ului primește cadrul. Nucleul Linux vede portul destinație 5005 și pune datagrama în coada socket-ului deschis de <code>csi_ui.py</code>. Firewall-ul poate bloca acest pas." },
+  { s: 8, t: "Python citește și validează", d: "La următorul semnal al cronometrului (cel mult 50 ms), <code>refresh</code> apelează <code>receive</code>. <code>receive</code> golește socket-ul. <code>parse_packet</code> verifică lungimea 138 și magic <code>0xA55A</code>." },
+  { s: 8, t: "Python calculează amplitudinea", d: "Din cei 128 de octeți, Python face 64 de perechi (Q, I). Calculează <code>hypot(Q, I)</code> pentru fiecare pereche. Rezultatul: 64 de amplitudini." },
+  { s: 8, t: "Interfața desenează", d: "<code>NodeColumn.show</code> actualizează spectrul (ultimul pachet) și cascada (ultimele 300). Titlul arată RSSI și seq. Ciclul se repetă." }
+];
+let cur = 0, timer = null;
+const stagesEl = $("#stages");
+STAGES.forEach(([c, n]) => { const d = document.createElement("div"); d.className = "stage " + c; d.textContent = n; stagesEl.appendChild(d); });
+function drawStep() {
+  const s = STEPS[cur];
+  stagesEl.querySelectorAll(".stage").forEach((e, i) => e.classList.toggle("on", i === s.s));
+  $("#stepbox").innerHTML = '<h3 style="margin-top:0">Pasul ' + (cur + 1) + ': ' + s.t + '</h3><p>' + s.d + '</p>';
+  $("#stepcount").textContent = (cur + 1) + " din " + STEPS.length;
+  $("#prev").disabled = cur === 0; $("#next").disabled = cur === STEPS.length - 1;
+}
+function stop() { if (timer) { clearInterval(timer); timer = null; $("#play").textContent = "▶ Pornește automat"; } }
+$("#prev").onclick = () => { stop(); if (cur > 0) cur--; drawStep(); };
+$("#next").onclick = () => { stop(); if (cur < STEPS.length - 1) cur++; drawStep(); };
+$("#play").onclick = () => {
+  if (timer) { stop(); return; }
+  if (cur === STEPS.length - 1) cur = 0;
+  drawStep();
+  $("#play").textContent = "⏸ Oprește";
+  timer = setInterval(() => { if (cur < STEPS.length - 1) { cur++; drawStep(); } else stop(); }, 2800);
+};
+drawStep();
+
+/* octeții pachetului */
+const FIELDS = [
+  { n: "magic", from: 0, to: 1, c: "f0", info: "<b>magic</b> (octeții 0–1): <code>0xA55A</code>. Python respinge pachetul dacă nu vede această valoare." },
+  { n: "node_id", from: 2, to: 2, c: "f1", info: "<b>node_id</b> (octetul 2): numărul plăcii care a măsurat. Din <code>#define NODE_ID</code>." },
+  { n: "rssi", from: 3, to: 3, c: "f2", info: "<b>rssi_dbm</b> (octetul 3): puterea semnalului primit, în dBm, număr cu semn." },
+  { n: "timp", from: 4, to: 7, c: "f3", info: "<b>timestamp_us</b> (octeții 4–7): timpul plăcii în microsecunde. Se resetează la repornire și revine la 0 după aproximativ 71,6 minute. Python nu îl folosește." },
+  { n: "seq", from: 8, to: 9, c: "f4", info: "<b>seq</b> (octeții 8–9): numărul pachetului. Crește cu 1 la fiecare pachet acceptat de <code>on_csi</code>. Revine la 0 după 65 535." },
+  { n: "csi", from: 10, to: 137, c: "f5", info: "<b>csi_iq</b> (octeții 10–137): 128 de octeți = 64 de perechi (Q, I). Primii 4 octeți (octeții 10–13) sunt 0 dacă <code>first_word_invalid</code> era adevărat." }
+];
+const bytesEl = $("#bytes");
+for (let i = 0; i < 138; i++) {
+  const f = FIELDS.find(f => i >= f.from && i <= f.to);
+  const b = document.createElement("div"); b.className = "b " + f.c; b.textContent = i;
+  b.title = f.n + " (octetul " + i + ")";
+  b.onclick = () => {
+    bytesEl.querySelectorAll(".b").forEach(x => x.classList.remove("sel"));
+    for (let j = f.from; j <= f.to; j++) bytesEl.children[j].classList.add("sel");
+    let extra = "";
+    if (f.n === "csi") {
+      const k = i - 10, sub = Math.floor(k / 2), part = k % 2 === 0 ? "Q (imaginar)" : "I (real)";
+      const freq = sub < 32 ? sub : sub - 64;
+      extra = "<br>Octetul " + i + " este " + part + " pentru subpurtătoarea cu indexul " + sub + " în buffer (k = " + freq + ").";
+    }
+    $("#bytesinfo").innerHTML = f.info + extra;
+  };
+  bytesEl.appendChild(b);
+}
+
+/* ---------- 5. situații ---------- */
+const KINDS = { normal: ["Cale normală", "ok"], start: ["Stări de pornire", "warn"], err: ["Căi de eroare", "bad"], odd: ["Date neobișnuite", "n"] };
+const SITS = [
+  { k: "normal", t: "Două noduri pornite, conectate, UDP unicast",
+    c: "Fiecare nod trimite probe la 10 ms. Fiecare nod măsoară CSI din probe-urile celuilalt. <code>on_csi</code> pune pachetele în coadă. <code>udp_sender_task</code> le trimite.",
+    p: "Python primește pachete de la ambele noduri. Creează două coloane.",
+    v: "Două coloane. Titlul fiecăreia arată RSSI și seq care cresc. Textul de sus arată aproximativ 100–200 pachete/s." },
+  { k: "normal", t: "Pornești interfața înainte de noduri",
+    c: "Nodurile nu au pornit încă sau nu au IP.",
+    p: "Socket-ul este deschis. <code>receive</code> nu găsește nimic. Nu apare nicio coloană.",
+    v: "Textul „astept pachete...”. Prima coloană apare la primul pachet valid." },
+  { k: "normal", t: "Un nod nou apare după ce interfața rulează",
+    c: "Nodul pornește, primește IP și începe să trimită.",
+    p: "<code>refresh</code> vede un <code>node_id</code> nou. Creează <code>NodeColumn</code> cu indexul egal cu numărul de coloane existente.",
+    v: "O coloană nouă apare în dreapta." },
+  { k: "start", t: "Nodul tocmai a pornit: nu are încă IP",
+    c: "Probe-urile se trimit, dar pot eșua. <code>on_csi</code> poate primi cadre și pune pachete în coadă. <code>sendto</code> eșuează fără IP. Pachetul se pierde. Coada se golește la fel de repede, deci nu se umple.",
+    p: "Nu primește nimic de la acest nod.",
+    v: "Nimic de la nod. Jurnalul serial arată mai târziu „IP … UDP către …” când Wi-Fi primește IP." },
+  { k: "start", t: "Nodul repornește (alimentare, reset, eroare)",
+    c: "<code>next_seq</code> începe de la 0. <code>timestamp_us</code> începe de la 0. Jurnalul arată „CSI #0”.",
+    p: "Același <code>node_id</code>, deci aceeași coloană. Python nu observă repornirea.",
+    v: "În titlu, seq sare înapoi la un număr mic. Istoricul din cascadă rămâne." },
+  { k: "start", t: "Wi-Fi se pierde (AP oprit, semnal slab)",
+    c: "Evenimentul <code>STA_DISCONNECTED</code> apelează <code>on_wifi_event</code>. Aceasta apelează <code>esp_wifi_connect</code>. Până la reconectare, <code>sendto</code> eșuează și pachetele se pierd.",
+    p: "Pachetele nu mai sosesc. Coloana nu se schimbă.",
+    v: "Imaginea înghețată. După reconectare, datele curg din nou. Seq arată o săritură." },
+  { k: "err", t: "Parolă Wi-Fi greșită sau SSID inexistent",
+    c: "Ciclul conectare → deconectare se repetă fără pauză și fără limită. Nu există IP. Probe-urile se pot trimite, dar UDP nu pleacă.",
+    p: "Nu primește nimic.",
+    v: "„astept pachete...” fără sfârșit. Cauza se vede doar în jurnalul serial al plăcii." },
+  { k: "err", t: "Coada este plină",
+    c: "<code>xRingbufferSend</code> cu timeout 0 eșuează. <code>on_csi</code> pierde pachetul. Jurnalul scrie „coada plina: N pachete CSI pierdute” la prima pierdere și apoi la fiecare a 100-a.",
+    p: "Python nu știe de pierdere. Seq are o săritură, dar Python nu verifică seq.",
+    v: "Rata (pachete/s) scade sub cea așteptată." },
+  { k: "err", t: "Trimiterea probe-urilor eșuează",
+    c: "<code>probe_sender_task</code> numără eșecurile. La fiecare 5 secunde scrie un avertisment cu numărul și cu motivul ultimei erori.",
+    p: "Alte noduri nu mai primesc probe de la acest nod. Ele măsoară mai puțin sau deloc.",
+    v: "Rata scade pe celelalte noduri. Avertismentul se vede doar în jurnalul serial." },
+  { k: "err", t: "Socket-ul UDP nu se creează",
+    c: "Codul scrie „UDP socket failed”, dar nu iese din funcție. <code>setsockopt</code> și <code>sendto</code> eșuează apoi la fiecare pachet.",
+    p: "Nu primește nimic.",
+    v: "Nimic pe ecran. Eroarea se vede în jurnalul serial." },
+  { k: "err", t: "O funcție de inițializare returnează eroare",
+    c: "<code>ESP_ERROR_CHECK</code> oprește programul. Placa repornește. Dacă eroarea se repetă, repornirea se repetă.",
+    p: "Nu primește nimic.",
+    v: "Nimic pe ecran. Jurnalul serial arată mesajul de eroare și repornirea." },
+  { k: "err", t: "Firewall-ul PC-ului blochează UDP",
+    c: "Nodul nu știe. UDP nu confirmă livrarea. Nodul crede că totul este în regulă.",
+    p: "Socket-ul este deschis, dar nucleul nu livrează nimic.",
+    v: "„astept pachete...” deși jurnalele plăcii arată că placa trimite. Verifică regula de firewall pentru portul 5005." },
+  { k: "err", t: "Portul 5005 este ocupat",
+    c: "Nicio diferență pe placă.",
+    p: "<code>bind</code> aruncă <code>OSError</code>. Programul afișează „Nu pot asculta pe UDP …” și iese. Atenție: cu <code>SO_REUSEADDR</code>, alt program poate fi deja pe port. Atunci pachetele unicast ajung la un singur program.",
+    v: "Mesaj în terminal și ieșire, sau o a doua fereastră care nu primește nimic." },
+  { k: "err", t: "Argument greșit: <code>--port 0</code> sau <code>--port 70000</code>",
+    c: "Nicio diferență.", p: "<code>parser.error</code> afișează „portul trebuie sa fie intre 1 si 65535” și iese.", v: "Mesaj în terminal." },
+  { k: "err", t: "Interfața este prea lentă și socket-ul se umple",
+    c: "Nu știe.",
+    p: "Nucleul aruncă pachete când coada socket-ului este plină. Python nu primește nicio notificare. <code>seq</code> ar arăta golul, dar codul nu îl verifică.",
+    v: "Rata scade fără mesaj. În practică, 20 de citiri pe secundă sunt suficiente pentru 200 de pachete/s." },
+  { k: "odd", t: "Datagramă cu lungime sau magic greșit",
+    c: "—", p: "<code>parse_packet</code> întoarce <code>None</code>. <code>receive</code> o ignoră.", v: "Nimic. Pachetul dispare fără urmă." },
+  { k: "odd", t: "Octeții 0–3 ai CSI sunt invalizi",
+    c: "<code>first_word_invalid</code> este adevărat. Codul pune primii 4 octeți pe 0.",
+    p: "Calculează amplitudinea normal. Rezultă 0 pentru indexurile 0 și 1.",
+    v: "Primele două puncte ale spectrului sunt la 0. Aceasta nu este o eroare." },
+  { k: "odd", t: "Driverul dă mai puțin de 128 de octeți",
+    c: "<code>memcpy</code> copiază doar lungimea reală. Restul pachetului rămâne zero.",
+    p: "Primește tot 138 de octeți. Nu vede diferența.",
+    v: "Ultimele subpurtătoare apar la 0." },
+  { k: "odd", t: "Subpurtătoare cu amplitudine foarte mică",
+    c: "Nu are legătură cu codul.",
+    p: "Afișează valorile așa cum sunt.",
+    v: "Din 64 de subpurtătoare, doar 52 sunt active în LLTF. Restul apar aproape de 0. Aceasta este normal." },
+  { k: "odd", t: "Două plăci au același NODE_ID",
+    c: "Ambele pun același număr în antet.",
+    p: "Python pune pachetele ambelor plăci în aceeași coloană.",
+    v: "Spectrul sare între două forme. Seq nu crește cu 1 între pachete. Corectează <code>NODE_ID</code> pe una dintre plăci." },
+  { k: "odd", t: "Un telefon sau alt aparat trimite un probe request",
+    c: "<code>on_csi</code> verifică doar tipul cadrului (<code>0x40</code>). Ea nu verifică cine l-a trimis. Dacă cadrul are LLTF, ajunge în coadă.",
+    p: "Primește pachetul ca pe oricare altul.",
+    v: "Posibile valori neașteptate. Nu există nicio verificare de sursă în cod." },
+  { k: "odd", t: "Un nod se oprește (alimentare întreruptă)",
+    c: "Nu mai trimite probe și nu mai măsoară.",
+    p: "Coloana lui rămâne în dicționar. <code>show</code> nu se mai apelează pentru ea.",
+    v: "Coloana rămâne înghețată cu ultimul spectru. Nu există semnal „nod pierdut”. Celelalte noduri măsoară mai puține pachete." },
+  { k: "odd", t: "Broadcast în loc de unicast",
+    c: "Cu <code>CSI_UDP_HOST = 255.255.255.255</code>, nodul trimite la toți.",
+    p: "Primește pachetele, dar mai puține.",
+    v: "Testul din 12 noiembrie 2026 (README): PC-ul a pierdut până la 24% din pachete cu broadcast și 0% cu unicast. Pentru latență mică, folosește IP-ul PC-ului." },
+  { k: "odd", t: "Contoarele revin la zero",
+    c: "<code>seq</code> are 16 biți: revine la 0 după 65 535 de pachete. <code>timestamp_us</code> are 32 de biți: revine la 0 după aproximativ 71,6 minute.",
+    p: "Afișează seq așa cum este. Ignoră timpul.",
+    v: "Seq sare la 0 fără motiv aparent. Aceasta este normal." }
+];
+let filter = "all";
+function renderFilters() {
+  const f = $("#filters"); f.innerHTML = "";
+  [["all", "Toate (" + SITS.length + ")"]].concat(Object.entries(KINDS).map(([k, v]) => [k, v[0] + " (" + SITS.filter(s => s.k === k).length + ")"])).forEach(([k, label]) => {
+    const b = document.createElement("button"); b.textContent = label; b.className = k === filter ? "on" : "";
+    b.onclick = () => { filter = k; renderFilters(); renderSits(); };
+    f.appendChild(b);
+  });
+}
+function renderSits() {
+  const el = $("#sits"); el.innerHTML = "";
+  SITS.filter(s => filter === "all" || s.k === filter).forEach(s => {
+    const d = document.createElement("details"); d.className = "fn";
+    d.innerHTML = '<summary><span class="tag ' + KINDS[s.k][1] + '">' + KINDS[s.k][0] + '</span>' + s.t + '</summary><div class="body"><div class="tbl-wrap"><table>' +
+      '<tr><th><span class="tag c">C</span> Pe placă</th><td>' + s.c + '</td></tr>' +
+      '<tr><th><span class="tag p">Python</span> Pe PC</th><td>' + s.p + '</td></tr>' +
+      '<tr><th>Ce vezi tu</th><td>' + s.v + '</td></tr></table></div></div>';
+    el.appendChild(d);
+  });
+}
+renderFilters(); renderSits();
+
+/* ---------- 6. glosar ---------- */
+const GL = [
+  ["CSI", "Channel State Information. Măsurătoare radio: cât de mult schimbă canalul semnalul, pentru fiecare subpurtătoare."],
+  ["Subpurtătoare", "O frecvență îngustă din canalul Wi-Fi. Canalul are 64 de subpurtătoare în LLTF. Doar 52 poartă date utile."],
+  ["LLTF", "Legacy Long Training Field. Parte din începutul cadrului OFDM. Receptorul o folosește ca să estimeze canalul."],
+  ["OFDM", "Modul de transmisie care folosește multe subpurtătoare. 6 Mbps este cea mai mică viteză OFDM."],
+  ["Probe request", "Cadru Wi-Fi mic, de tip management. Octetul <code>0x40</code> la început îl identifică."],
+  ["Mod promiscuu", "Placa primește toate cadrele de pe canal, nu doar pe cele adresate ei."],
+  ["I și Q", "Partea reală (I) și partea imaginară (Q) a unui număr complex. Amplitudinea este <code>hypot(I, Q)</code>."],
+  ["RSSI", "Puterea semnalului primit, în dBm. Numere negative. Valoarea mai apropiată de 0 înseamnă semnal mai puternic."],
+  ["UDP", "Protocol de rețea fără confirmare. Trimite datagrame. Nu garantează livrarea."],
+  ["Unicast / broadcast", "Unicast: către un singur IP. Broadcast: către toți (255.255.255.255)."],
+  ["Ring buffer (coadă)", "Zonă de memorie circulară. Un task scrie, alt task citește. Aici are 16 KB."],
+  ["Task (FreeRTOS)", "Un fir de execuție al plăcii. Fiecare task are prioritate și core."],
+  ["Callback", "O funcție pe care o dai driverului. Driverul o apelează când apare un eveniment. <code>on_csi</code> este callback."],
+  ["Socket non-blocant", "Un <code>recv</code> pe socket gol nu așteaptă. Aruncă o eroare imediat."],
+  ["Little-endian", "Octetul cel mai puțin semnificativ vine primul. ESP32 și PC-ul tău folosesc această ordine."],
+  ["Magic", "Valoare fixă la începutul pachetului (<code>0xA55A</code>). Ajută la recunoașterea formatului."],
+  ["seq", "Număr de ordine al pachetului. Crește cu 1. Arată pierderi, dacă cineva îl verifică."]
+];
+$("#glossary").innerHTML = GL.map(([t, d]) => "<dt>" + t + "</dt><dd>" + d + "</dd>").join("");
+
+/* ---------- 7. quiz ---------- */
+const QUIZ = [
+  { q: "Cum primește csi_ui.py datele de la main.c?",
+    o: ["Citește fișierul main.c și extrage valorile.", "Prin cablu serial, direct de la placă.", "Prin rețea, în datagrame UDP de 138 de octeți.", "Prin memorie partajată între ESP32 și PC."], a: 2,
+    e: "Fișierele nu se citesc între ele. Placa trimite pachete UDP prin Wi-Fi. Python le citește din socket-ul portului 5005." },
+  { q: "De ce ai nevoie de cel puțin două plăci?",
+    o: ["Un nod nu poate primi propriul semnal. Măsoară CSI din probe-urile altui nod.", "Prima placă este doar router.", "Python cere minimum două coloane.", "UDP merge doar între două plăci."], a: 0,
+    e: "Un radio nu primește propria transmisie. CSI vine din probe-urile trimise de alt nod." },
+  { q: "De ce on_csi nu trimite pachetul direct prin UDP?",
+    o: ["UDP nu poate fi folosit într-un callback.", "on_csi rulează în task-ul Wi-Fi și trebuie să fie rapidă. Trimiterea poate dura.", "Pachetul are 138 de octeți și nu încape.", "Python cere pachete doar la 50 ms."], a: 1,
+    e: "Funcția pune pachetul în coadă și iese. <code>udp_sender_task</code> face trimiterea." },
+  { q: "Ce face on_csi dacă coada este plină?",
+    o: ["Așteaptă până se eliberează loc.", "Oprește placa.", "Șterge cel mai vechi pachet din coadă.", "Pierde pachetul nou și scrie un avertisment la prima pierdere, apoi la fiecare a 100-a."], a: 3,
+    e: "Timeout-ul este 0, deci nu așteaptă. Funcția nu are voie să blocheze task-ul Wi-Fi." },
+  { q: "De ce on_csi acceptă doar cadrele cu primul octet 0x40?",
+    o: ["Ca să evite o buclă: CSI din UDP-ul altui nod ar genera mai mult UDP.", "Pentru că doar probe request are RSSI.", "Pentru că Python respinge alte tipuri.", "Pentru că 0x40 este numărul plăcii."], a: 0,
+    e: "Placa este în mod promiscuu și vede toate cadrele, inclusiv UDP-ul celorlalte noduri. Filtrul oprește bucla UDP → CSI → UDP." },
+  { q: "De ce trimite nodul probe-urile la 6 Mbps?",
+    o: ["Ca să consume mai puțină energie.", "Ca PC-ul să le primească mai repede.", "Pentru că 1 Mbps este interzis.", "Cadrul OFDM la 6 Mbps conține LLTF. La 1 Mbps nu există LLTF și nu se poate măsura CSI."], a: 3,
+    e: "LLTF este materia primă a măsurătorii." },
+  { q: "Din ce se compun cei 138 de octeți ai pachetului?",
+    o: ["10 octeți de antet și 128 de octeți CSI (64 de perechi Q, I).", "64 de octeți de antet și 74 de CSI.", "128 de octeți de antet și 10 de CSI.", "138 de octeți CSI, fără antet."], a: 0,
+    e: "Antetul: magic 2, node_id 1, rssi 1, timp 4, seq 2 = 10. Apoi 64 × 2 = 128." },
+  { q: "Ce face parse_packet cu o datagramă de 100 de octeți?",
+    o: ["Aruncă o excepție care oprește programul.", "Întoarce None. Pachetul se ignoră fără mesaj.", "Completează cu zerouri până la 138.", "Scrie o eroare în fereastră."], a: 1,
+    e: "Lungimea nu este 138, deci funcția întoarce <code>None</code>. <code>receive</code> ignoră pachetul." },
+  { q: "Cât de des se redesenează interfața?",
+    o: ["La fiecare pachet primit.", "O dată pe secundă.", "La fiecare 50 ms, indiferent de numărul de pachete.", "Doar când apeși un buton."], a: 2,
+    e: "<code>QTimer</code> are intervalul <code>REFRESH_MS = 50</code>. <code>refresh</code> golește tot socket-ul la fiecare apel." },
+  { q: "Cum decide csi_ui.py că trebuie o coloană nouă?",
+    o: ["Citește lista nodurilor din fișierul de configurare.", "Cere utilizatorului să adauge nodul.", "Vede un node_id care nu există încă în dicționarul de coloane.", "Fiecare pachet creează o coloană."], a: 2,
+    e: "Coloanele apar în ordinea în care sosesc primele pachete ale nodurilor." },
+  { q: "Ce arată cascada (graficul de jos) al unui nod?",
+    o: ["Spectrul ultimului pachet.", "Ultimele 300 de pachete, cel mai nou sus.", "Valorile RSSI din ultima secundă.", "Faza fiecărei subpurtătoare."], a: 1,
+    e: "<code>HISTORY_ROWS = 300</code>. Spectrul ultimului pachet este graficul de sus." },
+  { q: "Ce se întâmplă când se pierde conexiunea Wi-Fi?",
+    o: ["Placa repornește.", "Evenimentul de deconectare apelează esp_wifi_connect. Până la reconectare, sendto eșuează și pachetele se pierd.", "Python redeschide socket-ul.", "Pachetele se salvează și se trimit mai târziu."], a: 1,
+    e: "<code>on_wifi_event</code> reconectează fără limită. Fără IP, <code>sendto</code> eșuează și pachetul dispare." },
+  { q: "Ce valoare calculează Python din perechea (Q, I)?",
+    o: ["Faza: arctan(Q / I).", "Suma Q + I.", "Amplitudinea: hypot(Q, I).", "Media dintre Q și I."], a: 2,
+    e: "Python folosește <code>np.hypot</code>. Faza nu se calculează. Ordinea Q/I nu schimbă amplitudinea." },
+  { q: "Un nod își pierde alimentarea. Ce vezi în interfață?",
+    o: ["Coloana dispare.", "Apare un mesaj „nod pierdut”.", "Coloana rămâne înghețată cu ultimul spectru, fără avertisment.", "Programul se oprește."], a: 2,
+    e: "<code>show</code> se apelează doar când sosesc pachete. Nu există detectare de nod dispărut." },
+  { q: "Ce arată testul din 12 noiembrie 2026 (README) despre broadcast și unicast?",
+    o: ["Broadcast: 0% pierderi. Unicast: 24% pierderi.", "Ambele pierd la fel.", "Broadcast: până la 24% pierderi. Unicast: 0% pierderi.", "Unicast nu funcționează cu AP."], a: 2,
+    e: "Cu broadcast, AP-ul retransmite la viteză mică. Pentru latență mică, pune IP-ul PC-ului în <code>CSI_UDP_HOST</code>." }
+];
+let answered = 0, correct = 0;
+function renderQuiz() {
+  answered = 0; correct = 0;
+  const el = $("#quiz"); el.innerHTML = "";
+  QUIZ.forEach((q, qi) => {
+    const box = document.createElement("div"); box.className = "q";
+    box.innerHTML = "<h4>" + (qi + 1) + ". " + q.q + "</h4>";
+    const opts = [];
+    q.o.forEach((t, oi) => {
+      const b = document.createElement("button"); b.className = "opt"; b.innerHTML = t;
+      b.onclick = () => {
+        opts.forEach(x => x.disabled = true);
+        opts[q.a].classList.add("right");
+        if (oi !== q.a) b.classList.add("wrong"); else correct++;
+        answered++;
+        ex.classList.add("on");
+        updScore();
+      };
+      opts.push(b); box.appendChild(b);
+    });
+    const ex = document.createElement("div"); ex.className = "expl"; ex.innerHTML = "<b>Explicație:</b> " + q.e;
+    box.appendChild(ex); el.appendChild(box);
+  });
+  updScore();
+}
+function updScore() {
+  let msg = "Scor: " + correct + " / " + QUIZ.length + " (" + answered + " întrebări răspunse)";
+  if (answered === QUIZ.length) {
+    msg += correct >= 13 ? " — Foarte bine." : correct >= 9 ? " — Bine. Recitește secțiunile cu greșeli." : " — Recitește documentul și încearcă din nou.";
+  }
+  $("#scoretxt").textContent = msg;
+}
+$("#reset").onclick = () => { renderQuiz(); window.scrollTo({ top: 0 }); };
+renderQuiz();
+
+/* ---------- pornire ---------- */
+const start = (location.hash || "").slice(1);
+showTab(TABS.some(t => t[0] === start) ? start : "s-mare");
+</script>
+</body>
+</html>

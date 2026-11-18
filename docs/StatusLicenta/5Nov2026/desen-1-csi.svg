@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 566" font-family="Arial, Helvetica, sans-serif">
+<defs>
+  <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+    <path d="M0 0 L10 5 L0 10 z" fill="#1a237e"/>
+  </marker>
+  <pattern id="hatch" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+    <line x1="0" y1="0" x2="0" y2="8" stroke="#1a237e" stroke-width="2"/>
+  </pattern>
+</defs>
+<rect width="760" height="566" fill="#ffffff"/>
+<text x="380" y="34" font-size="22" text-anchor="middle" font-weight="bold" fill="#1a237e" >1. CSI – Channel State Info</text>
+<rect x="55" y="130" width="70" height="56" rx="8" fill="#e8eaf6" stroke="#1a237e" stroke-width="2.5"/>
+<text x="90" y="167" font-size="26" text-anchor="middle" font-weight="bold" fill="#1a237e" >Tx</text>
+<path d="M82.3 102.8 A12 12 0 0 1 97.7 102.8" fill="none" stroke="#1a237e" stroke-width="2.5" stroke-linecap="round"/>
+<path d="M75.9 95.1 A22 22 0 0 1 104.1 95.1" fill="none" stroke="#1a237e" stroke-width="2.5" stroke-linecap="round"/>
+<path d="M69.4 87.5 A32 32 0 0 1 110.6 87.5" fill="none" stroke="#1a237e" stroke-width="2.5" stroke-linecap="round"/>
+<circle cx="90" cy="112" r="3" fill="#1a237e"/>
+<rect x="635" y="130" width="70" height="56" rx="8" fill="#e8eaf6" stroke="#1a237e" stroke-width="2.5"/>
+<text x="670" y="167" font-size="26" text-anchor="middle" font-weight="bold" fill="#1a237e" >Rx</text>
+<path d="M662.3 102.8 A12 12 0 0 1 677.7 102.8" fill="none" stroke="#1a237e" stroke-width="2.5" stroke-linecap="round"/>
+<path d="M655.9 95.1 A22 22 0 0 1 684.1 95.1" fill="none" stroke="#1a237e" stroke-width="2.5" stroke-linecap="round"/>
+<path d="M649.4 87.5 A32 32 0 0 1 690.6 87.5" fill="none" stroke="#1a237e" stroke-width="2.5" stroke-linecap="round"/>
+<circle cx="670" cy="112" r="3" fill="#1a237e"/>
+<line x1="130" y1="158" x2="628" y2="158" stroke="#1a237e" stroke-width="3" marker-end="url(#ar)"/>
+<text x="380" y="148" font-size="18" text-anchor="middle" font-weight="normal" fill="#1a237e" >Cale directă (h₁)</text>
+<circle cx="380" cy="322" r="15" fill="none" stroke="#1a237e" stroke-width="3"/>
+<path d="M380 337 L380 382 M354 355 L406 355 M380 382 L360 418 M380 382 L400 418" fill="none" stroke="#1a237e" stroke-width="3" stroke-linecap="round"/>
+<line x1="110" y1="192" x2="352" y2="326" stroke="#1a237e" stroke-width="3" marker-end="url(#ar)"/>
+<text x="190" y="295" font-size="17" text-anchor="middle" font-weight="normal" fill="#1a237e" transform="rotate(29 190 295)">Cale spre persoană (h₂)</text>
+<line x1="408" y1="326" x2="650" y2="192" stroke="#1a237e" stroke-width="3" stroke-dasharray="8 6" marker-end="url(#ar)"/>
+<text x="585" y="295" font-size="18" text-anchor="middle" font-weight="normal" fill="#1a237e" transform="rotate(-29 585 295)">reflectată</text>
+<rect x="30" y="440" width="700" height="110" rx="6" fill="#f3f4fb" stroke="#c5cae9"/>
+<text x="42" y="464" font-size="15" text-anchor="start" font-weight="normal" fill="#333" >Semnalul ajunge la Rx pe mai multe căi: directă + reflectată de obiecte/persoane.</text>
+<text x="42" y="486" font-size="15" text-anchor="start" font-weight="normal" fill="#333" >Pe fiecare sub-frecvență, Rx măsoară suma căilor: H = h₁ + h₂ (același canal Wi-Fi).</text>
+<text x="42" y="508" font-size="15" text-anchor="start" font-weight="normal" fill="#333" >CSI = matrice (sub-frecvențe × perechi de antene); cu o antenă: vector (52 în LLTF).</text>
+<text x="42" y="536" font-size="13" text-anchor="start" font-style="italic" font-weight="normal" fill="#555">Surse: Wang et al., 2015 (CARM); Halperin et al., 2011; ESP-IDF Wi-Fi Driver.</text>
+</svg>

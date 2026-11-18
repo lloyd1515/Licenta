@@ -1,0 +1,368 @@
+<!doctype html>
+<html lang="ro">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Notițe și surse – 5 Nov 2026</title>
+<style>
+:root {
+  --bg: #f6f6f3; --panel: #ffffff; --ink: #1d1d1f; --muted: #5d5d66; --line: #dcdce2;
+  --mark: #fff2a8; --mark-strong: #ffd84d; --accent: #1a237e; --accent-soft: #e8eaf6;
+  --warn: #8a4b00; --warn-bg: #fff4e0; --flash: #ffe9a0;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #15161a; --panel: #1e1f25; --ink: #ececf1; --muted: #a3a3b0; --line: #34353d;
+    --mark: #5a4b12; --mark-strong: #8a7215; --accent: #9fa8da; --accent-soft: #262a45;
+    --warn: #ffcc80; --warn-bg: #3a2c12; --flash: #4a4220;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #15161a; --panel: #1e1f25; --ink: #ececf1; --muted: #a3a3b0; --line: #34353d;
+  --mark: #5a4b12; --mark-strong: #8a7215; --accent: #9fa8da; --accent-soft: #262a45;
+  --warn: #ffcc80; --warn-bg: #3a2c12; --flash: #4a4220;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body { background: var(--bg); color: var(--ink); font: 15px/1.55 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+header { padding: 14px 20px; border-bottom: 1px solid var(--line); background: var(--panel); }
+header h1 { margin: 0; font-size: 19px; }
+header p { margin: 4px 0 0; color: var(--muted); font-size: 13px; }
+.layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 0; }
+.notes { padding: 18px 24px 80px; border-right: 1px solid var(--line); }
+.evidence { position: sticky; top: 0; height: 100vh; overflow-y: auto; padding: 18px 20px 80px; }
+.notes h2 { font-size: 18px; margin: 26px 0 8px; color: var(--accent); }
+.notes h3 { font-size: 16px; margin: 18px 0 6px; }
+.notes img.desen { width: 100%; max-width: 560px; display: block; margin: 10px 0; border: 1px solid var(--line); border-radius: 6px; background: #fff; }
+.notes table { border-collapse: collapse; margin: 8px 0; }
+.notes td, .notes th { border: 1px solid var(--line); padding: 4px 10px; text-align: left; }
+.formula { font-weight: 600; }
+.caution { background: var(--warn-bg); color: var(--warn); padding: 8px 12px; border-radius: 6px; }
+mark { background: var(--mark); color: inherit; padding: 0 2px; border-radius: 3px; cursor: pointer; }
+mark:hover, mark.active { background: var(--mark-strong); }
+mark sup { font-size: 10px; font-weight: 700; color: var(--accent); margin-left: 2px; }
+.derived { border-bottom: 2px dashed var(--muted); }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 12px 14px; margin-bottom: 16px; scroll-margin-top: 12px; transition: background .4s; }
+.card.flash { background: var(--flash); }
+.card h3 { margin: 0 0 4px; font-size: 15px; display: flex; gap: 8px; align-items: baseline; }
+.num { background: var(--accent); color: var(--panel); border-radius: 10px; padding: 0 7px; font-size: 12px; font-weight: 700; }
+.claim { margin: 0 0 6px; }
+.src { color: var(--muted); font-size: 13px; margin: 0 0 8px; }
+.src a { color: var(--accent); }
+blockquote { margin: 0 0 8px; padding: 4px 10px; border-left: 3px solid var(--mark-strong); font-style: italic; font-size: 13.5px; }
+.shot { display: block; border: 1px solid var(--line); border-radius: 4px; overflow: hidden; background: #fff; }
+.shot img { width: 100%; display: block; }
+.shot + .shot { margin-top: 8px; }
+.links { font-size: 12.5px; margin-top: 6px; display: flex; gap: 14px; flex-wrap: wrap; }
+.links a, .back { color: var(--accent); cursor: pointer; text-decoration: underline; background: none; border: 0; padding: 0; font: inherit; }
+.note { font-size: 13px; background: var(--accent-soft); padding: 6px 10px; border-radius: 6px; margin-top: 8px; }
+.legend { font-size: 13px; color: var(--muted); }
+.q-ro { display: none; }
+body.ro .q-ro { display: inline; }
+body.ro .q-en { display: none; }
+.trad { font-style: normal; color: var(--muted); }
+header { display: flex; flex-wrap: wrap; gap: 8px 20px; align-items: center; justify-content: space-between; }
+#lang-toggle { font: inherit; font-size: 13px; padding: 6px 12px; border: 1px solid var(--accent); border-radius: 6px; background: var(--accent-soft); color: var(--accent); cursor: pointer; }
+#lang-toggle[aria-pressed="true"] { background: var(--accent); color: var(--panel); }
+@media (max-width: 900px) {
+  .layout { grid-template-columns: minmax(0, 1fr); }
+  .notes { border-right: 0; padding: 14px 16px 30px; }
+  .evidence { position: static; height: auto; overflow: visible; padding: 14px 16px 60px; border-top: 1px solid var(--line); }
+}
+</style>
+</head>
+<body>
+<header>
+  <div>
+  <h1>Licență – notițe 5 Nov 2026, cu sursele în paralel</h1>
+  <p>Stânga: notițele. Dreapta: dovada din sursă, cu textul evidențiat. Apasă pe un text <mark style="cursor:default">galben</mark> ca să vezi sursa lui. Apasă pe o captură ca să deschizi pagina întreagă.</p>
+  </div>
+  <button id="lang-toggle" type="button" aria-pressed="false">Citate: engleză (original)</button>
+</header>
+<div class="layout">
+<main class="notes">
+  <p class="legend">Text <mark style="cursor:default">galben<sup>n</sup></mark> = afirmație cu dovadă în cardul n. Text <span class="derived">subliniat punctat</span> = calcul propriu, fără sursă separată. [n] = numărul sursei din lista de la finalul notițelor (<code>Status_5Nov_2026_final.md</code>). Textul între ghilimele „…” este citat exact. „[…]” marchează un fragment omis. Notele de subsol din citate (de exemplu „[1]” din Wikipedia) sunt omise. Butonul din antet schimbă citatele între originalul în engleză și traducerea mea, marcată „(trad. proprie)”. Traducerea nu este citat exact. Referința rămâne originalul.</p>
+
+  <h2>1. CSI (Channel State Information)</h2>
+  <img class="desen" src="desen-1-csi.svg" alt="Desen 1 – Tx, Rx, cale directă și cale reflectată">
+  <ul>
+    <li>Între Tx și Rx există o cale directă (contribuția h₁).</li>
+    <li>Semnalul se reflectă pe o persoană și ajunge la Rx pe o cale reflectată (contribuția h₂).</li>
+    <li>Ambele căi folosesc același canal Wi-Fi și aceleași sub-frecvențe.</li>
+    <li>Pe fiecare sub-frecvență, Rx primește suma tuturor căilor: <mark data-ref="c1"><span class="formula">H(f) = Σₖ aₖ·e^(−j2πfτₖ)</span>. aₖ este coeficientul complex al căii k (atenuare și defazaj). τₖ = dₖ/c este întârzierea căii k [1]<sup>1</sup></mark>.</li>
+    <li>f este frecvența sub-frecvenței măsurate: <b>f = f_c + n·Δf</b>.
+      <ul>
+        <li>f_c = centrul canalului. Exemplu: <mark data-ref="c3">canalul 6 are f_c = 2437 MHz [6]<sup>3</sup></mark>.</li>
+        <li>n = indicele sub-frecvenței (−26…+26 pentru LLTF).</li>
+        <li><mark data-ref="c2">Δf = distanța dintre centrele a două sub-frecvențe vecine = 312,5 kHz [5]<sup>2</sup></mark>.</li>
+      </ul>
+    </li>
+    <li>Exemplu: pe canalul 6, n = +10 dă <span class="derived">f = 2437 MHz + 10 × 0,3125 MHz = 2440,125 MHz</span>.</li>
+    <li>Suma dă un singur număr complex, adică H = I + jQ din secțiunea 2: <span class="derived">I = Σₖ |aₖ|·cos(φₖ), Q = Σₖ |aₖ|·sin(φₖ)</span>, cu φₖ = faza totală a căii k.</li>
+  </ul>
+  <p><mark data-ref="c2">Receptorul eșantionează la 20 MHz și aplică un FFT [5]<sup>2</sup></mark>. Cu Δf = 0,3125 MHz, FFT-ul are <span class="derived">20 MHz / 0,3125 MHz = 64 de poziții</span>.</p>
+  <table>
+    <tr><th>Câmp pe ESP32</th><th>Sub-frecvențe active</th></tr>
+    <tr><td>LLTF (802.11a/g)</td><td><mark data-ref="c4">52, de la −26 la +26 [3]<sup>4</sup></mark></td></tr>
+    <tr><td>HT-LTF (802.11n, 20 MHz)</td><td><mark data-ref="c5">56, de la −28 la +28 [3], [7]<sup>5,6</sup></mark></td></tr>
+  </table>
+  <p>Intervalul −26…+26 are 53 de poziții, dar sursa dă 52. <span class="derived">Poziția lipsă este 0 (DC)</span>. Sursa nu spune explicit acest lucru.</p>
+  <p><mark data-ref="c7">CSI este un set de valori complexe: o valoare pentru fiecare sub-frecvență și pentru fiecare pereche de antene Tx–Rx [7]<sup>7</sup></mark>.</p>
+  <ul>
+    <li>În general, CSI este o matrice: sub-frecvențe × perechi de antene.</li>
+    <li>ESP32 are un singur lanț de recepție (o antenă activă). CSI din LLTF este deci un vector de 52 de numere complexe.</li>
+    <li><mark data-ref="c8">Bufferul LLTF de pe ESP32 are 64 de intrări (indicii 0~31 și −32~−1) și 128 de octeți [3]<sup>8</sup></mark>. Intrările nule sunt incluse și trebuie eliminate. <span class="derived">64 × 2 octeți = 128</span>.</li>
+    <li><mark data-ref="c8">Pe ESP32, primii 4 octeți din buffer pot fi invalizi. Câmpul <code>first_word_invalid</code> arată acest caz [3]<sup>8</sup></mark>. <span class="derived">4 octeți = primele 2 intrări</span>.</li>
+    <li>CSI nu este o măsurătoare exactă. <mark data-ref="c10">Faza brută are erori de sincronizare [9]<sup>10</sup></mark>.</li>
+  </ul>
+
+  <h2>2. Amplitudinea și Faza</h2>
+  <p>Pentru fiecare sub-frecvență, chipul Wi-Fi dă un număr complex:</p>
+  <p class="formula"><mark data-ref="c11">H = I + jQ. I = partea reală, Q = partea imaginară [4]<sup>11</sup></mark></p>
+  <ul>
+    <li>I = componenta în fază.</li>
+    <li>Q = componenta în cuadratură, defazată cu 90°.</li>
+  </ul>
+  <p>I și Q sunt coordonatele carteziene (x, y) ale unui vector.</p>
+  <ul>
+    <li>I este proiecția vectorului pe Ox.</li>
+    <li>Q este proiecția vectorului pe Oy.</li>
+    <li>(I, Q) descrie starea undei la momentul măsurării.</li>
+  </ul>
+  <p><mark data-ref="c12">ESP32 păstrează câte 2 octeți cu semn pe sub-frecvență. Primul octet este partea imaginară (Q). Al doilea octet este partea reală (I) [2]<sup>12</sup></mark>. Nu citi perechea ca (I, Q).</p>
+  <img class="desen" src="desen-4-vector-iq.svg" alt="Desen 2 – Vectorul (I, Q) cu modulul ρ și unghiul θ">
+
+  <h3>Amplitudinea</h3>
+  <p class="formula"><span class="derived">A = |H| = √(I² + Q²)</span> (modulul unui număr complex)</p>
+  <ul>
+    <li>Amplitudinea este lungimea vectorului (I, Q).</li>
+    <li><mark data-ref="c13">Puterea este pătratul amplitudinii: P = |H|² = I² + Q². CARM scrie puterea CFR în forma |H(f, t)|² [8]<sup>13</sup></mark>.</li>
+    <li>Atenuarea prin obstacole reduce lungimea vectorului.</li>
+  </ul>
+  <img class="desen" src="desen-2-amplitudine.svg" alt="Desen 3 – Unda atenuată de un obstacol">
+
+  <h3>Faza</h3>
+  <p class="formula">θ = arctan2(Q, I)</p>
+  <ul>
+    <li><mark data-ref="c14">arctan2(y, x) dă unghiul vectorului (x, y) față de axa Ox [1]<sup>14</sup></mark>. Pentru H, x = I și y = Q.</li>
+    <li>Faza este un unghi. Ea arată întârzierea undei față de o referință.</li>
+    <li><mark data-ref="c15">Legătura cu întârzierea τ și cu lungimea căii d: θ = 2πfτ = 2πd/λ [8]<sup>15</sup></mark>.</li>
+    <li><mark data-ref="c15">Când lungimea căii se schimbă cu o lungime de undă λ, faza se schimbă cu 2π [8], [9]<sup>15,16</sup></mark>.</li>
+    <li>Sursele scriu exponentul cu semnul minus: e^(−j2πfτ) [1], [8]. Folosește aceeași convenție în toată teza.</li>
+  </ul>
+  <img class="desen" src="desen-3-faza.svg" alt="Desen 4 – Faza și decalajul de cale Δd">
+
+  <h3>Efectul mișcării</h3>
+  <ul>
+    <li>Deplasarea unui obiect schimbă lungimea căii reflectate.</li>
+    <li><mark data-ref="c16">CSI este suma unei componente statice și a unei componente dinamice. Componenta dinamică are fază variabilă [9]<sup>16</sup></mark>.</li>
+    <li>Mișcarea schimbă deci unghiul vectorului total și amplitudinea lui.</li>
+  </ul>
+  <p class="caution">Atenție: Nu folosi faza brută ca măsură a distanței. <mark data-ref="c10">SFO, CFO și întârzierea de detecție a pachetului (PDD) deformează faza [9]<sup>10</sup></mark>. Corectează faza înainte de analiză.</p>
+  <p><mark data-ref="c9">Pe plăcile cu mai multe antene există și offseturi de fază între lanțurile RF [10]<sup>9</sup></mark>. ESP32 are un singur lanț de recepție. Deci offsetul dintre antene nu apare pe ESP32.</p>
+
+  <h2>Notes</h2>
+  <ul>
+    <li>ce fac funcțiile cu regiștrii de control.</li>
+    <li>cum se modif. param. de recepție.</li>
+    <li>de studiat ce face biblioteca.<ul><li>→ cum le trec în studiu bibliografic.</li></ul></li>
+    <li>Primul capitol mare zice de fizică, conceptual, cum scoate funcția chestiile din bibliotecă.</li>
+    <li>De documentat și generale, analizat datele, nu ca să dovedesc că s-a întâmplat x, y.</li>
+  </ul>
+  <p><b>!</b> de documentat cum scoate funcția din controllerul de wireless cu biblioteca etc.</p>
+</main>
+
+<aside class="evidence" id="evidence">
+
+<section class="card" id="c1">
+  <h3><span class="num">1</span> Suma căilor și τ = d/c</h3>
+  <p class="claim">H(f) este suma contribuțiilor tuturor căilor. Fiecare cale are un coeficient complex aₙ și o întârziere τₙ = rₙ/c.</p>
+  <p class="src">[1] Sionna RT: Technical Report (Aït Aoudia et al., 2025), arXiv:2504.21719v1, pagina 4, ecuația (3).</p>
+  <blockquote><span class="q-en">„The term aₙ is the complex-valued path coefficient for the n-th path, and τₙ = rₙ/c is the propagation delay, where rₙ is the distance the radio wave travels, and c is the speed of light.” Urmează ecuația (3): H(f) = Σ aₙ e^(−j2πfτₙ).</span><span class="q-ro" lang="ro">„Termenul aₙ este coeficientul complex al căii n, iar τₙ = rₙ/c este întârzierea de propagare, unde rₙ este distanța parcursă de unda radio, iar c este viteza luminii.” Urmează ecuația (3): H(f) = Σ aₙ e^(−j2πfτₙ). <small class="trad">(trad. proprie)</small></span></blockquote>
+  <a class="shot" href="surse-evidenta/e01-pagina.png" target="_blank"><img src="surse-evidenta/e01.png" alt="Sionna RT, pagina 4, ecuația 3, evidențiată"></a>
+  <div class="links"><a href="https://arxiv.org/pdf/2504.21719v1#page=4" target="_blank">Deschide PDF-ul (pagina 4)</a><button class="back" data-ref="c1">↩ în notițe</button></div>
+</section>
+
+<section class="card" id="c2">
+  <h3><span class="num">2</span> Δf = 312,5 kHz, eșantionare la 20 MHz, FFT</h3>
+  <p class="claim">Distanța dintre sub-frecvențe este 0,3125 MHz. Receptorul eșantionează la 20 MHz și aplică un FFT. Numărul de 64 de poziții este calculul nostru: 20 MHz / 0,3125 MHz.</p>
+  <p class="src">[5] Wikipedia, <i>IEEE 802.11a-1999</i>, secțiunea „Technical description”. Pagină tipărită pe 5 Nov 2026.</p>
+  <blockquote><span class="q-en">„Of the 52 OFDM subcarriers, 48 are for data and 4 are pilot subcarriers with a carrier separation of 0.3125 MHz (20 MHz/64).” · „Correspondingly the receiver downconverts, samples at 20 MHz and does an FFT to retrieve the original coefficients.”</span><span class="q-ro" lang="ro">„Dintre cele 52 de sub-frecvențe OFDM, 48 sunt pentru date și 4 sunt sub-frecvențe pilot, cu o distanță între purtătoare de 0,3125 MHz (20 MHz/64).” · „În mod corespunzător, receptorul coboară semnalul în frecvență, îl eșantionează la 20 MHz și aplică un FFT ca să recupereze coeficienții inițiali.” <small class="trad">(trad. proprie)</small></span></blockquote>
+  <a class="shot" href="surse-evidenta/e03-pagina.png" target="_blank"><img src="surse-evidenta/e03.png" alt="Wikipedia IEEE 802.11a, fraza evidențiată"></a>
+  <div class="links"><a href="https://en.wikipedia.org/wiki/IEEE_802.11a-1999#Technical_description" target="_blank">Deschide pagina</a><button class="back" data-ref="c2">↩ în notițe</button></div>
+  <p class="note">Wikipedia este o sursă secundară. În teză, citează standardul IEEE 802.11 direct.</p>
+</section>
+
+<section class="card" id="c3">
+  <h3><span class="num">3</span> Canalul 6 = 2437 MHz</h3>
+  <p class="claim">Frecvența din centrul canalului 6 (banda de 2,4 GHz) este 2437 MHz.</p>
+  <p class="src">[6] Wikipedia, <i>List of WLAN channels</i>, tabelul pentru banda de 2,4 GHz, coloana F₀ (MHz).</p>
+  <a class="shot" href="surse-evidenta/e04-pagina.png" target="_blank"><img src="surse-evidenta/e04.png" alt="Tabelul canalelor WLAN, rândul 6 evidențiat"></a>
+  <div class="links"><a href="https://en.wikipedia.org/wiki/List_of_WLAN_channels#2.4_GHz_(802.11b/g/n/ax/be)" target="_blank">Deschide pagina</a><button class="back" data-ref="c3">↩ în notițe</button></div>
+</section>
+
+<section class="card" id="c4">
+  <h3><span class="num">4</span> LLTF: −26…+26, 52 de sub-frecvențe</h3>
+  <p class="claim">Pentru 802.11a/g (LLTF), ESP-IDF dă intervalul −26…+26 și 52 de sub-frecvențe. Faptul că poziția 0 lipsește este deducția noastră (53 de poziții în interval, 52 în total).</p>
+  <p class="src">[3] ESP-IDF v6.0, <i>Wi-Fi Vendor Features</i> (ESP32), tabelul „PHY standard / Sub-carrier range”.</p>
+  <blockquote><span class="q-en">„802.11a/g · -26 to +26 · -21, -7, +7, +21 · 52 total, 48 usable”</span><span class="q-ro" lang="ro">„802.11a/g · de la -26 la +26 · -21, -7, +7, +21 · 52 în total, 48 utilizabile” <small class="trad">(trad. proprie)</small></span></blockquote>
+  <a class="shot" href="surse-evidenta/e06a-pagina.png" target="_blank"><img src="surse-evidenta/e06a.png" alt="Tabelul ESP-IDF, rândul 802.11a/g evidențiat"></a>
+  <div class="links"><a href="https://docs.espressif.com/projects/esp-idf/en/v6.0/esp32/api-guides/wifi-driver/wifi-vendor-features.html" target="_blank">Deschide pagina</a><button class="back" data-ref="c4">↩ în notițe</button></div>
+</section>
+
+<section class="card" id="c5">
+  <h3><span class="num">5</span> HT-LTF: −28…+28, 56 de sub-frecvențe</h3>
+  <p class="claim">Pentru 802.11n la 20 MHz (HT-LTF), ESP-IDF dă intervalul −28…+28 și 56 de sub-frecvențe.</p>
+  <p class="src">[3] ESP-IDF v6.0, <i>Wi-Fi Vendor Features</i> (ESP32), același tabel, rândul „802.11n, 20 MHz”.</p>
+  <blockquote><span class="q-en">„802.11n, 20 MHz · -28 to +28 · -21, -7, +7, +21 · 56 total, 52 usable”</span><span class="q-ro" lang="ro">„802.11n, 20 MHz · de la -28 la +28 · -21, -7, +7, +21 · 56 în total, 52 utilizabile” <small class="trad">(trad. proprie)</small></span></blockquote>
+  <a class="shot" href="surse-evidenta/e06b-pagina.png" target="_blank"><img src="surse-evidenta/e06b.png" alt="Tabelul ESP-IDF, rândul 802.11n 20 MHz evidențiat"></a>
+  <div class="links"><a href="https://docs.espressif.com/projects/esp-idf/en/v6.0/esp32/api-guides/wifi-driver/wifi-vendor-features.html" target="_blank">Deschide pagina</a><button class="back" data-ref="c5">↩ în notițe</button></div>
+</section>
+
+<section class="card" id="c6">
+  <h3><span class="num">6</span> 56 de sub-frecvențe la 20 MHz (802.11n)</h3>
+  <p class="claim">O a doua sursă confirmă 56 de sub-frecvențe pentru un canal 802.11n de 20 MHz.</p>
+  <p class="src">[7] Halperin et al., 2011, <i>Tool Release: Gathering 802.11n Traces with Channel State Information</i>, pagina 1, secțiunea „How it works”. PDF local.</p>
+  <blockquote><span class="q-en">„The Intel 5300 NIC reports CSI for 30 groups of subcarriers, spread evenly among the 56 subcarriers of a 20 MHz channel […]”</span><span class="q-ro" lang="ro">„Placa Intel 5300 raportează CSI pentru 30 de grupuri de sub-frecvențe, distribuite uniform între cele 56 de sub-frecvențe ale unui canal de 20 MHz […]” <small class="trad">(trad. proprie)</small></span></blockquote>
+  <a class="shot" href="surse-evidenta/e07b-pagina.png" target="_blank"><img src="surse-evidenta/e07b.png" alt="Halperin 2011, pagina 1, 56 subcarriers evidențiat"></a>
+  <div class="links"><a href="../../Materials/CSI_Sensing/sources-2026-10-21/Halperin_2011_Tool_Release_80211n_CSI.pdf#page=1" target="_blank">Deschide PDF-ul local</a><button class="back" data-ref="c5">↩ în notițe</button></div>
+</section>
+
+<section class="card" id="c7">
+  <h3><span class="num">7</span> CSI pe fiecare sub-frecvență și pe fiecare pereche de antene</h3>
+  <p class="claim">CSI descrie canalul la nivelul fiecărei sub-frecvențe, pentru fiecare pereche de antene Tx–Rx.</p>
+  <p class="src">[7] Halperin et al., 2011, pagina 1, introducerea. PDF local.</p>
+  <blockquote><span class="q-en">„[…] the CSI contains information about the channel between sender and receiver at the level of individual data subcarriers, for each pair of transmit and receive antennas.”</span><span class="q-ro" lang="ro">„[…] CSI conține informații despre canalul dintre emițător și receptor la nivelul fiecărei sub-frecvențe de date, pentru fiecare pereche de antene de emisie și de recepție.” <small class="trad">(trad. proprie)</small></span></blockquote>
+  <a class="shot" href="surse-evidenta/e07a-pagina.png" target="_blank"><img src="surse-evidenta/e07a.png" alt="Halperin 2011, pagina 1, fraza evidențiată"></a>
+  <div class="links"><a href="../../Materials/CSI_Sensing/sources-2026-10-21/Halperin_2011_Tool_Release_80211n_CSI.pdf#page=1" target="_blank">Deschide PDF-ul local</a><button class="back" data-ref="c7">↩ în notițe</button></div>
+</section>
+
+<section class="card" id="c8">
+  <h3><span class="num">8</span> Bufferul LLTF: 64 de intrări, 128 de octeți, primii 4 octeți</h3>
+  <p class="claim">Pentru un pachet non-HT pe 20 MHz, LLTF acoperă indicii 0~31 și −32~−1 (64 de poziții). Totalul este 128 de octeți.</p>
+  <p class="src">[3] ESP-IDF v6.0, <i>Wi-Fi Vendor Features</i> (ESP32), tabelul CSI, coloana „non HT / 20 MHz / non STBC”.</p>
+  <blockquote><span class="q-en">„LLTF: 0~31, -32~-1 […] total bytes: 128”</span><span class="q-ro" lang="ro">„LLTF: 0~31, -32~-1 […] total octeți: 128” <small class="trad">(trad. proprie)</small></span></blockquote>
+  <a class="shot" href="surse-evidenta/e05-pagina.png" target="_blank"><img src="surse-evidenta/e05.png" alt="Tabelul CSI ESP-IDF, LLTF și 128 evidențiate"></a>
+  <div class="links"><a href="https://docs.espressif.com/projects/esp-idf/en/v6.0/esp32/api-guides/wifi-driver/wifi-vendor-features.html" target="_blank">Deschide pagina</a><button class="back" data-ref="c8">↩ în notițe</button></div>
+  <p class="note">Calculul „64 × 2 octeți = 128” este dedus. Tabelul dă numai indicii și totalul de octeți.</p>
+  <blockquote><span class="q-en">„If first_word_invalid field of wifi_csi_info_t is true, it means that the first four bytes of CSI data is invalid due to a hardware limitation in ESP32.”</span><span class="q-ro" lang="ro">„Dacă câmpul first_word_invalid din wifi_csi_info_t este true, primii patru octeți din datele CSI sunt invalizi din cauza unei limitări hardware a ESP32.” <small class="trad">(trad. proprie)</small></span></blockquote>
+  <a class="shot" href="surse-evidenta/e05b-pagina.png" target="_blank"><img src="surse-evidenta/e05b.png" alt="ESP-IDF, first_word_invalid evidențiat"></a>
+</section>
+
+<section class="card" id="c9">
+  <h3><span class="num">9</span> Offseturi de fază între lanțurile RF</h3>
+  <p class="claim">Plăcile Wi-Fi cu mai multe antene au offseturi de fază între lanțurile RF.</p>
+  <p class="src">[10] Zubow et al., 2021, <i>On Phase Offsets of 802.11ac Commodity WiFi</i>, pagina 1, rezumatul.</p>
+  <blockquote><span class="q-en">„We analyze the phase offsets between RF chains of modern IEEE 802.11ac chips. […] the phase offset between receive antennas is due to random phase rotations semi-time-invariant with up to four possible values.”</span><span class="q-ro" lang="ro">„Analizăm offseturile de fază dintre lanțurile RF ale cipurilor moderne IEEE 802.11ac. […] offsetul de fază dintre antenele de recepție provine din rotații de fază aleatoare, aproape invariante în timp, cu cel mult patru valori posibile.” <small class="trad">(trad. proprie)</small></span></blockquote>
+  <a class="shot" href="surse-evidenta/e14-pagina.png" target="_blank"><img src="surse-evidenta/e14.png" alt="Zubow 2021, rezumatul evidențiat"></a>
+  <div class="links"><a href="https://www.ccs-labs.org/bib/zubow2021phase/zubow2021phase.pdf" target="_blank">Deschide PDF-ul</a><button class="back" data-ref="c9">↩ în notițe</button></div>
+  <p class="note">Zubow măsoară plăci 802.11ac cu mai multe antene. Offsetul este între antene. ESP32 are un singur lanț de recepție, deci această eroare nu apare acolo. Pentru ESP32 contează erorile din cardul 10.</p>
+</section>
+
+<section class="card" id="c10">
+  <h3><span class="num">10</span> CFO, SFO și PDD deformează faza</h3>
+  <p class="claim">Faza CSI de pe plăcile comerciale are zgomot de la SFO, CFO și întârzierea de detecție a pachetului (PDD).</p>
+  <p class="src">[9] Zeng et al., 2019, <i>FarSense</i>, pagina 5, secțiunea „Related work”. PDF local.</p>
+  <blockquote><span class="q-en">„The phase information of the CSI readings […] is especially noisy due to the presence of sampling frequency offset (SFO), carrier frequency offset (CFO) and packet detection delay (PDD) […]”</span><span class="q-ro" lang="ro">„Informația de fază din citirile CSI […] are un zgomot deosebit de mare din cauza decalajului frecvenței de eșantionare (SFO), a decalajului frecvenței purtătoare (CFO) și a întârzierii de detecție a pachetului (PDD) […]” <small class="trad">(trad. proprie)</small></span></blockquote>
+  <a class="shot" href="surse-evidenta/e13-pagina.png" target="_blank"><img src="surse-evidenta/e13.png" alt="Zeng 2019, pagina 5, SFO CFO PDD evidențiate"></a>
+  <div class="links"><a href="../../Materials/CSI_Sensing/sources-2026-10-21/Zeng_2019_FarSense_Respiration_CSI_Ratio.pdf#page=5" target="_blank">Deschide PDF-ul local</a><button class="back" data-ref="c10">↩ în notițe</button></div>
+</section>
+
+<section class="card" id="c11">
+  <h3><span class="num">11</span> I și Q = partea reală și partea imaginară</h3>
+  <p class="claim">Un eșantion I/Q este un număr complex. I este partea reală, Q este partea imaginară.</p>
+  <p class="src">[4] Wikipedia, <i>In-phase and quadrature components</i>, secțiunea „I/Q data”.</p>
+  <blockquote><span class="q-en">„Some sources treat I/Q as a complex number; with the I and Q components corresponding to the real and imaginary parts, respectively.”</span><span class="q-ro" lang="ro">„Unele surse tratează I/Q ca pe un număr complex, în care componentele I și Q corespund părții reale, respectiv părții imaginare.” <small class="trad">(trad. proprie)</small></span></blockquote>
+  <a class="shot" href="surse-evidenta/e09-pagina.png" target="_blank"><img src="surse-evidenta/e09.png" alt="Wikipedia I/Q, fraza evidențiată"></a>
+  <div class="links"><a href="https://en.wikipedia.org/wiki/In-phase_and_quadrature_components#I/Q_data" target="_blank">Deschide pagina</a><button class="back" data-ref="c11">↩ în notițe</button></div>
+</section>
+
+<section class="card" id="c12">
+  <h3><span class="num">12</span> ESP32: imaginar, apoi real</h3>
+  <p class="claim">Fiecare sub-frecvență ocupă 2 octeți cu semn. Primul octet este partea imaginară. Al doilea octet este partea reală.</p>
+  <p class="src">[2] ESP-IDF v4.3.3, <i>Wi-Fi Driver</i> (ESP32), secțiunea „Wi-Fi Channel State Information”.</p>
+  <blockquote><span class="q-en">„The first one is imaginary part and the second one is real part.” · „Each item is stored as two bytes: imaginary part followed by real part.”</span><span class="q-ro" lang="ro">„Primul este partea imaginară, iar al doilea este partea reală.” · „Fiecare element este stocat pe doi octeți: partea imaginară, urmată de partea reală.” <small class="trad">(trad. proprie)</small></span></blockquote>
+  <a class="shot" href="surse-evidenta/e08-pagina.png" target="_blank"><img src="surse-evidenta/e08.png" alt="ESP-IDF Wi-Fi Driver, ordinea octeților evidențiată"></a>
+  <div class="links"><a href="https://docs.espressif.com/projects/esp-idf/en/v4.3.3/esp32/api-guides/wifi.html#wi-fi-channel-state-information" target="_blank">Deschide pagina</a><button class="back" data-ref="c12">↩ în notițe</button></div>
+</section>
+
+<section class="card" id="c13">
+  <h3><span class="num">13</span> Puterea = |H|²</h3>
+  <p class="claim">CARM scrie puterea CFR ca |H(f, t)|², adică pătratul modulului. Deci P = |H|² = A².</p>
+  <p class="src">[8] Wang et al., 2015, <i>CARM</i>, pagina 4, ecuația (3). PDF local.</p>
+  <blockquote><span class="q-en">„The instantaneous CFR power at time t can be derived as follows […] |H(f, t)|² = […]”</span><span class="q-ro" lang="ro">„Puterea CFR instantanee la momentul t se poate obține astfel […] |H(f, t)|² = […]” <small class="trad">(trad. proprie)</small></span></blockquote>
+  <a class="shot" href="surse-evidenta/e11-pagina.png" target="_blank"><img src="surse-evidenta/e11.png" alt="CARM, pagina 4, ecuația puterii evidențiată"></a>
+  <div class="links"><a href="../../Materials/CSI_Sensing/sources-2026-10-21/Wang_2015_Understanding_Modeling_WiFi_HAR_CARM.pdf#page=4" target="_blank">Deschide PDF-ul local</a><button class="back" data-ref="c13">↩ în notițe</button></div>
+</section>
+
+<section class="card" id="c14">
+  <h3><span class="num">14</span> atan2 – unghiul unui vector (x, y)</h3>
+  <p class="claim">atan2(y, x) dă unghiul vectorului (x, y) față de axa Ox. Pentru H, x = I și y = Q. Deci θ = atan2(Q, I).</p>
+  <p class="src">[1] Sionna RT: Technical Report, arXiv:2504.21719v1, pagina 32, ecuația (50).</p>
+  <blockquote><span class="q-en">„φ = atan2(y, x) […] where atan2(y, x) is the two-argument inverse tangent function”</span><span class="q-ro" lang="ro">„φ = atan2(y, x) […] unde atan2(y, x) este funcția arctangentă cu două argumente” <small class="trad">(trad. proprie)</small></span></blockquote>
+  <a class="shot" href="surse-evidenta/e10-pagina.png" target="_blank"><img src="surse-evidenta/e10.png" alt="Sionna RT, pagina 32, atan2 evidențiat"></a>
+  <div class="links"><a href="https://arxiv.org/pdf/2504.21719v1#page=32" target="_blank">Deschide PDF-ul (pagina 32)</a><button class="back" data-ref="c14">↩ în notițe</button></div>
+  <p class="note">Sionna folosește atan2 pentru unghiul unui vector în spațiu, nu pentru CSI. Legătura x = I, y = Q este pasul nostru.</p>
+</section>
+
+<section class="card" id="c15">
+  <h3><span class="num">15</span> τ = d/c, faza = 2πd/λ, 2π pe o lungime de undă</h3>
+  <p class="claim">Întârzierea căii este τ = d/c. Faza e^(−j2πfτ) devine e^(−j2πd/λ). O schimbare a căii cu λ dă o schimbare de fază de 2π.</p>
+  <p class="src">[8] Wang et al., 2015, <i>CARM</i>, pagina 3, secțiunea 3.2. PDF local.</p>
+  <blockquote><span class="q-en">„[…] which means that when the path length changes by one wavelength, the receiver experiences a phase shift of 2π in the received subcarrier.”</span><span class="q-ro" lang="ro">„[…] ceea ce înseamnă că, atunci când lungimea căii se schimbă cu o lungime de undă, receptorul observă o schimbare de fază de 2π pe sub-frecvența recepționată.” <small class="trad">(trad. proprie)</small></span></blockquote>
+  <p class="note">În fraza dinainte, sursa scrie τₖ(t) = dₖ(t)/c și transformă faza e^(−j2πfτₖ(t)) în e^(−j2πdₖ(t)/λ). Formulele sunt rescrise aici în text simplu, deci nu sunt între ghilimele.</p>
+  <a class="shot" href="surse-evidenta/e02-pagina.png" target="_blank"><img src="surse-evidenta/e02.png" alt="CARM, pagina 3, fraza evidențiată"></a>
+  <div class="links"><a href="../../Materials/CSI_Sensing/sources-2026-10-21/Wang_2015_Understanding_Modeling_WiFi_HAR_CARM.pdf#page=3" target="_blank">Deschide PDF-ul local</a><button class="back" data-ref="c15">↩ în notițe</button></div>
+</section>
+
+<section class="card" id="c16">
+  <h3><span class="num">16</span> Componentă statică + componentă dinamică</h3>
+  <p class="claim">CSI = H_s (calea directă și reflexiile statice) + H_d (reflexia de pe om). Când calea crește cu λ, CSI se rotește cu 2π.</p>
+  <p class="src">[9] Zeng et al., 2019, <i>FarSense</i>, pagina 7, ecuația (2). PDF local.</p>
+  <blockquote><span class="q-en">„[…] the paths can be grouped into static path and dynamic path. […] When d(t) is increased by one wavelength, the CSI (H(f, t) in Eq. 2) rotates 2π clockwise […]”</span><span class="q-ro" lang="ro">„[…] căile pot fi grupate într-o cale statică și o cale dinamică. […] Când d(t) crește cu o lungime de undă, CSI (H(f, t) din ec. 2) se rotește cu 2π în sensul acelor de ceasornic […]” <small class="trad">(trad. proprie)</small></span></blockquote>
+  <a class="shot" href="surse-evidenta/e12-pagina.png" target="_blank"><img src="surse-evidenta/e12.png" alt="FarSense, pagina 7, ecuația 2 evidențiată"></a>
+  <div class="links"><a href="../../Materials/CSI_Sensing/sources-2026-10-21/Zeng_2019_FarSense_Respiration_CSI_Ratio.pdf#page=7" target="_blank">Deschide PDF-ul local</a><button class="back" data-ref="c16">↩ în notițe</button></div>
+</section>
+
+</aside>
+</div>
+<script>
+(() => {
+  const marks = Array.from(document.querySelectorAll("mark[data-ref]"));
+  const flash = (el) => { el.classList.add("flash"); setTimeout(() => el.classList.remove("flash"), 1200); };
+  marks.forEach((m) => {
+    m.addEventListener("click", () => {
+      const sup = m.querySelector("sup");
+      const first = sup ? sup.textContent.split(",")[0].trim() : "";
+      const card = document.getElementById("c" + first) || document.getElementById(m.dataset.ref);
+      if (!card) return;
+      marks.forEach((x) => x.classList.remove("active"));
+      m.classList.add("active");
+      card.scrollIntoView({ behavior: "smooth", block: "start" });
+      flash(card);
+    });
+  });
+  document.querySelectorAll("button.back").forEach((b) => {
+    b.addEventListener("click", () => {
+      const target = marks.find((m) => m.dataset.ref === b.dataset.ref);
+      if (!target) return;
+      marks.forEach((x) => x.classList.remove("active"));
+      target.classList.add("active");
+      target.scrollIntoView({ behavior: "smooth", block: "center" });
+    });
+  });
+  const toggle = document.getElementById("lang-toggle");
+  const setLang = (ro) => {
+    document.body.classList.toggle("ro", ro);
+    toggle.setAttribute("aria-pressed", String(ro));
+    toggle.textContent = ro ? "Citate: română (trad. proprie)" : "Citate: engleză (original)";
+    try { localStorage.setItem("citate-lang", ro ? "ro" : "en"); } catch (e) {}
+  };
+  let saved = null;
+  try { saved = localStorage.getItem("citate-lang"); } catch (e) {}
+  setLang(saved === "ro");
+  toggle.addEventListener("click", () => setLang(!document.body.classList.contains("ro")));
+})();
+</script>
+</body>
+</html>

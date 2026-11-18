@@ -1,0 +1,1402 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light}body{margin:0;font:14px system-ui}img{max-width:100%}[hidden]{display:none!important}</style></head><body><title>Senzorul Tactic Silențios</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=Saira+Semi+Condensed:wght@500;600;700&display=swap">
+<style>
+/* Layout: briefing de misiune — capitole în ordine, text lângă scena animată; o singură coloană pe telefon */
+:root {
+  --paper: #E6EBE5; --panel: #F3F6F1; --ink: #16201B; --muted: #55635B; --rule: #C1CBC3;
+  --rf: #0A7D76; --rf-soft: #0A7D7622;
+  --friend: #9CC3EE; --unknown: #F2C94C; --on-unknown: #16201B; --hostile: #D9574B; --warn: #B4561F; --ok: #2E7D4F;
+  --wf-lo: #F3F6F1; --wf-mid: #0A7D76; --wf-hi: #16201B;
+  --atak-bg: #19231F; --atak-line: #5E7C70; --atak-ink: #DCE6DF;
+  --display: "Saira Semi Condensed", "Arial Narrow", "Roboto Condensed", sans-serif;
+  --body: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #0D1311; --panel: #151D1A; --ink: #DAE4DD; --muted: #8FA097; --rule: #2B3833;
+    --rf: #3CC6B8; --rf-soft: #3CC6B826;
+    --friend: #4F87C8; --unknown: #E7BE3E; --on-unknown: #16201B; --hostile: #E0675B; --warn: #F0904F; --ok: #5CC08A;
+    --wf-lo: #151D1A; --wf-mid: #2FA79B; --wf-hi: #F2D27A;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #0D1311; --panel: #151D1A; --ink: #DAE4DD; --muted: #8FA097; --rule: #2B3833;
+  --rf: #3CC6B8; --rf-soft: #3CC6B826;
+  --friend: #4F87C8; --unknown: #E7BE3E; --on-unknown: #16201B; --hostile: #E0675B; --warn: #F0904F; --ok: #5CC08A;
+  --wf-lo: #151D1A; --wf-mid: #2FA79B; --wf-hi: #F2D27A;
+  color-scheme: dark;
+}
+
+body { background: var(--paper); color: var(--ink); font-family: var(--body); font-size: 16px; line-height: 1.6; }
+.wrap { max-width: 1180px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 0; }
+h1, h2, h3 { font-family: var(--display); text-wrap: balance; margin: 0; line-height: 1.08; }
+h1 { font-size: clamp(2.3rem, 5.4vw, 3.9rem); font-weight: 700; letter-spacing: -0.01em; }
+h2 { font-size: clamp(1.7rem, 3.2vw, 2.3rem); font-weight: 600; }
+h3 { font-size: 1.25rem; font-weight: 600; }
+p { margin: 0; }
+a { color: var(--rf); }
+code, .mono { font-family: var(--mono); font-size: 0.88em; }
+.eyebrow { font-family: var(--mono); font-size: 0.75rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
+.lead { font-size: 1.14rem; max-width: 60ch; }
+.prose { display: flex; flex-direction: column; gap: 14px; max-width: 62ch; min-width: 0; }
+.prose ol, .prose ul { margin: 0; padding-left: 1.25rem; display: flex; flex-direction: column; gap: 8px; }
+.note { font-size: 0.9rem; color: var(--muted); }
+.callout { border-left: 3px solid var(--rf); padding: 8px 0 8px 14px; }
+.caution { border-left: 3px solid var(--warn); padding: 8px 0 8px 14px; }
+.caution b { color: var(--warn); }
+
+/* hero */
+.hero { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); gap: 36px; align-items: center; padding-block: 48px 32px; }
+.hero-text { display: flex; flex-direction: column; gap: 18px; min-width: 0; }
+.facts { display: flex; flex-wrap: wrap; gap: 10px 22px; margin: 4px 0 0; }
+.facts div { display: flex; flex-direction: column; }
+.facts dt { font-family: var(--display); font-size: 1.5rem; font-weight: 600; font-variant-numeric: tabular-nums; }
+.facts dd { margin: 0; font-size: 0.82rem; color: var(--muted); }
+.toc { display: flex; flex-wrap: wrap; gap: 6px 8px; padding: 0; margin: 0; list-style: none; }
+.toc a { display: inline-block; font-size: 0.85rem; text-decoration: none; color: var(--ink); border: 1px solid var(--rule); border-radius: 999px; padding: 3px 11px; background: var(--panel); }
+.toc a:hover { border-color: var(--rf); }
+.toc a span { font-family: var(--mono); color: var(--muted); margin-right: 5px; font-size: 0.8em; }
+.hero-svg { width: 100%; height: auto; display: block; }
+
+/* chapters */
+.chap { padding-block: 44px; border-top: 1px solid var(--rule); scroll-margin-top: 12px; }
+.chap-head { display: flex; align-items: baseline; gap: 14px; margin-bottom: 22px; }
+.chap-no { font-family: var(--mono); font-size: 0.9rem; color: var(--rf); }
+.chap-grid { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 34px; align-items: start; }
+.stage { margin: 0; background: var(--panel); border: 1px solid var(--rule); border-radius: 10px; padding: 14px; min-width: 0; display: flex; flex-direction: column; gap: 12px; }
+.stage figcaption { font-size: 0.85rem; color: var(--muted); }
+.diag { overflow-x: auto; }
+.diag > svg { display: block; width: 100%; height: auto; min-width: 600px; }
+.full { margin-top: 22px; }
+
+/* svg text & shapes */
+svg text { font-family: var(--body); }
+.t { fill: var(--ink); font-size: 15px; }
+.t-s { fill: var(--ink); font-size: 13px; }
+.t-m { fill: var(--muted); font-size: 13px; }
+.t-mono { font-family: var(--mono); }
+.t-b { font-weight: 600; }
+.wall { fill: none; stroke: var(--ink); stroke-width: 5; }
+.wall-thin { fill: none; stroke: var(--ink); stroke-width: 3; stroke-linecap: square; }
+.floor { fill: var(--panel); }
+.street { fill: var(--rf-soft); }
+.hatch-line { stroke: var(--ink); stroke-width: 1.4; }
+.ghost { fill: none; stroke: var(--muted); stroke-width: 1.5; stroke-dasharray: 3 3; }
+.ghost-fill { fill: var(--muted); opacity: 0.35; }
+.dev { fill: var(--panel); stroke: var(--ink); stroke-width: 1.6; }
+.dev-line { stroke: var(--ink); stroke-width: 1.6; fill: none; }
+.friend { fill: var(--friend); stroke: var(--ink); stroke-width: 1.6; }
+.friend-x { stroke: var(--ink); stroke-width: 1.4; }
+.unknown { fill: var(--unknown); }
+.unknown-ring { fill: none; stroke: var(--ink); stroke-width: 1.2; }
+.hostile { fill: var(--hostile); stroke: var(--ink); stroke-width: 1.6; }
+.link { stroke: var(--rf); stroke-width: 2.4; fill: none; stroke-dasharray: 7 6; }
+.fresnel { fill: var(--rf-soft); stroke: var(--rf); stroke-width: 1; stroke-dasharray: 2 4; }
+.ripple { fill: none; stroke: var(--rf); stroke-width: 2; }
+.ring-bg { fill: none; stroke: var(--rule); stroke-width: 4; }
+.ring-fg { fill: none; stroke: var(--rf); stroke-width: 4; stroke-linecap: round; }
+.p-direct { stroke: var(--ink); stroke-width: 2.4; fill: none; }
+.p-wall { stroke: var(--muted); stroke-width: 1.6; fill: none; stroke-dasharray: 6 5; }
+.p-double { stroke: var(--muted); stroke-width: 1.2; fill: none; stroke-dasharray: 2 5; opacity: 0.8; }
+.p-person { stroke: var(--rf); stroke-width: 3; fill: none; }
+.bt-line { stroke: var(--hostile); stroke-width: 2.4; fill: none; }
+.steps-dot { fill: var(--friend); stroke: var(--ink); stroke-width: 0.8; }
+.cross { stroke: var(--warn); stroke-width: 3; stroke-linecap: round; }
+
+/* CSS loops */
+@keyframes ripple { from { transform: scale(0.2); opacity: 0.9; } to { transform: scale(1); opacity: 0; } }
+.rip { transform-box: fill-box; transform-origin: center; animation: ripple 2.4s ease-out infinite; }
+.rip.d1 { animation-delay: 0.8s; } .rip.d2 { animation-delay: 1.6s; }
+@keyframes breathe { 0%, 100% { transform: scale(0.85); opacity: 0.25; } 50% { transform: scale(1.15); opacity: 0.6; } }
+.breath { transform-box: fill-box; transform-origin: center; animation: breathe 3.8s ease-in-out infinite; fill: var(--unknown); }
+@keyframes flow { to { stroke-dashoffset: -26; } }
+.flow { animation: flow 1.1s linear infinite; }
+@keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
+.blink { animation: blink 1.6s ease-in-out infinite; }
+
+/* controls */
+.controls { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.btn { font: 500 0.9rem/1.2 var(--body); color: var(--ink); background: var(--paper); border: 1px solid var(--rule); border-radius: 6px; padding: 7px 12px; cursor: pointer; }
+.btn:hover { border-color: var(--rf); }
+.btn[aria-pressed="true"] { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+.btn:disabled { opacity: 0.45; cursor: not-allowed; }
+.btn:focus-visible, .toc a:focus-visible, input:focus-visible { outline: 2px solid var(--rf); outline-offset: 2px; }
+.readout { font-family: var(--mono); font-size: 0.85rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+canvas { display: block; width: 100%; }
+#c2-bars { height: 210px; }
+
+/* chapter 1 */
+.products { display: flex; flex-direction: column; gap: 12px; margin: 0; }
+.products div { display: grid; grid-template-columns: 9.5rem minmax(0, 1fr); gap: 12px; }
+.products dt { font-weight: 600; }
+.products dd { margin: 0; }
+.tbl-wrap { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-size: 0.92rem; }
+th, td { text-align: left; vertical-align: top; padding: 9px 10px; border-bottom: 1px solid var(--rule); }
+th { font-family: var(--mono); font-size: 0.74rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); font-weight: 500; }
+td.good { color: var(--ok); font-weight: 600; }
+td.bad { color: var(--warn); font-weight: 600; }
+
+/* chapter 3 */
+.sim-grid { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 14px; }
+.sim-side { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.sim-side svg { width: 100%; height: auto; display: block; background: var(--paper); border-radius: 6px; }
+.verdict { display: flex; flex-direction: column; gap: 4px; padding: 10px 12px; border-radius: 8px; background: var(--paper); border: 1px solid var(--rule); }
+.chip { align-self: flex-start; font-family: var(--display); font-size: 1.3rem; font-weight: 600; padding: 2px 12px; border-radius: 6px; background: var(--rule); color: var(--ink); }
+.chip.MISCARE { background: var(--unknown); color: var(--on-unknown); }
+.chip.NEMISCAT { background: var(--rf); color: var(--paper); }
+.chip.LA_SOL { background: var(--warn); color: var(--paper); }
+.meter { display: flex; flex-direction: column; gap: 3px; font-size: 0.82rem; }
+.meter-row { display: flex; justify-content: space-between; gap: 8px; color: var(--muted); }
+.bar { position: relative; height: 8px; background: var(--paper); border: 1px solid var(--rule); border-radius: 4px; overflow: hidden; }
+.bar i { position: absolute; inset: 0 auto 0 0; width: 0; background: var(--rf); }
+.bar b { position: absolute; top: -2px; bottom: -2px; width: 2px; background: var(--ink); }
+#c3-wf { height: 200px; border-radius: 4px; }
+#c3-tr { height: 96px; border-radius: 4px; }
+.axis { display: flex; justify-content: space-between; font-family: var(--mono); font-size: 0.72rem; color: var(--muted); }
+
+/* chapter 4 */
+.mode-text { min-height: 3.2em; }
+#c4 .only-active, #c4 .only-silent { transition: opacity 0.4s; }
+#c4[data-mode="active"] .only-silent, #c4[data-mode="silent"] .only-active { opacity: 0; }
+.code { background: var(--paper); border: 1px solid var(--rule); border-radius: 6px; padding: 12px; overflow-x: auto; font-family: var(--mono); font-size: 0.8rem; line-height: 1.55; margin: 0; white-space: pre; }
+.code .c { color: var(--muted); }
+.code .k { color: var(--rf); }
+
+/* chapter 5 */
+.cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 10px; }
+.card { background: var(--paper); border: 1px solid var(--rule); border-radius: 8px; padding: 10px 12px; display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.card h3 { font-size: 1.05rem; }
+.card p { font-size: 0.88rem; }
+.tag { align-self: flex-start; font-family: var(--mono); font-size: 0.7rem; letter-spacing: 0.06em; text-transform: uppercase; padding: 1px 7px; border-radius: 4px; border: 1px solid currentColor; }
+.tag.have { color: var(--ok); } .tag.buy { color: var(--warn); } .tag.opt { color: var(--muted); }
+.k-have { fill: none; stroke: var(--ok); stroke-width: 3; }
+.k-buy { fill: none; stroke: var(--warn); stroke-width: 3; stroke-dasharray: 7 4; }
+.k-opt { fill: none; stroke: var(--muted); stroke-width: 2; stroke-dasharray: 2 4; }
+.box-frame { fill: var(--paper); stroke: var(--ink); stroke-width: 2; }
+.wire { stroke: var(--ink); stroke-width: 2; fill: none; }
+.radio { stroke: var(--rf); stroke-width: 2; fill: none; stroke-dasharray: 5 6; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 0.82rem; color: var(--muted); }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.sw { width: 22px; height: 0; border-top: 3px solid var(--ok); display: inline-block; }
+.sw.buy { border-top-style: dashed; border-color: var(--warn); }
+.sw.opt { border-top: 2px dotted var(--muted); }
+
+/* chapter 6 — mission */
+.mission { display: grid; grid-template-columns: minmax(0, 1fr) 236px; gap: 16px; align-items: start; }
+.phone { width: 220px; margin: 0 auto; border: 8px solid var(--ink); border-radius: 28px; background: var(--atak-bg); color: var(--atak-ink); overflow: hidden; display: flex; flex-direction: column; }
+.phone-bar { font-family: var(--mono); font-size: 0.7rem; padding: 8px 12px; border-bottom: 1px solid var(--atak-line); display: flex; justify-content: space-between; }
+.phone svg { display: block; width: 100%; height: auto; }
+.phone-tick { font-family: var(--mono); font-size: 0.7rem; padding: 8px 12px; border-top: 1px solid var(--atak-line); min-height: 4.6em; }
+.a-line { stroke: var(--atak-line); fill: none; stroke-width: 1.4; }
+.a-text { fill: var(--atak-ink); font-size: 9px; font-family: var(--mono); }
+.mission-low { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 16px; margin-top: 12px; }
+.phases { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; counter-reset: ph; }
+.phases li { counter-increment: ph; display: grid; grid-template-columns: 1.8rem minmax(0, 1fr); gap: 8px; padding: 7px 9px; border-radius: 6px; border: 1px solid transparent; font-size: 0.9rem; color: var(--muted); }
+.phases li::before { content: counter(ph); font-family: var(--mono); font-size: 0.8rem; color: var(--muted); padding-top: 2px; }
+.phases li b { color: var(--ink); font-weight: 600; display: block; }
+.phases li.on { border-color: var(--rf); background: var(--paper); color: var(--ink); }
+.phases li.on::before { color: var(--rf); }
+.log { font-family: var(--mono); font-size: 0.76rem; line-height: 1.5; background: var(--paper); border: 1px solid var(--rule); border-radius: 6px; padding: 10px 12px; height: 236px; overflow-y: auto; margin: 0; list-style: none; display: flex; flex-direction: column; gap: 3px; }
+.log li { display: grid; grid-template-columns: 4.2rem minmax(0, 1fr); gap: 8px; }
+.log li span { color: var(--muted); font-variant-numeric: tabular-nums; }
+.log li:last-child { color: var(--rf); }
+#m-scrub { flex: 1 1 180px; accent-color: var(--rf); }
+
+/* chapter 7 */
+.flow-row { display: grid; grid-template-columns: 7.5rem minmax(0, 1fr); gap: 12px; align-items: start; }
+.flow-row + .flow-row { margin-top: 14px; }
+.flow-tag { font-family: var(--mono); font-size: 0.74rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); padding-top: 10px; }
+.flow-steps { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px 26px; }
+.flow-steps li { position: relative; background: var(--paper); border: 1px solid var(--rule); border-radius: 6px; padding: 7px 10px; font-size: 0.86rem; display: flex; flex-direction: column; animation: hop 6s ease-in-out infinite; animation-delay: calc(var(--i) * 0.7s); }
+.flow-steps li:not(:last-child)::after { content: "→"; position: absolute; right: -20px; top: 50%; transform: translateY(-50%); color: var(--muted); }
+.flow-steps li span { color: var(--muted); font-size: 0.8rem; }
+@keyframes hop { 0%, 12%, 100% { border-color: var(--rule); } 4%, 8% { border-color: var(--rf); box-shadow: 0 0 0 2px var(--rf-soft); } }
+
+/* chapter 8/9 */
+.limits { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; list-style: none; margin: 0; padding: 0; }
+.limits li { border-top: 2px solid var(--rule); padding-top: 10px; display: flex; flex-direction: column; gap: 4px; font-size: 0.92rem; }
+.limits li b { font-family: var(--display); font-size: 1.1rem; font-weight: 600; }
+footer { border-top: 1px solid var(--rule); padding-block: 32px 48px; display: flex; flex-direction: column; gap: 12px; }
+.sources { columns: 2 280px; column-gap: 28px; font-size: 0.85rem; margin: 0; padding-left: 1.1rem; }
+.sources li { break-inside: avoid; margin-bottom: 4px; }
+
+@media (max-width: 900px) {
+  .hero, .chap-grid, .sim-grid, .mission, .mission-low { grid-template-columns: minmax(0, 1fr); }
+  .hero { padding-block: 28px 20px; }
+}
+@media (max-width: 520px) {
+  .products div { grid-template-columns: minmax(0, 1fr); gap: 2px; }
+  .flow-row { grid-template-columns: minmax(0, 1fr); gap: 4px; }
+  .flow-tag { padding-top: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .rip, .breath, .flow, .blink, .flow-steps li { animation: none !important; }
+  .rip { opacity: 0.4; transform: scale(0.7); }
+  #c4 .only-active, #c4 .only-silent { transition: none; }
+}
+</style>
+
+<div class="wrap">
+
+<!-- HERO -->
+<header class="hero">
+  <div class="hero-text">
+    <p class="eyebrow">Concept de licență · ESP32 + Wi-Fi CSI · totul este simulat</p>
+    <h1>Ce este în camera de după perete?</h1>
+    <p class="lead">Un soldat se apropie de o clădire. Cutia din rucsac ascultă Wi-Fi-ul care există deja în clădire și nu emite nimic. Când soldatul se oprește lângă perete, cutia spune unde se mișcă cineva și unde stă un om nemișcat care respiră. Rezultatul apare pe harta ATAK a echipei.</p>
+    <dl class="facts">
+      <div><dt>3 × ESP32</dt><dd>plăcile pe care le ai deja</dd></div>
+      <div><dt>0 cadre</dt><dd>emise de cutie în modul silențios</dd></div>
+      <div><dt>50 CSI/s</dt><dd>pe fiecare legătură radio</dd></div>
+      <div><dt>52</dt><dd>subpurtătoare măsurate în fiecare pachet</dd></div>
+    </dl>
+    <ul class="toc" aria-label="Capitole">
+      <li><a href="#c1"><span>01</span>Problema</a></li>
+      <li><a href="#c2"><span>02</span>Fizica CSI</a></li>
+      <li><a href="#c3"><span>03</span>Starea camerei</a></li>
+      <li><a href="#c4"><span>04</span>Modul silențios</a></li>
+      <li><a href="#c5"><span>05</span>Kitul</a></li>
+      <li><a href="#c6"><span>06</span>Misiunea</a></li>
+      <li><a href="#c7"><span>07</span>Drumul datelor</a></li>
+      <li><a href="#c8"><span>08</span>Ce poți face acum</a></li>
+      <li><a href="#c9"><span>09</span>Limite</a></li>
+    </ul>
+  </div>
+  <svg class="hero-svg" viewBox="0 0 640 380" role="img" aria-label="Vedere de sus: routerul din clădire emite, semnalul trece pe lângă un om și ajunge la cutia soldatului de afară; telefonul arată un marcaj pe hartă.">
+    <defs>
+      <pattern id="hatch" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="7" class="hatch-line"/></pattern>
+    </defs>
+    <rect x="24" y="24" width="372" height="332" class="floor"/>
+    <rect x="24" y="24" width="372" height="332" class="wall"/>
+    <rect x="388" y="24" width="16" height="332" fill="url(#hatch)" stroke="var(--ink)" stroke-width="2"/>
+    <text x="40" y="52" class="t-m">clădire</text>
+    <ellipse cx="295" cy="175" rx="206" ry="42" transform="rotate(22.07 295 175)" class="fresnel"/>
+    <line x1="110" y1="100" x2="480" y2="250" class="link flow"/>
+    <g transform="translate(110 100)">
+      <circle r="70" class="ripple rip"/><circle r="70" class="ripple rip d1"/><circle r="70" class="ripple rip d2"/>
+      <rect x="-17" y="-9" width="34" height="18" rx="3" class="dev"/>
+      <line x1="-9" y1="-9" x2="-13" y2="-22" class="dev-line"/><line x1="9" y1="-9" x2="13" y2="-22" class="dev-line"/>
+    </g>
+    <text x="64" y="140" class="t">routerul clădirii</text>
+    <text x="64" y="158" class="t-m">emite oricum</text>
+    <g transform="translate(250 176)">
+      <circle r="26" class="breath"/>
+      <circle cx="-6" cy="0" r="7" class="unknown"/><circle cx="6" cy="0" r="7" class="unknown"/><circle cx="0" cy="-6" r="7" class="unknown"/><circle cx="0" cy="6" r="7" class="unknown"/>
+      <circle r="13" class="unknown-ring"/>
+    </g>
+    <text x="196" y="226" class="t">om nemișcat</text>
+    <text x="196" y="244" class="t-m">respiră</text>
+    <g transform="translate(480 250)">
+      <rect x="-17" y="-12" width="34" height="24" class="friend"/>
+      <line x1="-17" y1="-12" x2="17" y2="12" class="friend-x"/><line x1="-17" y1="12" x2="17" y2="-12" class="friend-x"/>
+    </g>
+    <text x="440" y="290" class="t">cutia doar ascultă</text>
+    <text x="440" y="308" class="t-m">0 emisii proprii</text>
+    <g transform="translate(530 30)">
+      <rect x="0" y="0" width="92" height="150" rx="14" fill="var(--atak-bg)" stroke="var(--ink)" stroke-width="4"/>
+      <rect x="14" y="34" width="62" height="58" fill="none" stroke="var(--atak-line)" stroke-width="1.5"/>
+      <line x1="62" y1="34" x2="62" y2="92" stroke="var(--atak-line)" stroke-width="1.5"/>
+      <g class="blink"><circle cx="35" cy="66" r="5" class="unknown"/><circle cx="41" cy="66" r="5" class="unknown"/><circle cx="38" cy="63" r="5" class="unknown"/><circle cx="38" cy="69" r="5" class="unknown"/></g>
+      <rect x="64" y="104" width="12" height="9" fill="var(--friend)"/>
+      <text x="46" y="138" text-anchor="middle" class="a-text">ATAK</text>
+    </g>
+  </svg>
+</header>
+
+<!-- 01 -->
+<section class="chap" id="c1" aria-labelledby="c1-h">
+  <div class="chap-head"><span class="chap-no">01</span><h2 id="c1-h">Problema: intrarea în clădire</h2></div>
+  <div class="chap-grid">
+    <div class="prose">
+      <p>În lupta din oraș, echipele intră în clădiri cameră cu cameră. Cel mai mare risc este camera pe care nu o vezi. Armatele și poliția cumpără azi aparate radar care „văd” prin perete.</p>
+      <dl class="products">
+        <div><dt>Lumineye Lux</dt><dd>Radar portabil. Detectează oameni care se mișcă sau respiră după perete. Armata SUA i-a dat un premiu de 250.000 USD în 2019.</dd></div>
+        <div><dt>L3Harris Range-R</dt><dd>Detector portabil. Arată prezența și distanța oamenilor care se mișcă sau stau pe loc.</dd></div>
+        <div><dt>Camero Xaver</dt><dd>Radare UWB de 3–10 GHz, cu imagine a camerei. Le folosesc armate, poliție și echipe de salvare.</dd></div>
+      </dl>
+      <p class="callout">Toate aceste aparate emit propriul semnal radar. Kitul din această pagină încearcă altceva: folosește semnalul Wi-Fi care există deja în clădire.</p>
+    </div>
+    <figure class="stage">
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>Criteriu</th><th>Radar dedicat</th><th>Kitul cu ESP32</th></tr></thead>
+          <tbody>
+            <tr><td>Sursa semnalului</td><td>emițătorul propriu</td><td class="good">Wi-Fi-ul clădirii sau un nod propriu</td></tr>
+            <tr><td>Emisii proprii</td><td class="bad">da, cât timp măsoară</td><td class="good">zero în modul silențios</td></tr>
+            <tr><td>Rezoluție în distanță</td><td class="good">centimetri (UWB)</td><td class="bad">aproximativ 7,5 m (banda de 20 MHz)</td></tr>
+            <tr><td>Ce arată</td><td>distanță, mișcare, respirație</td><td>cameră, mișcare, respirație</td></tr>
+            <tr><td>Unde apare rezultatul</td><td>pe ecranul aparatului</td><td class="good">pe harta ATAK a echipei</td></tr>
+            <tr><td>Hardware</td><td>echipament militar dedicat</td><td class="good">plăci de câțiva euro</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <figcaption>Kitul nu înlocuiește un radar. Este mai ieftin și silențios, dar mult mai puțin precis în distanță.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- 02 -->
+<section class="chap" id="c2" aria-labelledby="c2-h">
+  <div class="chap-head"><span class="chap-no">02</span><h2 id="c2-h">Fizica de la zero: ce este CSI</h2></div>
+  <div class="chap-grid">
+    <div class="prose">
+      <ol>
+        <li>Routerul trimite un pachet Wi-Fi. Fiecare pachet începe cu un preambul cunoscut, numit LLTF.</li>
+        <li>Semnalul ajunge la ESP32 pe mai multe drumuri: direct și prin reflexii pe pereți.</li>
+        <li>ESP32 compară ce a primit cu ce trebuia să primească. Rezultatul este CSI: un număr pentru fiecare din cele 52 de subpurtătoare.</li>
+        <li>Un om adaugă un drum nou, prin reflexie pe corp. Lungimea de undă este 12,3 cm la 2,437 GHz. Câțiva centimetri de mișcare schimbă mult barele.</li>
+      </ol>
+      <p class="callout">Trage omul prin cameră. Barele pline sunt CSI-ul cu omul. Conturul arată camera goală.</p>
+      <p class="note">Placa ta trimite deja aceste date. Pachetul UDP are 138 de octeți: un antet și 64 de perechi (Q, I) din LLTF.</p>
+    </div>
+    <figure class="stage">
+      <div class="diag"><svg id="c2-svg" viewBox="0 0 680 440" role="img" aria-label="Cameră de 8 pe 5 metri văzută de sus, cu routerul, ESP32 și drumurile semnalului."></svg></div>
+      <canvas id="c2-bars" aria-label="Amplitudinea CSI pe cele 52 de subpurtătoare"></canvas>
+      <div class="controls">
+        <button class="btn" id="c2-auto" type="button" aria-pressed="true">Mișcare automată</button>
+        <span class="readout" id="c2-read">—</span>
+      </div>
+      <figcaption>Model fizic simplu: 6 drumuri fixe (direct, 3 reflexii, 2 reflexii duble) și drumul prin om. Canalul 6, 2,437 GHz, spațiere 312,5 kHz.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- 03 -->
+<section class="chap" id="c3" aria-labelledby="c3-h">
+  <div class="chap-head"><span class="chap-no">03</span><h2 id="c3-h">De la detecția căderii la starea camerei</h2></div>
+  <div class="chap-grid">
+    <div class="prose">
+      <p>Detectorul tău vechi de cădere (<code>src/csi/fall_detector.py</code>, acum în istoricul git) trecea prin stările CALM → MERS → IMPACT → VERIFICARE → ALARMĂ. Același semnal spune mai mult decât „a căzut”.</p>
+      <ul>
+        <li><b>Cameră goală:</b> CSI aproape constant, doar zgomot.</li>
+        <li><b>Mișcare:</b> varianță mare pe toate subpurtătoarele.</li>
+        <li><b>Om nemișcat:</b> varianță mică, dar cu o oscilație lentă. Respirația mișcă pieptul cu câțiva milimetri.</li>
+        <li><b>Om la sol:</b> un impact scurt și puternic, apoi nemișcare.</li>
+      </ul>
+      <p>Simularea folosește modelul din capitolul 2, la 50 CSI/s. Placa ta dă tot 50 CSI/s, cu ping la 20 ms.</p>
+      <p class="note">Deciziile sunt calculate din semnalul simulat, cu praguri simple. Clasificatorul real, pe date măsurate, este prima etapă a tezei.</p>
+    </div>
+    <figure class="stage">
+      <div class="controls" role="group" aria-label="Ce face omul">
+        <button class="btn" type="button" data-c3="empty" aria-pressed="false">Cameră goală</button>
+        <button class="btn" type="button" data-c3="walk" aria-pressed="false">Om în mișcare</button>
+        <button class="btn" type="button" data-c3="still" aria-pressed="true">Om nemișcat</button>
+        <button class="btn" type="button" data-c3="fall" aria-pressed="false">Cădere</button>
+      </div>
+      <div class="sim-grid">
+        <div class="sim-side">
+          <svg id="c3-room" viewBox="0 0 680 440" aria-label="Poziția omului în cameră"></svg>
+          <div class="verdict" aria-live="polite">
+            <span class="eyebrow">Decizia senzorului</span>
+            <span class="chip" id="c3-chip">—</span>
+            <span class="readout" id="c3-breath">—</span>
+            <span class="readout" id="c3-truth">—</span>
+          </div>
+        </div>
+        <div class="sim-side">
+          <span class="eyebrow">Cascada CSI · 52 subpurtătoare · ultimele 10 s</span>
+          <canvas id="c3-wf" aria-label="Cascada amplitudinii CSI"></canvas>
+          <div class="axis"><span>−10 s</span><span>acum</span></div>
+          <span class="eyebrow" id="c3-tr-label">Cea mai sensibilă subpurtătoare · ultimele 20 s</span>
+          <canvas id="c3-tr" aria-label="Amplitudinea unei subpurtătoare în timp"></canvas>
+          <div class="meter">
+            <div class="meter-row"><span>Mișcare: varianța pe 1 s</span><span class="readout" id="c3-v1">—</span></div>
+            <div class="bar"><i id="c3-v1-bar"></i><b id="c3-v1-th"></b></div>
+          </div>
+          <div class="meter">
+            <div class="meter-row"><span>Prezență: varianța pe 3 s</span><span class="readout" id="c3-vp">—</span></div>
+            <div class="bar"><i id="c3-vp-bar"></i><b id="c3-vp-th"></b></div>
+          </div>
+        </div>
+      </div>
+      <figcaption>Scara barelor este logaritmică. Linia verticală marchează pragul de decizie.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- 04 -->
+<section class="chap" id="c4" data-mode="silent" aria-labelledby="c4-h">
+  <div class="chap-head"><span class="chap-no">04</span><h2 id="c4-h">Modul silențios</h2></div>
+  <div class="chap-grid">
+    <div class="prose">
+      <p>Firmware-ul de azi emite 100 de probe-uri pe secundă, din <code>probe_sender_task</code>. Un radiogoniometru inamic poate găsi cutia după aceste emisii. Rapoartele din Ucraina spun că unele unități au fost găsite după semnalele lor Wi-Fi, celulare și Bluetooth.</p>
+      <p>În modul silențios, cutia nu emite nimic. Routerul clădirii emite oricum, pentru telefoanele și televizoarele din interior. Cutia măsoară CSI din aceste cadre. Radarul pasiv Hensoldt TwInvis folosește același principiu, cu semnale radio și TV. UCL a arătat principiul cu Wi-Fi, prin perete, în 2012.</p>
+      <p class="callout">Nu orice cadru dă CSI. Beacon-urile sunt 802.11b și nu au LLTF. Ai văzut asta pe 9 noiembrie. Cutia are nevoie de cadre OFDM: date trimise către un telefon sau un televizor. Tot pe 9 noiembrie, placa ta a primit aproximativ 400 CSI/s de la un dispozitiv străin.</p>
+<pre class="code"><span class="c">// azi: mod activ</span>
+<span class="k">if</span> (info-&gt;hdr[0] != 0x40) <span class="k">return</span>;    <span class="c">// doar probe-urile nodurilor</span>
+xTaskCreatePinnedToCore(probe_sender_task, ...);
+
+<span class="c">// propunere: mod silențios</span>
+<span class="k">if</span> (memcmp(info-&gt;mac, ap_mac, 6) != 0) <span class="k">return</span>;  <span class="c">// doar AP-ul ales</span>
+<span class="c">// fără probe_sender_task: 0 cadre emise</span></pre>
+    </div>
+    <figure class="stage">
+      <div class="controls" role="group" aria-label="Modul cutiei">
+        <button class="btn" type="button" data-c4="active" aria-pressed="false">Mod activ</button>
+        <button class="btn" type="button" data-c4="silent" aria-pressed="true">Mod silențios</button>
+      </div>
+      <div class="diag">
+        <svg viewBox="0 0 720 320" role="img" aria-label="Clădirea cu router, cutia soldatului și un radiogoniometru inamic.">
+          <rect x="30" y="30" width="370" height="260" class="floor"/>
+          <rect x="30" y="30" width="370" height="260" class="wall"/>
+          <text x="46" y="56" class="t-m">clădire</text>
+          <g transform="translate(250 110)">
+            <circle r="80" class="ripple rip"/><circle r="80" class="ripple rip d1"/><circle r="80" class="ripple rip d2"/>
+            <rect x="-17" y="-9" width="34" height="18" rx="3" class="dev"/>
+            <line x1="-9" y1="-9" x2="-13" y2="-22" class="dev-line"/><line x1="9" y1="-9" x2="13" y2="-22" class="dev-line"/>
+          </g>
+          <text x="200" y="148" class="t">router (emite oricum)</text>
+          <g transform="translate(170 214)"><circle r="12" class="ghost"/><circle r="5" class="ghost-fill"/></g>
+          <!-- active -->
+          <g class="only-active">
+            <g transform="translate(470 200)">
+              <circle r="60" class="ripple rip" style="stroke: var(--warn)"/><circle r="60" class="ripple rip d1" style="stroke: var(--warn)"/><circle r="60" class="ripple rip d2" style="stroke: var(--warn)"/>
+            </g>
+            <line x1="650" y1="70" x2="470" y2="200" class="bt-line"/>
+            <text x="452" y="290" class="t t-b" style="fill: var(--hostile)">Cutia este găsită: 100 de cadre/s</text>
+          </g>
+          <!-- silent -->
+          <g class="only-silent">
+            <line x1="250" y1="110" x2="470" y2="200" class="link flow"/>
+            <line x1="650" y1="70" x2="250" y2="110" class="ghost"/>
+            <text x="452" y="290" class="t t-b" style="fill: var(--ok)">Detectorul vede doar routerul</text>
+          </g>
+          <g transform="translate(470 200)">
+            <rect x="-17" y="-12" width="34" height="24" class="friend"/>
+            <line x1="-17" y1="-12" x2="17" y2="12" class="friend-x"/><line x1="-17" y1="12" x2="17" y2="-12" class="friend-x"/>
+          </g>
+          <text x="446" y="238" class="t">cutia</text>
+          <g transform="translate(650 70)">
+            <path d="M0 -16 L16 0 L0 16 L-16 0 Z" class="hostile"/>
+            <line x1="0" y1="-16" x2="0" y2="-34" class="dev-line"/><line x1="-8" y1="-30" x2="8" y2="-30" class="dev-line"/>
+          </g>
+          <text x="560" y="112" class="t-s">radiogoniometru</text>
+          <text x="560" y="128" class="t-m">inamic</text>
+        </svg>
+      </div>
+      <p class="mode-text only-active" id="c4-ta">Mod activ: cutia trimite probe-uri. CSI-ul este stabil și nu depinde de clădire, dar cutia devine o sursă radio nouă, ușor de găsit.</p>
+      <p class="mode-text only-silent" id="c4-ts">Mod silențios: cutia doar ascultă. Detectorul vede numai traficul normal al routerului. Dacă routerul nu are trafic OFDM, cutia nu are date.</p>
+    </figure>
+  </div>
+</section>
+
+<!-- 05 -->
+<section class="chap" id="c5" aria-labelledby="c5-h">
+  <div class="chap-head"><span class="chap-no">05</span><h2 id="c5-h">Kitul: ce intră în cutie</h2></div>
+  <div class="chap-grid">
+    <div class="prose">
+      <p>Kitul are două părți. Cutia de perete ascultă. Nodurile de pus emit doar când clădirea nu are Wi-Fi.</p>
+      <p>Cele trei plăci ESP32 pe care le ai acoperă tot kitul: o placă în cutie și două noduri. Ubertooth-ul adaugă dispozitivele Bluetooth în modul „mers”.</p>
+      <p>Telefonul se leagă de cutie prin cablu USB-OTG. Cablul nu face emisii radio. Pentru o cutie silențioasă, acest detaliu contează.</p>
+      <div class="legend">
+        <span><i class="sw"></i>ai deja</span>
+        <span><i class="sw buy"></i>de cumpărat</span>
+        <span><i class="sw opt"></i>opțional</span>
+      </div>
+    </div>
+    <figure class="stage">
+      <div class="diag">
+        <svg viewBox="0 0 760 380" role="img" aria-label="Schema kitului: cutia cu antenă, ESP32, IMU și baterie, legată de telefon; două noduri; Ubertooth opțional.">
+          <rect x="16" y="16" width="440" height="214" rx="14" class="box-frame"/>
+          <text x="32" y="42" class="t t-b">Cutia de perete</text>
+          <!-- antenna -->
+          <rect x="36" y="92" width="34" height="74" rx="3" class="dev"/>
+          <rect x="31" y="87" width="44" height="84" rx="6" class="k-buy"/>
+          <text x="30" y="194" class="t-s">antenă</text><text x="30" y="210" class="t-s">direcțională</text>
+          <!-- esp32-a -->
+          <rect x="132" y="98" width="128" height="62" rx="4" class="dev"/>
+          <rect x="127" y="93" width="138" height="72" rx="7" class="k-have"/>
+          <text x="196" y="125" text-anchor="middle" class="t t-b">ESP32-A</text>
+          <text x="196" y="145" text-anchor="middle" class="t-m">receptor</text>
+          <line x1="75" y1="129" x2="127" y2="129" class="wire"/><text x="80" y="121" class="t-m t-mono">u.FL</text>
+          <!-- imu -->
+          <rect x="314" y="58" width="116" height="44" rx="4" class="dev"/>
+          <rect x="309" y="53" width="126" height="54" rx="7" class="k-buy"/>
+          <text x="372" y="85" text-anchor="middle" class="t-s t-b">IMU MPU-6050</text>
+          <path d="M309 80 H288 V112 H265" class="wire"/><text x="270" y="72" class="t-m t-mono">I²C</text>
+          <!-- battery -->
+          <rect x="314" y="150" width="116" height="44" rx="4" class="dev"/>
+          <rect x="309" y="145" width="126" height="54" rx="7" class="k-buy"/>
+          <text x="372" y="177" text-anchor="middle" class="t-s t-b">baterie LiPo</text>
+          <path d="M309 172 H288 V146 H265" class="wire"/>
+          <!-- phone -->
+          <rect x="604" y="30" width="96" height="168" rx="14" fill="var(--atak-bg)" stroke="var(--ink)" stroke-width="3"/>
+          <rect x="599" y="25" width="106" height="178" rx="18" class="k-have"/>
+          <text x="652" y="110" text-anchor="middle" class="a-text" style="font-size: 13px">ATAK</text>
+          <text x="652" y="128" text-anchor="middle" class="a-text" style="font-size: 11px">telefon</text>
+          <path d="M265 129 H456 M456 129 H599" class="wire"/>
+          <text x="470" y="120" class="t-s">USB-OTG</text><text x="470" y="148" class="t-m">fără emisii</text>
+          <!-- nodes -->
+          <rect x="40" y="280" width="128" height="56" rx="4" class="dev"/>
+          <rect x="35" y="275" width="138" height="66" rx="7" class="k-have"/>
+          <text x="104" y="305" text-anchor="middle" class="t t-b">ESP32-B</text><text x="104" y="324" text-anchor="middle" class="t-m">nod de pus</text>
+          <rect x="216" y="280" width="128" height="56" rx="4" class="dev"/>
+          <rect x="211" y="275" width="138" height="66" rx="7" class="k-have"/>
+          <text x="280" y="305" text-anchor="middle" class="t t-b">ESP32-C</text><text x="280" y="324" text-anchor="middle" class="t-m">nod de pus</text>
+          <path d="M104 275 C 90 250, 60 230, 54 172" class="radio flow"/>
+          <path d="M280 275 C 250 240, 120 220, 66 172" class="radio flow"/>
+          <text x="118" y="262" class="t-m">emit doar fără Wi-Fi</text>
+          <!-- ubertooth -->
+          <rect x="414" y="280" width="128" height="56" rx="4" class="dev"/>
+          <rect x="409" y="275" width="138" height="66" rx="7" class="k-have"/>
+          <text x="478" y="305" text-anchor="middle" class="t t-b">Ubertooth</text><text x="478" y="324" text-anchor="middle" class="t-m">Bluetooth</text>
+          <rect x="592" y="280" width="140" height="56" rx="4" class="dev"/>
+          <rect x="587" y="275" width="150" height="66" rx="7" class="k-opt"/>
+          <text x="662" y="305" text-anchor="middle" class="t t-b">Raspberry Pi</text><text x="662" y="324" text-anchor="middle" class="t-m">gazdă Linux</text>
+          <line x1="547" y1="308" x2="587" y2="308" class="wire"/>
+          <path d="M662 275 V203" class="wire" stroke-dasharray="4 4"/>
+        </svg>
+      </div>
+      <div class="cards">
+        <div class="card"><span class="tag have">ai deja</span><h3>3 × ESP32</h3><p>A în cutie, ca receptor. B și C sunt noduri de pus, ca emițătoare.</p></div>
+        <div class="card"><span class="tag have">ai deja</span><h3>Ubertooth One</h3><p>În modul „mers”, listează dispozitivele Bluetooth: telefoane, căști, ceasuri. Are nevoie de o gazdă Linux.</p></div>
+        <div class="card"><span class="tag buy">de cumpărat</span><h3>IMU MPU-6050</h3><p>Știe dacă soldatul merge sau stă. Schimbă singur modul cutiei.</p></div>
+        <div class="card"><span class="tag buy">de cumpărat</span><h3>Antenă direcțională</h3><p>Antenă de 2,4 GHz spre perete. Cere placa ESP32-WROOM-32U, cu conector u.FL.</p></div>
+        <div class="card"><span class="tag buy">de cumpărat</span><h3>Baterie LiPo</h3><p>Alimentează cutia fără PC. Măsoară consumul înainte să scrii o autonomie în teză.</p></div>
+        <div class="card"><span class="tag opt">opțional</span><h3>Raspberry Pi</h3><p>Gazda pentru Ubertooth în rucsac. Fără el, Ubertooth rămâne pe laptop.</p></div>
+      </div>
+    </figure>
+  </div>
+</section>
+
+<!-- 06 -->
+<section class="chap" id="c6" aria-labelledby="c6-h">
+  <div class="chap-head"><span class="chap-no">06</span><h2 id="c6-h">Misiunea pas cu pas</h2></div>
+  <div class="prose">
+    <p>O echipă trebuie să intre într-o clădire cu trei camere. Soldatul cu cutia merge pe trotuar, de-a lungul peretelui. Liniile punctate gri arată realitatea, pe care soldatul nu o vede. Valorile din jurnal sunt exemple, nu măsurători.</p>
+  </div>
+  <figure class="stage full" id="mission">
+    <div class="mission">
+      <div class="diag">
+        <svg id="m-svg" viewBox="0 0 800 470" role="img" aria-label="Harta de sus: clădire cu trei camere, soldatul pe trotuar, emițătoarele găsite și marcajele detectate.">
+          <rect x="0" y="300" width="800" height="170" class="street"/>
+          <text x="20" y="458" class="t-m">trotuar</text>
+          <!-- IMU panel -->
+          <rect x="14" y="20" width="160" height="150" rx="8" class="dev"/>
+          <text x="26" y="44" class="t-m t-mono">IMU</text>
+          <text x="26" y="76" class="t t-b" style="font-size: 26px; font-family: var(--display)" id="m-mode">OPRIRE</text>
+          <text x="26" y="98" class="t-m t-mono" id="m-steps">0 pași/s</text>
+          <polyline id="m-wave-walk" points="26,128 38,112 50,140 62,114 74,138 86,112 98,140 110,114 122,138 134,112 146,140 158,120" class="p-person"/>
+          <line id="m-wave-still" x1="26" y1="126" x2="160" y2="126" class="p-person"/>
+          <text x="26" y="160" class="t-m t-mono">emisii: 0 cadre</text>
+          <!-- building -->
+          <rect x="190" y="24" width="580" height="270" class="floor"/>
+          <rect x="190" y="24" width="580" height="270" class="wall"/>
+          <path d="M383 24 V236 M383 274 V294 M577 24 V236 M577 274 V294" class="wall-thin"/>
+          <text x="210" y="50" class="t-m">Camera 1</text>
+          <text x="403" y="50" class="t-m">Camera 2</text>
+          <text x="597" y="50" class="t-m">Camera 3</text>
+          <!-- ground truth -->
+          <g transform="translate(478 196)"><circle r="13" class="ghost"/><circle r="5" class="ghost-fill"/></g>
+          <g id="m-p3" transform="translate(630 232)"><circle r="13" class="ghost"/><circle r="5" class="ghost-fill"/></g>
+          <!-- links -->
+          <g id="m-links">
+            <ellipse id="m-f-ap" class="fresnel"/>
+            <ellipse id="m-f-ph" class="fresnel"/>
+            <line x1="520" y1="92" x2="480" y2="322" class="link flow" id="m-l-ap"/>
+            <line x1="735" y1="150" x2="480" y2="322" class="link flow" id="m-l-ph"/>
+          </g>
+          <!-- emitters: ghost + found -->
+          <g transform="translate(250 120)">
+            <rect x="-17" y="-11" width="34" height="22" rx="2" class="ghost"/>
+            <g id="m-e-tv"><rect x="-17" y="-11" width="34" height="22" rx="2" class="dev"/><text x="0" y="5" text-anchor="middle" class="t-m t-mono" style="font-size: 11px">TV</text>
+              <circle r="30" class="ripple" id="m-r-tv"/></g>
+            <g id="m-x-tv"><line x1="-12" y1="-12" x2="12" y2="12" class="cross"/><line x1="-12" y1="12" x2="12" y2="-12" class="cross"/><text x="-40" y="34" class="t-m" style="font-size: 12px">doar beacon 11b</text></g>
+          </g>
+          <g transform="translate(520 84)">
+            <rect x="-15" y="-8" width="30" height="16" rx="3" class="ghost"/>
+            <g id="m-e-ap"><rect x="-15" y="-8" width="30" height="16" rx="3" class="dev"/><line x1="-8" y1="-8" x2="-11" y2="-19" class="dev-line"/><line x1="8" y1="-8" x2="11" y2="-19" class="dev-line"/>
+              <text x="22" y="5" class="t-s t-mono">AP</text><circle r="30" class="ripple" id="m-r-ap"/></g>
+          </g>
+          <g transform="translate(735 150)">
+            <rect x="-6" y="-10" width="12" height="20" rx="3" class="ghost"/>
+            <g id="m-e-ph"><rect x="-6" y="-10" width="12" height="20" rx="3" class="dev"/><text x="-60" y="-14" class="t-s t-mono">telefon</text><circle r="30" class="ripple" id="m-r-ph"/></g>
+          </g>
+          <g transform="translate(748 196)">
+            <circle r="5" class="ghost"/>
+            <g id="m-e-bt"><circle r="5" class="dev"/><text x="-26" y="22" class="t-s t-mono">BT</text><circle r="22" class="ripple" id="m-r-bt"/></g>
+          </g>
+          <!-- detections -->
+          <g id="m-k2" transform="translate(478 196)">
+            <circle cx="-6" r="7" class="unknown"/><circle cx="6" r="7" class="unknown"/><circle cy="-6" r="7" class="unknown"/><circle cy="6" r="7" class="unknown"/><circle r="13" class="unknown-ring"/>
+            <text x="-88" y="34" class="t-s t-b">nemișcat · ~16/min</text>
+          </g>
+          <g id="m-k3" transform="translate(662 214)">
+            <circle cx="-6" r="7" class="unknown"/><circle cx="6" r="7" class="unknown"/><circle cy="-6" r="7" class="unknown"/><circle cy="6" r="7" class="unknown"/><circle r="13" class="unknown-ring"/>
+            <text x="-30" y="-20" class="t-s t-b">mișcare</text>
+          </g>
+          <g id="m-k1" transform="translate(286 206)">
+            <circle r="14" class="dev"/><text x="0" y="5" text-anchor="middle" class="t t-b">?</text>
+            <text x="-62" y="36" class="t-m" style="font-size: 12px">fără emițător util</text>
+          </g>
+          <!-- steps + soldier -->
+          <g id="m-steps-g"></g>
+          <g id="m-ring" transform="translate(480 322)">
+            <circle r="30" class="ring-bg"/>
+            <circle r="30" class="ring-fg" id="m-ring-fg" transform="rotate(-90)" stroke-dasharray="188.5" stroke-dashoffset="0"/>
+          </g>
+          <g id="m-soldier" transform="translate(480 322)">
+            <rect x="-15" y="-11" width="30" height="22" class="friend"/>
+            <line x1="-15" y1="-11" x2="15" y2="11" class="friend-x"/><line x1="-15" y1="11" x2="15" y2="-11" class="friend-x"/>
+          </g>
+          <text x="500" y="364" class="t-s t-mono" id="m-meas">măsurare 100%</text>
+        </svg>
+      </div>
+      <div class="phone" aria-label="Ecranul ATAK al echipei">
+        <div class="phone-bar"><span>ATAK · Echipa 1</span><span id="ph-time">T+0 s</span></div>
+        <svg viewBox="0 0 200 250" role="img" aria-label="Harta ATAK cu marcajele primite">
+          <rect x="0" y="0" width="200" height="250" fill="var(--atak-bg)"/>
+          <path d="M0 136 H200" class="a-line" stroke-dasharray="3 4"/>
+          <rect x="10" y="40" width="180" height="84" class="a-line"/>
+          <path d="M70 40 V124 M130 40 V124" class="a-line"/>
+          <text x="12" y="34" class="a-text">clădirea țintă</text>
+          <text x="176" y="22" class="a-text">N ↑</text>
+          <path d="M12 236 H42" class="a-line"/><text x="46" y="239" class="a-text">10 m</text>
+          <g id="ph-self" transform="translate(100 132)"><rect x="-6" y="-4.5" width="12" height="9" fill="var(--friend)" stroke="var(--atak-ink)" stroke-width="0.8"/></g>
+          <g id="ph-k3" transform="translate(147 99)"><circle cx="-3" r="3.6" class="unknown"/><circle cx="3" r="3.6" class="unknown"/><circle cy="-3" r="3.6" class="unknown"/><circle cy="3" r="3.6" class="unknown"/><text x="-14" y="-8" class="a-text">mișcare</text></g>
+          <g id="ph-k2" transform="translate(89 93)"><circle cx="-3" r="3.6" class="unknown"/><circle cx="3" r="3.6" class="unknown"/><circle cy="-3" r="3.6" class="unknown"/><circle cy="3" r="3.6" class="unknown"/><text x="-20" y="16" class="a-text">~16/min</text></g>
+          <g id="ph-k1" transform="translate(40 98)"><circle r="5" fill="none" stroke="var(--atak-ink)" stroke-width="1"/><text x="-2.5" y="3" class="a-text">?</text></g>
+        </svg>
+        <div class="phone-tick" id="ph-tick">Niciun marcaj încă.</div>
+      </div>
+    </div>
+    <div class="controls">
+      <button class="btn" id="m-prev" type="button" aria-label="Pasul anterior">⏮</button>
+      <button class="btn" id="m-play" type="button" aria-pressed="false">▶ Pornește</button>
+      <button class="btn" id="m-next" type="button" aria-label="Pasul următor">⏭</button>
+      <input type="range" id="m-scrub" min="0" max="1000" value="1000" aria-label="Momentul din misiune">
+      <span class="readout" id="m-time">T+27,0 s</span>
+    </div>
+    <div class="mission-low">
+      <ol class="phases" id="m-phases">
+        <li data-t="0"><span><b>Apropiere · mod MERS</b>IMU-ul vede pași. Cutia ascultă și face harta emițătoarelor.</span></li>
+        <li data-t="8"><span><b>Alegerea legăturilor</b>Routerul acoperă camera 2. Telefonul acoperă camera 3.</span></li>
+        <li data-t="10"><span><b>Oprire · mod OPRIRE</b>Soldatul stă lângă perete. Cutia măsoară CSI.</span></li>
+        <li data-t="20"><span><b>Decizie pe cameră</b>Mișcare în camera 3. Om nemișcat care respiră în camera 2.</span></li>
+        <li data-t="21"><span><b>Harta echipei</b>Marcajele ajung în ATAK ca mesaje CoT.</span></li>
+      </ol>
+      <ol class="log" id="m-log" aria-live="off"></ol>
+    </div>
+    <figcaption>Timpul este comprimat. Respirația cere în realitate 10–15 s de date nemișcate. Fără GSAP sau cu „mișcare redusă”, scena arată starea finală.</figcaption>
+  </figure>
+  <p class="note" style="margin-top: 14px">Clădirea nu are Wi-Fi? Soldatul pune nodurile B și C la alți pereți. Nodul B emite scurt, cu putere mică, iar cutia măsoară legătura B → cutie. Modul acesta nu mai este complet silențios.</p>
+</section>
+
+<!-- 07 -->
+<section class="chap" id="c7" aria-labelledby="c7-h">
+  <div class="chap-head"><span class="chap-no">07</span><h2 id="c7-h">Drumul datelor</h2></div>
+  <div class="chap-grid">
+    <div class="prose">
+      <p>Prima linie există deja în repo. A doua linie este kitul. Diferența principală este destinația: telefonul, nu PC-ul.</p>
+      <ul>
+        <li><b>Filtrare:</b> filtrul median elimină vârfurile izolate.</li>
+        <li><b>Caracteristici:</b> varianța pe 1 s și spectrul între 0,1 și 0,5 Hz, adică 6–30 de respirații pe minut.</li>
+        <li><b>Decizie:</b> gol, mișcare, nemișcat sau la sol, pe fiecare legătură.</li>
+        <li><b>CoT:</b> un mesaj XML pe cameră. ATAK îl desenează ca marcaj „necunoscut” (<code>a-u-G</code>).</li>
+      </ul>
+    </div>
+    <figure class="stage">
+      <div class="flow-row">
+        <span class="flow-tag">Azi, în repo</span>
+        <ol class="flow-steps">
+          <li style="--i:0"><b>Antenă PCB</b><span>ESP32</span></li>
+          <li style="--i:1"><b>on_csi</b><span>task-ul Wi-Fi</span></li>
+          <li style="--i:2"><b>csi_queue</b><span>ring buffer</span></li>
+          <li style="--i:3"><b>udp_sender_task</b><span>UDP :5005</span></li>
+          <li style="--i:4"><b>csi_ui.py</b><span>PC, grafic live</span></li>
+        </ol>
+      </div>
+      <div class="flow-row">
+        <span class="flow-tag">În kit</span>
+        <ol class="flow-steps">
+          <li style="--i:0"><b>Antenă direcțională</b><span>u.FL</span></li>
+          <li style="--i:1"><b>on_csi</b><span>filtru pe MAC-ul AP</span></li>
+          <li style="--i:2"><b>csi_queue</b><span>ring buffer</span></li>
+          <li style="--i:3"><b>USB-OTG</b><span>serial, fără radio</span></li>
+          <li style="--i:4"><b>Telefon</b><span>filtrare → decizie</span></li>
+          <li style="--i:5"><b>ATAK</b><span>mesaje CoT</span></li>
+        </ol>
+      </div>
+<pre class="code"><span class="c">&lt;!-- exemplu: un mesaj CoT pentru camera 2 --&gt;</span>
+&lt;event version="2.0" uid="csi-camera-2" type="<span class="k">a-u-G</span>" how="h-e"
+       time="2027-05-14T10:21:07Z" start="2027-05-14T10:21:07Z"
+       stale="2027-05-14T10:23:07Z"&gt;
+  &lt;point lat="45.000120" lon="25.000340" hae="0" ce="4.0" le="9999999"/&gt;
+  &lt;detail&gt;
+    &lt;contact callsign="Camera 2 · nemișcat"/&gt;
+    &lt;remarks&gt;CSI: respirație ~16/min; legătura AP → cutie&lt;/remarks&gt;
+  &lt;/detail&gt;
+&lt;/event&gt;</pre>
+      <figcaption>Biblioteca PyTAK (Python) construiește și trimite astfel de mesaje. Proiectul DragonSync face deja același lucru pentru detecții de drone de pe un ESP32.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- 08 -->
+<section class="chap" id="c8" aria-labelledby="c8-h">
+  <div class="chap-head"><span class="chap-no">08</span><h2 id="c8-h">Ce poți face cu ce ai acum</h2></div>
+  <div class="prose" style="margin-bottom: 18px">
+    <p class="callout">Etapele 1–5 nu cer nicio cumpărătură. Ai nevoie doar de cele trei ESP32, de routerul tău, de un perete din casă și de un telefon Android.</p>
+  </div>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>Etapă</th><th>Ce demonstrezi</th><th>Hardware</th><th>Ai tot?</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>Clasificatorul de stare: gol, mișcare, nemișcat, cădere</td><td>2 × ESP32, PC</td><td class="good">da</td></tr>
+        <tr><td>2</td><td>Același clasificator prin perete: cât pierzi</td><td>2 × ESP32, un perete din casă</td><td class="good">da</td></tr>
+        <tr><td>3</td><td>Modul silențios: activ comparat cu pasiv</td><td>1 × ESP32, routerul tău, un telefon care face trafic</td><td class="good">da</td></tr>
+        <tr><td>4</td><td>Respirația unui om nemișcat</td><td>montajul din etapa 2 sau 3</td><td class="good">da</td></tr>
+        <tr><td>5</td><td>Marcaje pe harta ATAK (PyTAK, CoT)</td><td>telefon Android cu ATAK-CIV</td><td class="good">probabil</td></tr>
+        <tr><td>6</td><td>Comutare automată MERS / OPRIRE</td><td>IMU MPU-6050</td><td class="bad">nu, ieftin</td></tr>
+        <tr><td>7</td><td>Cutia mobilă, pe baterie</td><td>ESP32-WROOM-32U, antenă, baterie, carcasă 3D</td><td class="bad">nu</td></tr>
+        <tr><td>8</td><td>Bluetooth în modul MERS</td><td>Ubertooth, Raspberry Pi</td><td>parțial</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- 09 -->
+<section class="chap" id="c9" aria-labelledby="c9-h">
+  <div class="chap-head"><span class="chap-no">09</span><h2 id="c9-h">Limite</h2></div>
+  <ul class="limits">
+    <li><b>Doar când stă pe loc</b>Mișcarea cutiei schimbă CSI mai mult decât omul din cameră. Detecția în mers cere un radar UWB.</li>
+    <li><b>Rezoluție de 7,5 m</b>Banda de 20 MHz nu separă peretele de camera din spate. Kitul spune „camera”, nu „la 3 m”.</li>
+    <li><b>Pereți groși</b>Betonul armat atenuează mult semnalul de 2,4 GHz. Cărămida și gips-cartonul atenuează mai puțin.</li>
+    <li><b>Depinde de trafic</b>Modul silențios are nevoie de cadre OFDM. Un router fără clienți activi dă doar beacon-uri, fără CSI.</li>
+    <li><b>Telefoane cu MAC aleator</b>Telefoanele moderne își schimbă adresa MAC. Numărul de telefoane din modul MERS este aproximativ.</li>
+    <li><b>Viața privată</b>Fă testele doar în spațiul tău, cu rețeaua ta și cu voluntari care știu de test.</li>
+  </ul>
+</section>
+
+<footer>
+  <p class="eyebrow">Surse</p>
+  <ol class="sources">
+    <li><a href="https://www.militarytimes.com/news/your-army/2019/10/24/this-device-could-help-soldiers-see-through-walls-in-the-urban-fight" target="_blank" rel="noopener">Lumineye pentru soldați (Military Times)</a></li>
+    <li><a href="https://nij.ojp.gov/index%2ephp/library/publications/through-wall-sensors-ttws-law-enforcement-test-evaluation-version-12" target="_blank" rel="noopener">Senzori prin perete pentru poliție (NIJ)</a></li>
+    <li><a href="https://camero-tech.com/camero-tech-launches-its-groundbreaking-xavertm-long-range-system/" target="_blank" rel="noopener">Camero Xaver</a></li>
+    <li><a href="https://phys.org/news/2012-08-see-through-wall-surveillance-wifi-shown-ucl.html" target="_blank" rel="noopener">UCL: Wi-Fi pasiv prin perete (2012)</a></li>
+    <li><a href="https://www.hensoldt.net/products/twinvis-passive-radar-surveillance-of-noiseless-objects" target="_blank" rel="noopener">Hensoldt TwInvis</a></li>
+    <li><a href="https://dev.to/joshbullock90/atak-over-a-mesh-network-5a8g" target="_blank" rel="noopener">Unități găsite după semnalele lor (DEV)</a></li>
+    <li><a href="https://pypi.org/project/pytak/5.5.0" target="_blank" rel="noopener">PyTAK</a></li>
+    <li><a href="https://github.com/alphafox02/DragonSync" target="_blank" rel="noopener">DragonSync: de la ESP32 la ATAK</a></li>
+    <li><a href="https://www.mintlify.com/FreeTAKTeam/FreeTakServer/api/cot/message-format" target="_blank" rel="noopener">Formatul CoT (FreeTAKServer)</a></li>
+    <li><a href="https://arxiv.org/pdf/1810.10109" target="_blank" rel="noopener">Et Tu Alexa? (arXiv)</a></li>
+    <li><a href="https://mdpi.com/2076-3417/14/15/6458" target="_blank" rel="noopener">Respirația cu ESP32 CSI (MDPI 2024)</a></li>
+    <li><a href="https://gsap.com/" target="_blank" rel="noopener">GSAP, biblioteca de animație a paginii</a></li>
+  </ol>
+  <p class="note">Toate scenele sunt ilustrative. Nicio valoare din pagină nu este o măsurătoare, cu excepția celor marcate „placa ta”.</p>
+</footer>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+
+<script>
+/* SIM-CORE-START */
+const Sim = (() => {
+  const C = 299792458, FC = 2.437e9, DF = 312500;
+  const KS = [];
+  for (let k = -26; k <= 26; k++) if (k !== 0) KS.push(k);
+  const N = KS.length;
+  const FREQS = KS.map(k => FC + k * DF);
+  const LAMBDA = C / FC;
+  const ROOM = { w: 8, h: 5 };
+  const TX = { x: 0.6, y: 2.0 }, RX = { x: 7.4, y: 2.9 };
+  const dist = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
+  const mY = (p, w) => ({ x: p.x, y: 2 * w - p.y });
+  const mX = (p, w) => ({ x: 2 * w - p.x, y: p.y });
+  const iY = (a, b, w) => { const t = (w - a.y) / (b.y - a.y); return { x: a.x + t * (b.x - a.x), y: w }; };
+  const iX = (a, b, w) => { const t = (w - a.x) / (b.x - a.x); return { x: w, y: a.y + t * (b.y - a.y) }; };
+
+  const PATHS = (() => {
+    const out = [{ kind: 'direct', a: 1, d: dist(TX, RX), pts: [TX, RX] }];
+    for (const w of [0, ROOM.h]) {
+      const im = mY(TX, w);
+      out.push({ kind: 'wall', a: 0.6, d: dist(im, RX), pts: [TX, iY(im, RX, w), RX] });
+    }
+    const imx = mX(TX, ROOM.w);
+    out.push({ kind: 'wall', a: 0.6, d: dist(imx, RX), pts: [TX, iX(imx, RX, ROOM.w), RX] });
+    for (const [w1, w2] of [[0, ROOM.h], [ROOM.h, 0]]) {
+      const t1 = mY(TX, w1), t2 = mY(t1, w2), B = iY(t2, RX, w2), A = iY(t1, B, w1);
+      out.push({ kind: 'double', a: 0.4, d: dist(t2, RX), pts: [TX, A, B, RX] });
+    }
+    return out;
+  })();
+
+  const SRE = new Float64Array(N), SIM = new Float64Array(N);
+  for (let i = 0; i < N; i++) {
+    for (const p of PATHS) {
+      const amp = p.a / p.d, ph = -2 * Math.PI * FREQS[i] * p.d / C;
+      SRE[i] += amp * Math.cos(ph);
+      SIM[i] += amp * Math.sin(ph);
+    }
+  }
+  const personD = P => dist(TX, P) + dist(P, RX);
+
+  let spare = null;
+  function gauss() {
+    if (spare !== null) { const s = spare; spare = null; return s; }
+    let u = 0;
+    while (u === 0) u = Math.random();
+    const v = Math.random(), r = Math.sqrt(-2 * Math.log(u));
+    spare = r * Math.sin(2 * Math.PI * v);
+    return r * Math.cos(2 * Math.PI * v);
+  }
+
+  function amps(extras, noise, out) {
+    for (let i = 0; i < N; i++) {
+      let re = SRE[i], im = SIM[i];
+      const f = FREQS[i];
+      for (let j = 0; j < extras.length; j++) {
+        const e = extras[j], amp = e.a / e.d, ph = -2 * Math.PI * f * e.d / C;
+        re += amp * Math.cos(ph);
+        im += amp * Math.sin(ph);
+      }
+      if (noise) { re += noise * gauss(); im += noise * gauss(); }
+      out[i] = Math.hypot(re, im);
+    }
+    return out;
+  }
+
+  const clampPos = p => ({ x: Math.min(7.3, Math.max(0.7, p.x)), y: Math.min(4.5, Math.max(0.5, p.y)) });
+
+  function makeScenario() {
+    const s = { mode: 'empty', t: 0, pos: { x: 3.6, y: 3.8 }, head: 0.4, coef: 0.6, br: 0.25, brAmp: 0.007, fallStart: 0, fallDir: 0, fallFrom: null };
+    function set(mode) {
+      if (mode === 'fall') {
+        if (s.mode === 'empty' || s.mode === 'falling' || s.mode === 'down') return;
+        s.mode = 'falling'; s.fallStart = s.t; s.fallDir = s.head; s.fallFrom = { ...s.pos };
+        return;
+      }
+      if (mode === 'walk' && s.mode === 'empty') { s.pos = { x: 1.4, y: 4.2 }; s.head = -0.3; }
+      if (mode === 'still') {
+        if (s.mode === 'empty') s.pos = { x: 3.6, y: 3.8 };
+        s.br = 0.22 + Math.random() * 0.08; s.brAmp = 0.007;
+      }
+      s.coef = 0.6; s.mode = mode;
+    }
+    function step(dt) {
+      s.t += dt;
+      const ex = [];
+      if (s.mode === 'empty') return ex;
+      if (s.mode === 'walk') {
+        s.head += gauss() * 1.6 * Math.sqrt(dt);
+        s.pos.x += 0.75 * dt * Math.cos(s.head);
+        s.pos.y += 0.75 * dt * Math.sin(s.head);
+        if (s.pos.x < 1.2 || s.pos.x > 6.8) { s.head = Math.PI - s.head; s.pos.x = Math.min(6.8, Math.max(1.2, s.pos.x)); }
+        if (s.pos.y < 0.6 || s.pos.y > 4.4) { s.head = -s.head; s.pos.y = Math.min(4.4, Math.max(0.6, s.pos.y)); }
+        const d = personD(s.pos);
+        ex.push({ d, a: s.coef }, { d: d + 0.15 * Math.sin(2 * Math.PI * 1.8 * s.t), a: 0.3 });
+        return ex;
+      }
+      if (s.mode === 'falling') {
+        const u = (s.t - s.fallStart) / 0.9;
+        if (u >= 1) {
+          s.mode = 'down'; s.coef = 0.45; s.br = 0.31 + Math.random() * 0.05; s.brAmp = 0.008;
+        } else {
+          const m = Math.min(1, u / 0.55);
+          s.pos = clampPos({ x: s.fallFrom.x + 0.8 * m * Math.cos(s.fallDir), y: s.fallFrom.y + 0.8 * m * Math.sin(s.fallDir) });
+          s.coef = 0.6 - 0.15 * m;
+          ex.push({ d: personD(s.pos), a: s.coef });
+          if (u > 0.55) ex.push({ d: 6 + 3 * Math.random(), a: 2.4 });
+          return ex;
+        }
+      }
+      ex.push({ d: personD(s.pos) + s.brAmp * Math.sin(2 * Math.PI * s.br * s.t), a: s.coef });
+      return ex;
+    }
+    return { s, set, step };
+  }
+
+  function makeBuffer(len) {
+    const data = new Float32Array(len * N);
+    let head = 0, count = 0;
+    return {
+      len,
+      push(a) { data.set(a, head * N); head = (head + 1) % len; if (count < len) count++; },
+      count: () => count,
+      at(back, k) { const idx = (head - 1 - back + len * 2) % len; return data[idx * N + k]; }
+    };
+  }
+  function varK(buf, n, k) {
+    n = Math.min(n, buf.count());
+    if (n < 2) return 0;
+    let s = 0, s2 = 0;
+    for (let b = 0; b < n; b++) { const v = buf.at(b, k); s += v; s2 += v * v; }
+    const m = s / n;
+    return Math.max(0, s2 / n - m * m);
+  }
+  function meanVar(buf, n) { let t = 0; for (let k = 0; k < N; k++) t += varK(buf, n, k); return t / N; }
+  function topVar(buf, n) {
+    let best = 0, bk = 0;
+    for (let k = 0; k < N; k++) { const v = varK(buf, n, k); if (v > best) { best = v; bk = k; } }
+    return { v: best, k: bk };
+  }
+  function topKs(buf, n, m) {
+    const v = [];
+    for (let k = 0; k < N; k++) v.push([varK(buf, n, k), k]);
+    return v.sort((a, b) => b[0] - a[0]).slice(0, m).map(x => x[1]);
+  }
+  function breath(buf, n, ks, fs) {
+    n = Math.min(n, buf.count());
+    const means = ks.map(k => { let m = 0; for (let b = 0; b < n; b++) m += buf.at(b, k); return m / n; });
+    const power = f => {
+      let p = 0;
+      ks.forEach((k, j) => {
+        let re = 0, im = 0;
+        for (let b = 0; b < n; b++) {
+          const x = buf.at(b, k) - means[j], ph = 2 * Math.PI * f * b / fs;
+          re += x * Math.cos(ph); im += x * Math.sin(ph);
+        }
+        p += re * re + im * im;
+      });
+      return p;
+    };
+    let bestF = 0, bestP = 0;
+    for (let f = 0.1; f <= 0.6001; f += 0.005) { const p = power(f); if (p > bestP) { bestP = p; bestF = f; } }
+    if (bestF / 2 >= 0.1 && power(bestF / 2) > 0.12 * bestP) bestF /= 2;
+    return { f: bestF, perMin: bestF * 60 };
+  }
+
+  const TH = { move: 3e-4, moveOff: 1.5e-4, fall: 5e-3, pres: 2e-5 };
+  function makeClassifier(fs) {
+    const st = { moving: false, lastImpact: -99, fallen: false, stillSince: 0, label: 'GOL', v1: 0, v05: 0, top: { v: 0, k: 0 }, br: null, nextBr: 0, stillFor: 0 };
+    function update(buf, t) {
+      st.v1 = meanVar(buf, fs);
+      st.v05 = meanVar(buf, Math.round(fs / 2));
+      st.top = topVar(buf, fs * 3);
+      if (st.v05 > TH.fall) st.lastImpact = t;
+      const mv = st.moving ? st.v1 > TH.moveOff : st.v1 > TH.move;
+      if (mv && !st.moving) { st.fallen = false; st.br = null; }
+      if (!mv && st.moving) { st.fallen = t - st.lastImpact < 2.5; st.stillSince = t; }
+      st.moving = mv;
+      const prev = st.label;
+      if (st.moving) st.label = 'MISCARE';
+      else if (st.top.v > TH.pres) st.label = st.fallen ? 'LA_SOL' : 'NEMISCAT';
+      else st.label = 'GOL';
+      if (prev === 'GOL' && st.label !== 'GOL' && !st.moving) st.stillSince = t;
+      st.stillFor = st.moving ? 0 : t - st.stillSince;
+      if (st.label === 'GOL' || st.moving) st.br = null;
+      else if (st.stillFor >= 8 && t >= st.nextBr) {
+        st.br = breath(buf, Math.min(fs * 12, Math.floor(st.stillFor * fs)), topKs(buf, fs * 3, 3), fs);
+        st.nextBr = t + 0.5;
+      }
+      return st;
+    }
+    return { st, update };
+  }
+
+  return { C, FC, DF, KS, N, FREQS, LAMBDA, ROOM, TX, RX, PATHS, TH, dist, personD, amps, makeScenario, makeBuffer, makeClassifier, meanVar, topVar };
+})();
+/* SIM-CORE-END */
+</script>
+
+<script>
+(() => {
+  const REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const NS = 'http://www.w3.org/2000/svg';
+  const $ = s => document.querySelector(s);
+  const el = (tag, attrs, parent) => {
+    const e = document.createElementNS(NS, tag);
+    for (const k in attrs) e.setAttribute(k, attrs[k]);
+    if (parent) parent.appendChild(e);
+    return e;
+  };
+  const fmt = (v, d = 1) => v.toFixed(d).replace('.', ',');
+
+  /* ---------- colors from tokens ---------- */
+  const COL = {};
+  const hex = s => {
+    s = (s || '').trim();
+    if (s[0] !== '#') return [128, 128, 128];
+    if (s.length === 4) s = '#' + s[1] + s[1] + s[2] + s[2] + s[3] + s[3];
+    return [parseInt(s.slice(1, 3), 16), parseInt(s.slice(3, 5), 16), parseInt(s.slice(5, 7), 16)];
+  };
+  function readColors() {
+    const cs = getComputedStyle(document.documentElement);
+    for (const k of ['paper', 'panel', 'ink', 'muted', 'rule', 'rf', 'unknown', 'warn', 'wf-lo', 'wf-mid', 'wf-hi']) COL[k] = cs.getPropertyValue('--' + k).trim();
+    const a = hex(COL['wf-lo']), b = hex(COL['wf-mid']), c = hex(COL['wf-hi']);
+    const lut = new Uint8ClampedArray(256 * 3);
+    for (let i = 0; i < 256; i++) {
+      const t = i / 255, [p, q, u] = t < 0.5 ? [a, b, t * 2] : [b, c, (t - 0.5) * 2];
+      for (let j = 0; j < 3; j++) lut[i * 3 + j] = p[j] + (q[j] - p[j]) * u;
+    }
+    COL.lut = lut;
+  }
+  readColors();
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => { readColors(); redrawAll(); });
+  new MutationObserver(() => { readColors(); redrawAll(); }).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+
+  function fitCanvas(cv) {
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const w = Math.max(1, Math.round(cv.clientWidth * dpr)), h = Math.max(1, Math.round(cv.clientHeight * dpr));
+    if (cv.width !== w || cv.height !== h) { cv.width = w; cv.height = h; }
+    const ctx = cv.getContext('2d');
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    return { ctx, w: cv.clientWidth, h: cv.clientHeight };
+  }
+
+  function onVisible(node, cb) {
+    if (!('IntersectionObserver' in window)) { cb(true); return; }
+    new IntersectionObserver(es => es.forEach(e => cb(e.isIntersecting)), { threshold: 0.05 }).observe(node);
+  }
+
+  /* ---------- room drawing shared by ch2 and ch3 ---------- */
+  const S = 80, O = 20;
+  const X = x => O + x * S, Y = y => O + y * S;
+  const ptsAttr = pts => pts.map(p => X(p.x).toFixed(1) + ',' + Y(p.y).toFixed(1)).join(' ');
+  function drawRoom(svg, opts) {
+    el('rect', { x: O, y: O, width: Sim.ROOM.w * S, height: Sim.ROOM.h * S, class: 'floor' }, svg);
+    el('rect', { x: O, y: O, width: Sim.ROOM.w * S, height: Sim.ROOM.h * S, class: 'wall' }, svg);
+    const g = el('g', { opacity: opts.faint ? 0.55 : 1 }, svg);
+    for (const p of Sim.PATHS) el('polyline', { points: ptsAttr(p.pts), class: 'p-' + p.kind }, g);
+    const pp = el('polyline', { class: 'p-person', points: '' }, svg);
+    const tx = el('g', { transform: `translate(${X(Sim.TX.x)} ${Y(Sim.TX.y)})` }, svg);
+    el('rect', { x: -17, y: -9, width: 34, height: 18, rx: 3, class: 'dev' }, tx);
+    el('line', { x1: -9, y1: -9, x2: -13, y2: -22, class: 'dev-line' }, tx);
+    el('line', { x1: 9, y1: -9, x2: 13, y2: -22, class: 'dev-line' }, tx);
+    const rx = el('g', { transform: `translate(${X(Sim.RX.x)} ${Y(Sim.RX.y)})` }, svg);
+    el('rect', { x: -15, y: -10, width: 30, height: 20, rx: 2, class: 'dev' }, rx);
+    el('rect', { x: -6, y: -4, width: 12, height: 8, class: 'ghost-fill' }, rx);
+    if (opts.labels) {
+      const lt = el('text', { x: X(Sim.TX.x) - 12, y: Y(Sim.TX.y) + 34, class: 't' }, svg); lt.textContent = 'router (TX)';
+      const lr = el('text', { x: X(Sim.RX.x) - 76, y: Y(Sim.RX.y) + 36, class: 't' }, svg); lr.textContent = 'ESP32 (RX)';
+      el('line', { x1: X(0.3), y1: Y(4.75), x2: X(1.3), y2: Y(4.75), class: 'dev-line' }, svg);
+      const ls = el('text', { x: X(0.3), y: Y(4.62), class: 't-m' }, svg); ls.textContent = '1 m';
+      const lw = el('text', { x: X(5.3), y: Y(4.75), class: 't-m' }, svg); lw.textContent = 'cameră 8 × 5 m';
+    }
+    const person = el('g', {}, svg);
+    const body = el('ellipse', { rx: 18, ry: 11, class: 'unknown' }, person);
+    el('circle', { r: 8, class: 'dev' }, person);
+    return { pp, person, body };
+  }
+
+  /* ---------- chapter 2: interactive physics ---------- */
+  const c2 = (() => {
+    const svg = $('#c2-svg'), cv = $('#c2-bars'), read = $('#c2-read'), autoBtn = $('#c2-auto');
+    const room = drawRoom(svg, { labels: true });
+    room.person.style.cursor = 'grab';
+    room.person.style.touchAction = 'none';
+    el('circle', { r: 34, fill: 'transparent' }, room.person);
+    const hint = el('text', { x: 24, y: -16, class: 't-s t-b' }, room.person); hint.textContent = 'trage-mă';
+    let P = { x: 3.8, y: 3.9 }, auto = !REDUCED, t0 = 0, dragging = false, visible = false;
+    autoBtn.setAttribute('aria-pressed', String(auto));
+    const out = new Float32Array(Sim.N), empty = Sim.amps([], 0, new Float32Array(Sim.N));
+    function place() {
+      room.person.setAttribute('transform', `translate(${X(P.x)} ${Y(P.y)})`);
+      room.pp.setAttribute('points', ptsAttr([Sim.TX, P, Sim.RX]));
+    }
+    function draw() {
+      const d = Sim.personD(P);
+      Sim.amps([{ d, a: 0.6 }], 0, out);
+      read.textContent = `drumul prin om: ${fmt(d, 2)} m = ${fmt(d / Sim.LAMBDA, 1)} λ`;
+      const { ctx, w, h } = fitCanvas(cv);
+      ctx.clearRect(0, 0, w, h);
+      const ml = 34, mr = 6, mt = 8, mb = 24, slots = 53, bw = (w - ml - mr) / slots, ymax = 0.42;
+      const yv = v => mt + (h - mt - mb) * (1 - Math.min(v, ymax) / ymax);
+      ctx.strokeStyle = COL.rule; ctx.lineWidth = 1;
+      ctx.font = '11px "IBM Plex Mono", monospace'; ctx.fillStyle = COL.muted;
+      for (const v of [0, 0.1, 0.2, 0.3, 0.4]) {
+        const y = yv(v); ctx.beginPath(); ctx.moveTo(ml, y); ctx.lineTo(w - mr, y); ctx.stroke();
+        ctx.fillText(fmt(v, 1), 2, y + 4);
+      }
+      for (let i = 0; i < Sim.N; i++) {
+        const slot = i < 26 ? i : i + 1, x = ml + slot * bw;
+        ctx.fillStyle = COL.rf; ctx.fillRect(x + 1, yv(out[i]), Math.max(1, bw - 2), h - mb - yv(out[i]));
+        ctx.strokeStyle = COL.ink; ctx.lineWidth = 1.2;
+        ctx.beginPath(); ctx.moveTo(x + 1, yv(empty[i])); ctx.lineTo(x + bw - 1, yv(empty[i])); ctx.stroke();
+      }
+      ctx.fillStyle = COL.muted;
+      for (const k of [-26, -13, 13, 26]) {
+        const i = Sim.KS.indexOf(k), slot = i < 26 ? i : i + 1;
+        ctx.fillText(String(k), ml + slot * bw + bw / 2 - 8, h - 7);
+      }
+      ctx.fillText('k = 0 (nul)', ml + 26 * bw - 26, h - 7);
+    }
+    function toRoom(evt) {
+      const pt = svg.createSVGPoint(); pt.x = evt.clientX; pt.y = evt.clientY;
+      const p = pt.matrixTransform(svg.getScreenCTM().inverse());
+      return { x: Math.min(7.6, Math.max(0.4, (p.x - O) / S)), y: Math.min(4.6, Math.max(0.4, (p.y - O) / S)) };
+    }
+    room.person.addEventListener('pointerdown', e => { dragging = true; auto = false; autoBtn.setAttribute('aria-pressed', 'false'); room.person.setPointerCapture(e.pointerId); room.person.style.cursor = 'grabbing'; hint.style.display = 'none'; });
+    room.person.addEventListener('pointermove', e => { if (!dragging) return; P = toRoom(e); place(); draw(); });
+    const end = () => { dragging = false; room.person.style.cursor = 'grab'; };
+    room.person.addEventListener('pointerup', end);
+    room.person.addEventListener('pointercancel', end);
+    autoBtn.addEventListener('click', () => { auto = !auto; autoBtn.setAttribute('aria-pressed', String(auto)); if (auto) loop(); });
+    let last = 0;
+    function loop(ts) {
+      if (!auto || !visible) return;
+      if (ts) {
+        if (last) t0 += Math.min(0.05, (ts - last) / 1000);
+        last = ts;
+        P = { x: 3.9 + 2.0 * Math.sin(0.23 * t0), y: 3.55 + 0.95 * Math.sin(0.41 * t0 + 0.6) };
+        place(); draw();
+      }
+      requestAnimationFrame(loop);
+    }
+    onVisible(svg, v => { visible = v; last = 0; if (v && auto) requestAnimationFrame(loop); });
+    window.addEventListener('resize', draw);
+    place(); draw();
+    return { draw };
+  })();
+
+  /* ---------- chapter 3: state simulator ---------- */
+  const c3 = (() => {
+    const FS = 50, DT = 1 / FS;
+    const scen = Sim.makeScenario(), buf = Sim.makeBuffer(1000), clf = Sim.makeClassifier(FS);
+    const tmp = new Float32Array(Sim.N);
+    let t = 0, visible = false, last = 0;
+    const room = drawRoom($('#c3-room'), { faint: true });
+    const wf = $('#c3-wf'), tr = $('#c3-tr');
+    const off = document.createElement('canvas'); off.width = 500; off.height = Sim.N;
+    const offCtx = off.getContext('2d'), img = offCtx.createImageData(500, Sim.N);
+    const NAMES = { GOL: 'Cameră goală', MISCARE: 'Mișcare', NEMISCAT: 'Om nemișcat', LA_SOL: 'Om la sol, după cădere' };
+    const TRUTH = { empty: 'camera este goală', walk: 'omul merge', still: 'omul stă nemișcat', falling: 'omul cade', down: 'omul stă la sol după cădere' };
+    const btns = [...document.querySelectorAll('[data-c3]')];
+    function stepN(n) {
+      for (let i = 0; i < n; i++) {
+        Sim.amps(scen.step(DT), 0.0015, tmp);
+        buf.push(tmp); t += DT;
+        clf.update(buf, t);
+      }
+    }
+    function logPos(v) { return Math.max(0, Math.min(100, (Math.log10(Math.max(v, 1e-7)) + 7) / 6 * 100)); }
+    $('#c3-v1-th').style.left = logPos(Sim.TH.move) + '%';
+    $('#c3-vp-th').style.left = logPos(Sim.TH.pres) + '%';
+    function render() {
+      const st = clf.st, s = scen.s;
+      const chip = $('#c3-chip');
+      chip.textContent = NAMES[st.label]; chip.className = 'chip ' + st.label;
+      $('#c3-breath').textContent = st.br ? `respirație estimată: ~${Math.round(st.br.perMin)}/min (${fmt(st.br.f, 2)} Hz)`
+        : (st.label === 'NEMISCAT' || st.label === 'LA_SOL') ? `respirație: măsoară… ${Math.min(8, Math.floor(st.stillFor))}/8 s` : 'respirație: —';
+      $('#c3-truth').textContent = 'scenariul: ' + TRUTH[s.mode];
+      $('#c3-v1').textContent = st.v1.toExponential(1).replace('.', ',');
+      $('#c3-vp').textContent = st.top.v.toExponential(1).replace('.', ',');
+      $('#c3-v1-bar').style.width = logPos(st.v1) + '%';
+      $('#c3-vp-bar').style.width = logPos(st.top.v) + '%';
+      $('#c3-tr-label').textContent = `Subpurtătoarea k = ${Sim.KS[st.top.k]} · cea mai sensibilă · ultimele 20 s`;
+      room.person.style.display = s.mode === 'empty' ? 'none' : '';
+      if (s.mode !== 'empty') {
+        room.person.setAttribute('transform', `translate(${X(s.pos.x)} ${Y(s.pos.y)})`);
+        const lying = s.mode === 'down' || s.mode === 'falling';
+        room.body.setAttribute('rx', lying ? 26 : 18); room.body.setAttribute('ry', lying ? 9 : 11);
+        room.pp.setAttribute('points', ptsAttr([Sim.TX, s.pos, Sim.RX]));
+      } else room.pp.setAttribute('points', '');
+      const n = Math.min(500, buf.count());
+      let lo = Infinity, hi = -Infinity;
+      for (let b = 0; b < n; b++) for (let k = 0; k < Sim.N; k++) { const v = buf.at(b, k); if (v < lo) lo = v; if (v > hi) hi = v; }
+      const span = Math.max(1e-6, hi - lo), lut = COL.lut, d = img.data;
+      for (let col = 0; col < 500; col++) {
+        const back = 499 - col;
+        for (let k = 0; k < Sim.N; k++) {
+          const o = ((Sim.N - 1 - k) * 500 + col) * 4;
+          if (back >= n) { d[o] = lut[0]; d[o + 1] = lut[1]; d[o + 2] = lut[2]; d[o + 3] = 255; continue; }
+          const q = Math.round((buf.at(back, k) - lo) / span * 255) * 3;
+          d[o] = lut[q]; d[o + 1] = lut[q + 1]; d[o + 2] = lut[q + 2]; d[o + 3] = 255;
+        }
+      }
+      offCtx.putImageData(img, 0, 0);
+      const a = fitCanvas(wf);
+      a.ctx.imageSmoothingEnabled = false;
+      a.ctx.drawImage(off, 0, 0, a.w, a.h);
+      const b2 = fitCanvas(tr), m = Math.min(1000, buf.count()), k = st.top.k;
+      b2.ctx.fillStyle = COL['wf-lo']; b2.ctx.fillRect(0, 0, b2.w, b2.h);
+      if (m > 1) {
+        let l2 = Infinity, h2 = -Infinity;
+        for (let i = 0; i < m; i++) { const v = buf.at(i, k); if (v < l2) l2 = v; if (v > h2) h2 = v; }
+        const sp = Math.max(2e-3, h2 - l2), mid = (h2 + l2) / 2;
+        b2.ctx.strokeStyle = COL.rf; b2.ctx.lineWidth = 1.5; b2.ctx.beginPath();
+        for (let i = 0; i < m; i++) {
+          const x = b2.w - (i / 999) * b2.w, y = b2.h / 2 - ((buf.at(i, k) - mid) / sp) * (b2.h - 16);
+          if (i === 0) b2.ctx.moveTo(x, y); else b2.ctx.lineTo(x, y);
+        }
+        b2.ctx.stroke();
+      }
+    }
+    function setMode(mode) {
+      scen.set(mode);
+      const active = mode === 'fall' ? 'fall' : mode;
+      btns.forEach(b => b.setAttribute('aria-pressed', String(b.dataset.c3 === active)));
+      syncButtons();
+      if (REDUCED) { stepN(15 * FS); render(); }
+    }
+    function syncButtons() {
+      const fb = btns.find(b => b.dataset.c3 === 'fall');
+      fb.disabled = scen.s.mode === 'empty';
+      fb.title = fb.disabled ? 'Adaugă întâi un om în cameră' : '';
+    }
+    btns.forEach(b => b.addEventListener('click', () => setMode(b.dataset.c3)));
+    function loop(ts) {
+      if (!visible || REDUCED) return;
+      if (last) {
+        const dt = Math.min(0.1, (ts - last) / 1000);
+        let n = Math.round(dt * FS + (loop.acc || 0));
+        loop.acc = dt * FS + (loop.acc || 0) - n;
+        if (n > 0) stepN(n);
+        render();
+        if (scen.s.mode !== 'falling' && btns.find(b => b.dataset.c3 === 'fall').getAttribute('aria-pressed') === 'true' && scen.s.mode === 'down') syncButtons();
+      }
+      last = ts;
+      requestAnimationFrame(loop);
+    }
+    scen.set('walk'); stepN(3 * FS);
+    scen.set('still'); stepN(13 * FS);
+    syncButtons(); render();
+    onVisible($('#c3'), v => { visible = v; last = 0; if (v && !REDUCED) requestAnimationFrame(loop); });
+    window.addEventListener('resize', render);
+    return { render };
+  })();
+
+  /* ---------- chapter 4: silent mode toggle ---------- */
+  (() => {
+    const sec = $('#c4'), btns = [...document.querySelectorAll('[data-c4]')];
+    btns.forEach(b => b.addEventListener('click', () => {
+      sec.dataset.mode = b.dataset.c4;
+      btns.forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+    }));
+  })();
+
+  /* ---------- chapter 6: mission timeline (GSAP) ---------- */
+  (() => {
+    const svg = $('#m-svg');
+    const ell = (id, a, b, ry) => {
+      const e = $(id), cx = (a.x + b.x) / 2, cy = (a.y + b.y) / 2;
+      const len = Math.hypot(b.x - a.x, b.y - a.y), ang = Math.atan2(b.y - a.y, b.x - a.x) * 180 / Math.PI;
+      e.setAttribute('cx', cx); e.setAttribute('cy', cy); e.setAttribute('rx', len / 2 + 8); e.setAttribute('ry', ry);
+      e.setAttribute('transform', `rotate(${ang.toFixed(2)} ${cx} ${cy})`);
+    };
+    const BOX = { x: 480, y: 322 };
+    ell('#m-f-ap', { x: 520, y: 92 }, BOX, 30);
+    ell('#m-f-ph', { x: 735, y: 150 }, BOX, 30);
+    const route = [{ x: 60, y: 430 }, { x: 220, y: 392 }, { x: 360, y: 345 }, { x: 480, y: 322 }];
+    const segLen = route.slice(1).map((p, i) => Math.hypot(p.x - route[i].x, p.y - route[i].y));
+    const total = segLen.reduce((a, b) => a + b, 0);
+    const at = u => {
+      let d = u * total;
+      for (let i = 0; i < segLen.length; i++) {
+        if (d <= segLen[i] || i === segLen.length - 1) {
+          const f = Math.min(1, d / segLen[i]), a = route[i], b = route[i + 1];
+          return { x: a.x + (b.x - a.x) * f, y: a.y + (b.y - a.y) * f, nx: -(b.y - a.y) / segLen[i], ny: (b.x - a.x) / segLen[i] };
+        }
+        d -= segLen[i];
+      }
+    };
+    const stepsG = $('#m-steps-g'), NSTEP = 24, dots = [];
+    for (let i = 0; i < NSTEP; i++) {
+      const p = at(i / NSTEP), side = i % 2 ? 5 : -5;
+      dots.push(el('ellipse', { cx: (p.x + p.nx * side).toFixed(1), cy: (p.y + p.ny * side).toFixed(1), rx: 3.2, ry: 2.2, class: 'steps-dot' }, stepsG));
+    }
+
+    const LOG = [
+      [0.2, '[IMU] pași detectați, 1,8 pași/s → mod MERS'],
+      [0.6, '[ESP32-A] promiscuu pe canalul 6 · 0 cadre emise'],
+      [2.6, '[Wi-Fi] TV · −72 dBm · doar beacon 802.11b → fără CSI'],
+      [4.0, '[Wi-Fi] AP · −61 dBm · 410 cadre OFDM/s → CSI util'],
+      [5.5, '[Wi-Fi] telefon · −66 dBm · 38 cadre OFDM/s → CSI util'],
+      [6.6, '[BT] Ubertooth: 1 dispozitiv Bluetooth în camera 3'],
+      [8.2, '[Fuziune] legături: AP → cutie (camera 2), telefon → cutie (camera 3)'],
+      [10.0, '[IMU] nemișcat 0,5 s → mod OPRIRE'],
+      [10.2, '[CSI] măsurare pornită pe 2 legături'],
+      [13.0, '[CSI] camera 3: varianță 4,1e-3 > prag → MIȘCARE'],
+      [13.4, '[CoT] a-u-G · camera 3 · trimis la ATAK'],
+      [20.0, '[CSI] camera 2: varianță mică, vârf 0,27 Hz → NEMIȘCAT, ~16/min'],
+      [20.5, '[CoT] a-u-G · camera 2 · trimis la ATAK'],
+      [20.8, '[Decizie] camera 1: niciun emițător util → necunoscut'],
+      [21.2, '[ATAK] 3 marcaje pe harta echipei']
+    ];
+    const TICK = [[13.4, 'CoT primit: Camera 3 · mișcare'], [20.5, 'CoT primit: Camera 2 · nemișcat, ~16/min'], [20.8, 'Camera 1 · fără date']];
+    const logEl = $('#m-log'), phases = [...document.querySelectorAll('#m-phases li')], tick = $('#ph-tick');
+    const scrub = $('#m-scrub'), timeEl = $('#m-time'), phTime = $('#ph-time'), playBtn = $('#m-play');
+    const modeEl = $('#m-mode'), stepsEl = $('#m-steps'), measEl = $('#m-meas');
+    const DUR = 27;
+    let shown = -1;
+    function sync(time) {
+      const n = LOG.filter(l => l[0] <= time).length;
+      if (n !== shown) {
+        logEl.innerHTML = '';
+        LOG.slice(0, n).forEach(([lt, txt]) => {
+          const li = document.createElement('li'), sp = document.createElement('span');
+          sp.textContent = 'T+' + fmt(lt, 1) + ' s'; li.append(sp, document.createTextNode(txt)); logEl.appendChild(li);
+        });
+        logEl.scrollTop = logEl.scrollHeight; shown = n;
+      }
+      let pi = 0;
+      phases.forEach((li, i) => { if (time >= +li.dataset.t) pi = i; });
+      phases.forEach((li, i) => li.classList.toggle('on', i === pi));
+      const walking = time < 10;
+      modeEl.textContent = walking ? 'MERS' : 'OPRIRE';
+      stepsEl.textContent = walking ? '1,8 pași/s' : '0 pași/s';
+      measEl.textContent = time < 10 ? '' : 'măsurare ' + Math.round(Math.min(1, (time - 10) / 10) * 100) + '%';
+      const tk = TICK.filter(x => x[0] <= time);
+      tick.textContent = tk.length ? tk.map(x => x[1]).join('\n') : 'Niciun marcaj încă.';
+      tick.style.whiteSpace = 'pre-line';
+      timeEl.textContent = 'T+' + fmt(time, 1) + ' s';
+      phTime.textContent = 'T+' + Math.floor(time) + ' s';
+    }
+
+    if (!window.gsap) { sync(DUR); playBtn.disabled = true; $('#m-prev').disabled = true; $('#m-next').disabled = true; scrub.disabled = true; return; }
+
+    const tl = gsap.timeline({ paused: true, repeat: -1, repeatDelay: 1.5, onUpdate: () => { sync(tl.time()); scrub.value = Math.round(tl.time() / DUR * 1000); } });
+    const show = (sel, t, d = 0.4) => tl.fromTo(sel, { autoAlpha: 0 }, { autoAlpha: 1, duration: d }, t);
+    const pulse = (sel, t) => tl.fromTo(sel, { attr: { r: 4 }, autoAlpha: 1 }, { attr: { r: 34 }, autoAlpha: 0, duration: 1.1, ease: 'power1.out' }, t);
+    tl.addLabel('p1', 0).addLabel('p2', 8).addLabel('p3', 10).addLabel('p4', 20).addLabel('p5', 21);
+    tl.set('#m-soldier', { x: route[0].x, y: route[0].y }, 0);
+    tl.to('#m-soldier', { keyframes: route.slice(1).map((p, i) => ({ x: p.x, y: p.y, duration: segLen[i] / total * 8, ease: 'none' })) }, 0);
+    tl.fromTo(dots, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.15, stagger: 8 / NSTEP }, 0);
+    tl.fromTo('#m-wave-walk', { autoAlpha: 1 }, { autoAlpha: 0, duration: 0.3 }, 10);
+    tl.fromTo('#m-wave-still', { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.3 }, 10);
+    show('#m-e-tv', 2.5); pulse('#m-r-tv', 2.5); show('#m-x-tv', 2.9);
+    show('#m-e-ap', 3.9); pulse('#m-r-ap', 3.9);
+    show('#m-e-ph', 5.4); pulse('#m-r-ph', 5.4);
+    show('#m-e-bt', 6.5); pulse('#m-r-bt', 6.5);
+    show(['#m-f-ap', '#m-l-ap'], 8.2, 0.6);
+    show(['#m-f-ph', '#m-l-ph'], 8.6, 0.6);
+    show('#m-ring', 10, 0.3);
+    tl.fromTo('#m-ring-fg', { attr: { 'stroke-dashoffset': 188.5 } }, { attr: { 'stroke-dashoffset': 0 }, duration: 10, ease: 'none' }, 10);
+    tl.fromTo('#m-k3', { autoAlpha: 0, scale: 0.3, transformOrigin: '50% 50%' }, { autoAlpha: 1, scale: 1, duration: 0.5, ease: 'back.out(2)' }, 13);
+    tl.fromTo('#m-k2', { autoAlpha: 0, scale: 0.3, transformOrigin: '50% 50%' }, { autoAlpha: 1, scale: 1, duration: 0.5, ease: 'back.out(2)' }, 20);
+    show('#m-k1', 20.8);
+    show('#ph-self', 10);
+    tl.fromTo('#ph-k3', { autoAlpha: 0, scale: 0.3, transformOrigin: '50% 50%' }, { autoAlpha: 1, scale: 1, duration: 0.4, ease: 'back.out(2)' }, 13.4);
+    tl.fromTo('#ph-k2', { autoAlpha: 0, scale: 0.3, transformOrigin: '50% 50%' }, { autoAlpha: 1, scale: 1, duration: 0.4, ease: 'back.out(2)' }, 20.5);
+    show('#ph-k1', 20.8);
+    tl.set({}, {}, DUR);
+
+    gsap.to('#m-p3', { x: 700, y: 186, duration: 2.6, ease: 'sine.inOut', yoyo: true, repeat: -1 });
+
+    let userPaused = false;
+    const setPlay = p => { playBtn.setAttribute('aria-pressed', String(p)); playBtn.textContent = p ? '⏸ Pauză' : '▶ Pornește'; };
+    tl.pause(DUR - 0.01); sync(DUR); scrub.value = 1000;
+    playBtn.addEventListener('click', () => {
+      if (tl.paused()) { if (tl.time() >= DUR - 0.05) tl.seek(0); tl.play(); userPaused = false; setPlay(true); }
+      else { tl.pause(); userPaused = true; setPlay(false); }
+    });
+    const labels = ['p1', 'p2', 'p3', 'p4', 'p5'].map(l => tl.labels[l]);
+    $('#m-prev').addEventListener('click', () => { const t = tl.time(); const prev = labels.filter(x => x < t - 0.3).pop(); tl.seek(prev ?? 0); sync(tl.time()); });
+    $('#m-next').addEventListener('click', () => { const t = tl.time(); const nx = labels.find(x => x > t + 0.05); tl.seek(nx ?? DUR - 0.01); sync(tl.time()); });
+    scrub.addEventListener('input', () => { tl.pause(); userPaused = true; setPlay(false); tl.time(scrub.value / 1000 * (DUR - 0.01)); sync(tl.time()); });
+
+    if (!REDUCED && window.ScrollTrigger) {
+      gsap.registerPlugin(ScrollTrigger);
+      let started = false;
+      ScrollTrigger.create({
+        trigger: '#mission', start: 'top 75%', end: 'bottom 15%',
+        onEnter: () => { if (userPaused) return; if (!started) { started = true; tl.seek(0); } tl.play(); setPlay(true); },
+        onEnterBack: () => { if (!userPaused) { tl.play(); setPlay(true); } },
+        onLeave: () => { tl.pause(); setPlay(false); },
+        onLeaveBack: () => { tl.pause(); setPlay(false); }
+      });
+    }
+  })();
+
+  function redrawAll() { c2.draw(); c3.render(); }
+})();
+</script>
+</body></html>
