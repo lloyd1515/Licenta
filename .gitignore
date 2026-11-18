@@ -55,3 +55,4 @@ latest_output.txt
 
 # Video build workspaces are published too
 !.codebase-video/**/build/
+claude-history/
