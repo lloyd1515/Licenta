@@ -1,5 +1,12 @@
 menu "CSI Node UDP"
 
+    config CSI_NODE_ID
+        int "Node ID"
+        range 0 255
+        default 3
+        help
+            Identitatea nodului in pachetul UDP. Fiecare placa are alt ID. tools/flash.sh il ia din NODE_ID.
+
     config CSI_WIFI_SSID
         string "Wi-Fi SSID"
         default "csi-lab"

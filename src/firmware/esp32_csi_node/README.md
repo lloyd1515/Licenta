@@ -9,10 +9,25 @@ Acest firmware transformă un modul ESP32 într-un nod senzor radio pasiv:
 
 ## 1. Configurare ID Nod
 
-Înainte de flash, se ajustează `#define NODE_ID` în `main/main.c`:
-- Nodul 1: `NODE_ID 1`
-- Nodul 2: `NODE_ID 2`
-- Nodul 3: `NODE_ID 3`
+Fiecare placă are alt ID (0–255, implicit 3). ID-ul este opțiunea Kconfig `CSI_NODE_ID`, nu o constantă în cod.
+- Cu scriptul: `NODE_ID=1 WIFI_SSID=... WIFI_PASS=... bash tools/flash.sh`. Scriptul scrie ID-ul nou peste valoarea din `sdkconfig`.
+- Manual: `idf.py menuconfig` → `CSI Node UDP` → `Node ID`.
+
+---
+
+## Structura codului (`main/`)
+
+Codul este împărțit pe contexte, ca pe PC (`src/csi/`):
+
+| Fișier | Rol |
+| :--- | :--- |
+| `main.c` | Rădăcina de compunere: pornește modulele în ordine. |
+| `node_wifi.c` | Stația Wi-Fi: conectare, reconectare, rata de 6 Mbps, fără economie de energie. |
+| `csi_capture.c` | Captura: modul promiscuu, configurarea CSI și callback-ul `on_csi`. |
+| `csi_packet.h` | Contractul cu PC-ul: structura de 138 de octeți. Trebuie să rămână identic cu `src/csi/contract/packet_v1.py`. |
+| `udp_transport.c` | Transportul: golește coada și trimite fiecare pachet prin UDP. |
+| `probe_sender.c` | Emițătorul: un probe request la fiecare tick (10 ms). |
+| `csi_log.h` | Eticheta de jurnal `CSI_NODE`. |
 
 ---
 
@@ -52,7 +67,7 @@ idf.py -p /dev/ttyUSB0 flash monitor
 | Câmp | Dimensiune | Descriere |
 | :--- | :--- | :--- |
 | `magic` | 2 bytes | Valoare fixă `0xA55A` pentru aliniere cadru |
-| `node_id` | 1 byte | ID-ul nodului receptor (`1`, `2` sau `3`) |
+| `node_id` | 1 byte | ID-ul nodului receptor (`CONFIG_CSI_NODE_ID`, 0–255) |
 | `rssi_dbm` | 1 byte | Puterea semnalului recepționat (dBm) |
 | `timestamp_us` | 4 bytes | Timestamp intern microsecunde (`esp_timer_get_time`) |
 | `seq` | 2 bytes | Contor secvențial pachete |

@@ -1,23 +1,25 @@
 #!/bin/bash
-# Compileaza main.c si scrie firmware-ul pe placa, cu jurnal colorat.
-# Utilizare: WIFI_SSID=retea WIFI_PASS=parola bash flash.sh
-# Parola ramane in ~/esp/csi-node (in afara repository-ului).
-# Culori: rosu = eroare, galben = avertisment, verde = reusita,
-#         cyan = etapa, albastru = placa, gri = detalii de compilare.
+# Compilare si flash, jurnal colorat
 set -e -o pipefail
 : "${WIFI_SSID:?Seteaza WIFI_SSID}"
 : "${WIFI_PASS:?Seteaza WIFI_PASS}"
 PORT="${PORT:-/dev/ttyUSB0}"
+NODE_ID="${NODE_ID:-3}"
+if ! [[ "$NODE_ID" =~ ^[0-9]+$ ]] || [ "$NODE_ID" -gt 255 ]; then echo "NODE_ID trebuie sa fie intre 0 si 255" >&2; exit 1; fi
 PROJ="$(cd "$(dirname "$0")/.." && pwd)"
 OUT="${OUT:-$HOME/esp/csi-node}"
 mkdir -p "$OUT"
 printf 'CONFIG_CSI_WIFI_SSID="%s"\nCONFIG_CSI_WIFI_PASSWORD="%s"\n' "$WIFI_SSID" "$WIFI_PASS" > "$OUT/wifi.defaults"
 chmod 600 "$OUT/wifi.defaults"
+# Scrie ID-ul nodului
+printf 'CONFIG_CSI_NODE_ID=%s\n' "$NODE_ID" > "$OUT/node.defaults"
+if [ -f "$OUT/sdkconfig" ]; then sed -i '/^CONFIG_CSI_NODE_ID=/d' "$OUT/sdkconfig"; fi
 . "$HOME/esp/esp-idf/export.sh" > /dev/null
 cd "$PROJ"
 
 if [ -t 1 ] || [ -n "$FORCE_COLOR" ]; then COLOR=1; else COLOR=0; fi
 
+# Filtreaza si coloreaza jurnalul idf
 coloreaza() {
   awk -v color="$COLOR" '
     BEGIN { W = 30; activ = 0; hash = 0; app_afisat = 0 }
@@ -57,8 +59,9 @@ coloreaza() {
     END { sfarsit_bara(); if (hash > 0) p(hash == 3 ? "92" : "1;91", "Verificare: " hash "/3 parti scrise corect") }'
 }
 
+# Compileaza si scrie placa
 if idf.py -B "$OUT/build" -DSDKCONFIG="$OUT/sdkconfig" \
-  -DSDKCONFIG_DEFAULTS="sdkconfig.defaults;$OUT/wifi.defaults" \
+  -DSDKCONFIG_DEFAULTS="sdkconfig.defaults;$OUT/wifi.defaults;$OUT/node.defaults" \
   -p "$PORT" build flash 2>&1 | coloreaza; then
   [ "$COLOR" = 1 ] && printf '\033[1;92m>>> GATA: firmware scris pe placa.\033[0m\n' || echo ">>> GATA: firmware scris pe placa."
 else

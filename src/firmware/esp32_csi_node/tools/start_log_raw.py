@@ -1,17 +1,14 @@
-"""Reseteaza placa si arata TOT ce trimite, exact cum vine. Nu filtreaza nimic.
-Utilizare:
-  PY=~/.espressif/python_env/idf5.1_py3.14_env/bin/python
-  $PY start_log_raw.py        # pana la Ctrl+C
-  $PY start_log_raw.py 15     # 15 secunde"""
 import sys
 import time
 
 import serial
 
+# Port serial si viteza
 PORT = "/dev/ttyUSB0"
 BAUD = 115200
 
 
+# Reseteaza placa, arata tot
 def main():
     limita = float(sys.argv[1]) if len(sys.argv) > 1 else None
     port = serial.Serial(PORT, BAUD, timeout=0.2)

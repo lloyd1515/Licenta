@@ -1,11 +1,11 @@
-"""Asculta UDP 5005 si verifica pachetele nodurilor cu parse_packet din src/csi_ui.py.
+"""Asculta UDP 5005 si verifica pachetele nodurilor cu decode din src/csi/contract/packet_v1.py.
 Utilizare (din radacina repository-ului): .venv/bin/python docs/StatusLicenta/9Nov2026/unelte/verifica_udp.py <secunde>
 Afiseaza: pachete pe nod, seq lipsa, RSSI, indicii mereu 0 si amplitudinea medie pe indice."""
 import collections, socket, sys, time
 # sys.path[0] = acest director, care are dis.py (ar ascunde modulul standard dis); il inlocuim cu src/
 sys.path[0] = str(__import__("pathlib").Path(__file__).resolve().parents[4] / "src")
 import numpy as np
-from csi_ui import parse_packet, PACKET_BYTES
+from csi.contract.packet_v1 import decode as parse_packet, PACKET_BYTES
 
 secunde = float(sys.argv[1])
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -26,8 +26,8 @@ while time.time() - start < secunde:
     if p is None:
         invalide += 1
         continue
-    surse[(adr[0], p.node_id)] += 1
-    per_nod[p.node_id].append((time.time(), p))
+    surse[(adr[0], p.node_id.value)] += 1
+    per_nod[p.node_id.value].append((time.time(), p))
 print(f"datagrame: {brute}, invalide: {invalide}, marime asteptata {PACKET_BYTES} B")
 for (ip, nod), n in sorted(surse.items()):
     print(f"  {ip} -> node_id {nod}: {n} pachete")

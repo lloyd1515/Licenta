@@ -1,10 +1,3 @@
-"""Reseteaza placa si arata jurnalul simplificat si colorat.
-Ascunde zgomotul (ROM, bootloader, memorie) si liniile stricate.
-Pentru tot jurnalul, folositi start_log_raw.py.
-Utilizare:
-  PY=~/.espressif/python_env/idf5.1_py3.14_env/bin/python
-  $PY start_log.py        # pana la Ctrl+C
-  $PY start_log.py 15     # 15 secunde"""
 import os
 import re
 import sys
@@ -12,6 +5,7 @@ import time
 
 import serial
 
+# Port serial, filtre, culori
 PORT = "/dev/ttyUSB0"
 BAUD = 115200
 LINE = re.compile(r"^([IWE]) \((\d+)\) ([\w.-]+): ?(.*)$")
@@ -24,15 +18,18 @@ COLOR = sys.stdout.isatty() or "FORCE_COLOR" in os.environ
 GRI, VERDE, GALBEN, ROSU, CYAN, RESET = "90", "92", "93", "91", "96", "0"
 
 
+# Coloreaza textul in terminal
 def vopsea(cod, text):
     return "\x1b[%sm%s\x1b[0m" % (cod, text) if COLOR else text
 
 
+# Linie stricata de zgomot?
 def stricata(linie):
     return "�" in linie or any(ord(c) < 32 and c != "\t" for c in linie) \
         or len(INCEPUT_LINIE.findall(linie)) > 1
 
 
+# Linia merita afisata?
 def util(nivel, tag, text):
     if nivel in "WE":
         return not (tag == "spi_flash" or "Password length" in text)
@@ -43,12 +40,14 @@ def util(nivel, tag, text):
     return True
 
 
+# Nivel, timp, tag, text
 def formateaza(nivel, ms, tag, text):
     culoare = {"W": GALBEN, "E": ROSU}.get(nivel) or (VERDE if tag == "CSI_NODE" else CYAN if tag == "wifi" else RESET)
     timp = vopsea(GRI, "%7.2f s" % (int(ms) / 1000))
     return "%s %s  %s %s" % (vopsea(culoare, nivel), timp, vopsea(culoare, "%-9s" % tag), vopsea(culoare, text))
 
 
+# Reseteaza placa, citeste jurnalul
 def main():
     limita = float(sys.argv[1]) if len(sys.argv) > 1 else None
     port = serial.Serial(PORT, BAUD, timeout=0.2)
